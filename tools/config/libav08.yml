@@ -1,0 +1,102 @@
+type:
+    - int8_t
+    - uint8_t
+    - int16_t
+    - uint16_t
+    - int32_t
+    - uint32_t
+    - int64_t
+    - uint64_t
+    - STRING
+    - CodecID
+    - AVPacketSideDataType
+    - AVDiscard
+    - AVStreamParseType
+    - AVColorPrimaries
+    - AVColorTransferCharacteristic
+    - AVColorSpace
+    - AVColorRange
+    - AVChromaLocation
+    - AVLPCType
+    - AVAudioServiceType
+    - AVSampleFormat
+    - AVMediaType
+    - PixelFormat
+    - AVPictureType
+
+alias:
+    - ByteIOContext
+    - AVMetadata
+
+class:
+    - N8AVPacket4DOT_30E
+    - N8AVStream4DOT_33E
+    - AVProfile
+    - AVPanScan
+    - AVCodec
+    - RcOverride
+    - AVFrame
+    - AVPaletteControl
+    - AVHWAccel
+    - AVCodecParser
+    - AVFormatParameters
+    - AVCodecContext
+    - AVCodecParserContext
+    - AVIndexEntry
+    - AVDictionary
+    - AVIOContext
+    - AVOption
+    - AVCodecTag
+    - AVMetadataConv
+    - AVProbeData
+    - AVRational
+    - AVFrac
+    - AVClass
+    - AVInputFormat
+    - AVOutputFormat
+    - AVStream
+    - AVPacketList
+    - AVStream
+    - AVPacket
+    - AVProgram
+    - AVChapter
+    - AVPacketList
+    - AVFormatContext
+    # 0.8
+    - AVCodecInternal
+    - AVFieldOrder
+    - AVCodecDefault
+    - AVIOInterruptCB
+    - AVDictionaryEntry
+
+import:
+    - from ctypes import CDLL, RTLD_GLOBAL
+    - from ctypes import Structure, POINTER, CFUNCTYPE
+    - from ctypes import c_int, c_uint, c_char, c_void_p, c_char_p, c_ubyte
+    - from ctypes import c_short
+    - from ctypes import c_ulong
+    - from ctypes import c_int8, c_uint8
+    - from ctypes import c_int16, c_uint16
+    - from ctypes import c_int32, c_uint32
+    - from ctypes import c_int64, c_uint64
+    - from ctypes import c_float    
+    - from ctypes import c_double
+
+cdll:
+    - CDLL('libavutil.so', RTLD_GLOBAL)
+    - _libraries = {}
+    - _libraries['libavcodec.so'] = CDLL('libavcodec.so', mode=RTLD_GLOBAL)
+    - _libraries['libavdevice.so'] = CDLL('libavdevice.so', mode=RTLD_GLOBAL)
+    - _libraries['libavformat.so'] = CDLL('libavformat.so', mode=RTLD_GLOBAL)
+    - _libraries['libswscale.so'] = CDLL('libswscale.so', mode=RTLD_GLOBAL)
+
+function:
+    - av_register_all
+    - av_open_input_file
+    #- av_find_stream_info
+    #- dump_format
+    - av_dict_get
+    - av_oformat_next
+    - avcodec_find_decoder_by_name
+    - av_iformat_next
+
