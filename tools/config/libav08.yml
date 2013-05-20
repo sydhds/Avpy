@@ -24,6 +24,9 @@ type:
     - PixelFormat
     - AVPictureType
 
+define:
+    - AV_DICT_IGNORE_SUFFIX
+
 alias:
     - ByteIOContext
     - AVMetadata

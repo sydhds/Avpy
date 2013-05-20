@@ -83,6 +83,7 @@ def main(options):
     fd = open(options.dst, 'w')	
     wHeader(fd, y)
     wAssignement(fd, y, options.src, 'type')
+    wAssignement(fd, y, options.src, 'define')
     wClass(fd, y)
     wAssignement(fd, y, options.src, 'alias')
     wClassFields(fd, y, options.src)
