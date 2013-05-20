@@ -31,10 +31,10 @@ def buildGit(options):
             raise
 
     try:
-        os.chdir('%s_git' % options.lib)
+        os.chdir('build/%s_git' % options.lib)
     except OSError:
         print 'Could not find libav repo: %s_git' % options.lib
-            sys.exit(1)
+        sys.exit(1)
 
     run('git checkout v%s' % options.version)
     run('git describe --tags')
@@ -60,7 +60,7 @@ def main(options):
             buildGit(options)
         else:
             print 'Could not create folder: build'
-                sys.exit(1)
+            sys.exit(1)
 
 if __name__ == '__main__':
 
@@ -79,3 +79,4 @@ if __name__ == '__main__':
         print 'Please provide a version using -v flag'
     else:
         main(options)
+
