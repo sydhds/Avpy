@@ -46,6 +46,7 @@ Testing in a virtualenvs
 -------------
 
 source ~/dev/virtualenvs/pyav/bin/activate
+pip uninstall Pyav
 pip install [...]/dist/Pyav-*.tar.gz
 python -c 'from pyav import Media; print Media.formats()'
 

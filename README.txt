@@ -26,7 +26,7 @@ sudo apt-get install ffmpeg
 Install from source:
 -------------
 
-- Clone repository
+- Clone this repository
 - python setup.py sdist
 - pip install dist/Pyav-*.tar.gz
 
