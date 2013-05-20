@@ -1,5 +1,4 @@
-# FIXME
-from ctypes import *
+from ctypes import CDLL
 
 def version():
     
