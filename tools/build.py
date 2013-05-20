@@ -49,7 +49,7 @@ def buildGit(options):
 
     print 'build done!'
     print 'configure log: %s' % os.path.join(buildDir, 'config.log')
-    print 'make log: %s' % os.paht.join(buildDir, 'make.log')
+    print 'make log: %s' % os.path.join(buildDir, 'make.log')
 
 def main(options):
 
