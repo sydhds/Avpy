@@ -9,7 +9,7 @@ git
 h2xml
 xml2py
 gcc & co
-python yaml
+python yaml lib
 
 for ubuntu users, please run the following command:
 
