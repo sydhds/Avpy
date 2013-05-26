@@ -794,8 +794,14 @@ AVClass._fields_ = [
     ('child_class_next', CFUNCTYPE(POINTER(AVClass), POINTER(AVClass))),
 ]
 
+avcodec_find_decoder = _libraries['libavcodec.so'].avcodec_find_decoder
+avcodec_find_decoder.restype = POINTER(AVCodec)
+avcodec_find_decoder.argtypes = [CodecID]
+avcodec_find_decoder_by_name = _libraries['libavcodec.so'].avcodec_find_decoder_by_name
 avcodec_find_decoder_by_name = _libraries['libavcodec.so'].avcodec_find_decoder_by_name
 avcodec_find_decoder_by_name.restype = POINTER(AVCodec)
+avcodec_find_decoder_by_name.restype = POINTER(AVCodec)
+avcodec_find_decoder_by_name.argtypes = [STRING]
 avcodec_find_decoder_by_name.argtypes = [STRING]
 av_register_all = _libraries['libavformat.so'].av_register_all
 av_register_all.restype = None

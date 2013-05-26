@@ -104,6 +104,7 @@ function:
     #- dump_format
     - av_dict_get
     - av_oformat_next
+    - avcodec_find_decoder
     - avcodec_find_decoder_by_name
     - av_iformat_next
 

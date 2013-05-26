@@ -46,17 +46,20 @@ class Media():
 
     def _streamInfo(self, stream):
         
-        streamDict = {}
+        streamInfo = {}
+        cCodecCtx = stream.contents.codec
         
-        cCodec = stream.contents.codec
+        # cCodecCtx.contents.codec is NULL so retrieve codec using id  
+        c = av.lib.avcodec_find_decoder(cCodecCtx.contents.codec_id)
+        streamInfo['codec'] = c.contents.name
 
-        streamDict['type'] = 'video' if cCodec.contents.codec_type == av.lib.AVMEDIA_TYPE_VIDEO else 'audio'
+        streamInfo['type'] = 'video' if cCodecCtx.contents.codec_type == av.lib.AVMEDIA_TYPE_VIDEO else 'audio'
 
-        if streamDict['type'] == 'video':
-                streamDict['width'] = cCodec.contents.width
-                streamDict['height'] = cCodec.contents.width
+        if streamInfo['type'] == 'video':
+            streamInfo['width'] = cCodecCtx.contents.width
+            streamInfo['height'] = cCodecCtx.contents.width
 
-        return streamDict
+        return streamInfo
 
     def metadata(self):
 
