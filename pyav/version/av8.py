@@ -42,6 +42,7 @@ uint16_t = c_uint16
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
+PIX_FMT_NONE = -1
 AVMEDIA_TYPE_VIDEO = 0
 AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
 AV_TIME_BASE = 1000000 # Variable c_int '1000000'
@@ -794,6 +795,9 @@ AVClass._fields_ = [
     ('child_class_next', CFUNCTYPE(POINTER(AVClass), POINTER(AVClass))),
 ]
 
+avcodec_get_pix_fmt_name = _libraries['libavcodec.so'].avcodec_get_pix_fmt_name
+avcodec_get_pix_fmt_name.restype = STRING
+avcodec_get_pix_fmt_name.argtypes = [PixelFormat]
 avcodec_find_decoder = _libraries['libavcodec.so'].avcodec_find_decoder
 avcodec_find_decoder.restype = POINTER(AVCodec)
 avcodec_find_decoder.argtypes = [CodecID]

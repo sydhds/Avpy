@@ -28,6 +28,7 @@ define:
     - AV_DICT_IGNORE_SUFFIX
     - AVMEDIA_TYPE_VIDEO
     - AV_TIME_BASE
+    - PIX_FMT_NONE
 
 alias:
     - ByteIOContext
@@ -107,4 +108,5 @@ function:
     - avcodec_find_decoder
     - avcodec_find_decoder_by_name
     - av_iformat_next
+    - avcodec_get_pix_fmt_name
 
