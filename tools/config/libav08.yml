@@ -26,6 +26,8 @@ type:
 
 define:
     - AV_DICT_IGNORE_SUFFIX
+    - AVMEDIA_TYPE_VIDEO
+    - AV_TIME_BASE
 
 alias:
     - ByteIOContext

@@ -42,7 +42,9 @@ uint16_t = c_uint16
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
+AVMEDIA_TYPE_VIDEO = 0
 AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
+AV_TIME_BASE = 1000000 # Variable c_int '1000000'
 
 class N8AVPacket4DOT_30E(Structure):
 	pass

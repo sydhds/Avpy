@@ -17,9 +17,9 @@ class Media():
         if av.lib.av_open_input_file(self.pFormatCtx, self.mediaName, None, 0, None):
             raise IOError('Could not open file')
 
-        self.cFrame = 0
-        self.__setup = False
-        self.pCodecCtx = None 
+        #self.cFrame = 0
+        #self.__setup = False
+        #self.pCodecCtx = None 
 
     def info(self):
 
@@ -33,12 +33,11 @@ class Media():
         infoDict['stream'] = []
         infoDict['duration'] = None
         
-        if self.pCodecCtx:
-            infoDict['duration'] = self.pFormatCtx.contents.duration / av.lib.AV_TIME_BASE
-            for i in range(self.pFormatCtx.contents.nb_streams):
-                cStream = self.pFormatCtx.contents.streams[i]
-                cStreamInfo = self._streamInfo(cStream)
-                infoDict['stream'].append( cStreamInfo )
+        infoDict['duration'] = self.pFormatCtx.contents.duration / av.lib.AV_TIME_BASE
+        for i in range(self.pFormatCtx.contents.nb_streams):
+            cStream = self.pFormatCtx.contents.streams[i]
+            cStreamInfo = self._streamInfo(cStream)
+            infoDict['stream'].append( cStreamInfo )
 
         return infoDict
 
