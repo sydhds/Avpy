@@ -9,7 +9,8 @@ looks like this:
     from pyav import av
     print Media.formats()
     print Media.codecInfo('mp3')
-    m = Media.info()
+    m = Media('test.avi')
+    print m.info()
 
 Install
 ========
