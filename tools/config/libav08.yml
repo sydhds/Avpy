@@ -97,7 +97,9 @@ cdll:
 
 function:
     - av_register_all
-    - av_open_input_file
+    - avformat_open_input
+    - avformat_find_stream_info
+    #- av_open_input_file
     #- av_find_stream_info
     #- dump_format
     - av_dict_get

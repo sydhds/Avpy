@@ -9,35 +9,38 @@ class Media():
 
     def __init__(self, mediaName):
 
-        self.mediaName = mediaName
         # TODO: init lib in a singleton?
         av.lib.av_register_all()
         self.pFormatCtx = ctypes.POINTER(av.lib.AVFormatContext)()
 
-        if av.lib.av_open_input_file(self.pFormatCtx, self.mediaName, None, 0, None):
-            raise IOError('Could not open file')
+        if av.lib.avformat_open_input(self.pFormatCtx, mediaName, None, None):
+            raise IOError('Unable to open %s' % mediaName)
 
-        #self.cFrame = 0
-        #self.__setup = False
-        #self.pCodecCtx = None 
+        # need this call in order to retrieve duration
+        if av.lib.avformat_find_stream_info(self.pFormatCtx, None) < 0:
+        #if av.lib.av_find_stream_info(self.pFormatCtx) < 0:
+            raise IOError('Unable to retrieve stream info')
 
     def info(self):
 
         '''
         return a dict with media information
+
+        duration: media duration in seconds
+        name: media filename
+        stream: list of stream info (dict)
         '''
 
         infoDict = {}
-        infoDict['name'] = self.mediaName
+        infoDict['name'] = self.pFormatCtx.contents.filename
         infoDict['metadata'] = self.metadata()
-        infoDict['stream'] = []
-        infoDict['duration'] = None
-        
+        infoDict['stream'] = [] 
         infoDict['duration'] = self.pFormatCtx.contents.duration / av.lib.AV_TIME_BASE
+
         for i in range(self.pFormatCtx.contents.nb_streams):
             cStream = self.pFormatCtx.contents.streams[i]
             cStreamInfo = self._streamInfo(cStream)
-            infoDict['stream'].append( cStreamInfo )
+            infoDict['stream'].append(cStreamInfo)
 
         return infoDict
 
