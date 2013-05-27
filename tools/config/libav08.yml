@@ -29,6 +29,7 @@ define:
     - AVMEDIA_TYPE_VIDEO
     - AV_TIME_BASE
     - PIX_FMT_NONE
+    - AV_LOG_QUIET
 
 alias:
     - ByteIOContext
@@ -109,4 +110,5 @@ function:
     - avcodec_find_decoder_by_name
     - av_iformat_next
     - avcodec_get_pix_fmt_name
+    - av_log_set_level
 

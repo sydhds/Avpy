@@ -45,6 +45,7 @@ int32_t = c_int32
 PIX_FMT_NONE = -1
 AVMEDIA_TYPE_VIDEO = 0
 AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
+AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
 AV_TIME_BASE = 1000000 # Variable c_int '1000000'
 
 class N8AVPacket4DOT_30E(Structure):
@@ -825,4 +826,7 @@ avformat_find_stream_info.argtypes = [POINTER(AVFormatContext), POINTER(POINTER(
 av_dict_get = _libraries['libavcodec.so'].av_dict_get
 av_dict_get.restype = POINTER(AVDictionaryEntry)
 av_dict_get.argtypes = [POINTER(AVDictionary), STRING, POINTER(AVDictionaryEntry), c_int]
+av_log_set_level = _libraries['libavcodec.so'].av_log_set_level
+av_log_set_level.restype = None
+av_log_set_level.argtypes = [c_int]
 

@@ -9,6 +9,8 @@ class Media():
 
     def __init__(self, mediaName):
 
+        av.lib.av_log_set_level(av.lib.AV_LOG_QUIET)
+
         # TODO: init lib in a singleton?
         av.lib.av_register_all()
         self.pFormatCtx = ctypes.POINTER(av.lib.AVFormatContext)()
