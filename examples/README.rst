@@ -3,7 +3,8 @@
 =================
 
 
-* pythonproject
+* mediaInfo
 
-Example Python project using pyav.
+Retrieve media infos et libav infos
+
 
