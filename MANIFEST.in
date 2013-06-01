@@ -1,2 +1,5 @@
 include *.txt
 recursive-include docs *.txt
+recursive-include examples *
+prune *.pyc
+prune *.sw*
