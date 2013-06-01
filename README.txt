@@ -6,7 +6,7 @@ Pyav is a ctypes binding for libav (and ffmpeg). Typical usage often
 looks like this:
 
     #!/usr/bin/env python
-    from pyav import av
+    from pyav import Media
     print Media.formats()
     print Media.codecInfo('mp3')
     m = Media('test.avi')
