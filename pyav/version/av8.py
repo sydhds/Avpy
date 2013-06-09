@@ -18,6 +18,7 @@ _libraries['libavformat.so'] = CDLL('libavformat.so', mode=RTLD_GLOBAL)
 _libraries['libswscale.so'] = CDLL('libswscale.so', mode=RTLD_GLOBAL)
 
 STRING = c_char_p
+size_t = c_ulong
 AVSampleFormat = c_int # enum
 CodecID = c_int # enum
 AVDiscard = c_int # enum
@@ -826,6 +827,9 @@ avformat_find_stream_info.argtypes = [POINTER(AVFormatContext), POINTER(POINTER(
 av_dict_get = _libraries['libavcodec.so'].av_dict_get
 av_dict_get.restype = POINTER(AVDictionaryEntry)
 av_dict_get.argtypes = [POINTER(AVDictionary), STRING, POINTER(AVDictionaryEntry), c_int]
+av_strerror = _libraries['libavcodec.so'].av_strerror
+av_strerror.restype = c_int
+av_strerror.argtypes = [c_int, STRING, size_t]
 av_log_set_level = _libraries['libavcodec.so'].av_log_set_level
 av_log_set_level.restype = None
 av_log_set_level.argtypes = [c_int]

@@ -2,6 +2,7 @@
 High-level libav python API
 '''
 
+import os
 import ctypes
 import av
 
@@ -14,14 +15,17 @@ class Media():
         # TODO: init lib in a singleton?
         av.lib.av_register_all()
         self.pFormatCtx = ctypes.POINTER(av.lib.AVFormatContext)()
-
-        if av.lib.avformat_open_input(self.pFormatCtx, mediaName, None, None):
-            raise IOError('Unable to open %s' % mediaName)
-
+ 
+        # open media
+        res = av.lib.avformat_open_input(self.pFormatCtx, mediaName, None, None)
+        if res: 
+            raise IOError(avError(res))
+        
+        # get stream info
         # need this call in order to retrieve duration
-        if av.lib.avformat_find_stream_info(self.pFormatCtx, None) < 0:
-        #if av.lib.av_find_stream_info(self.pFormatCtx) < 0:
-            raise IOError('Unable to retrieve stream info')
+        res = av.lib.avformat_find_stream_info(self.pFormatCtx, None)
+        if res < 0:
+            raise IOError(avError(res))
 
     def info(self):
 
@@ -161,4 +165,29 @@ class Media():
         # TODO --> http://new.libav.org/doxygen/master/cmdutils_8c_source.html#l00598
 
         return ci
+
+
+def avError(res):
+
+    '''
+    Return an error message according to AVERROR code 
+    '''
+
+    # cmdutils.c - print_error
+
+    # setup error buffer
+    bufSize = 128
+    buf = ctypes.create_string_buffer(bufSize) 
+    errRes = av.lib.av_strerror(res, buf, bufSize)
+    if errRes < 0:
+        try:
+            msg = os.strerror(res)
+        except ValueError:
+            msg = 'Unknown error code %d' % res
+        
+        return msg
+    else:
+        return buf.value
+
+
 
