@@ -63,7 +63,7 @@ class Media():
 
         if streamInfo['type'] == 'video':
             streamInfo['width'] = cCodecCtx.contents.width
-            streamInfo['height'] = cCodecCtx.contents.width
+            streamInfo['height'] = cCodecCtx.contents.height
 
         return streamInfo
 
