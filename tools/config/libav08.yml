@@ -28,9 +28,14 @@ type:
 define:
     - AV_DICT_IGNORE_SUFFIX
     - AVMEDIA_TYPE_VIDEO
+    - AVMEDIA_TYPE_AUDIO
+    - AVMEDIA_TYPE_SUBTITLE
     - AV_TIME_BASE
     - PIX_FMT_NONE
     - AV_LOG_QUIET
+    - CODEC_CAP_FRAME_THREADS
+    - CODEC_CAP_SLICE_THREADS
+    - CODEC_CAP_AUTO_THREADS
 
 alias:
     - ByteIOContext
@@ -109,6 +114,7 @@ function:
     - av_oformat_next
     - avcodec_find_decoder
     - avcodec_find_decoder_by_name
+    - avcodec_find_encoder_by_name
     - av_iformat_next
     - avcodec_get_pix_fmt_name
     - av_log_set_level
