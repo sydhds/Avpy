@@ -60,10 +60,15 @@ class Media():
         streamInfo['codec'] = c.contents.name
 
         streamInfo['type'] = 'video' if cCodecCtx.contents.codec_type == av.lib.AVMEDIA_TYPE_VIDEO else 'audio'
-
+        
         if streamInfo['type'] == 'video':
             streamInfo['width'] = cCodecCtx.contents.width
             streamInfo['height'] = cCodecCtx.contents.height
+        elif streamInfo['type'] == 'audio':
+            streamInfo['sample_rate'] = cCodecCtx.contents.sample_rate
+            streamInfo['channels'] = cCodecCtx.contents.channels
+            #streamInfo['frame_size'] = cCodecCtx.contents.frame_size
+            streamInfo['sample_fmt'] = av.lib.av_get_sample_fmt_name(cCodecCtx.contents.sample_fmt)
 
         return streamInfo
 

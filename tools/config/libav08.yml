@@ -119,3 +119,5 @@ function:
     - avcodec_get_pix_fmt_name
     - av_log_set_level
     - av_strerror
+    - av_get_sample_fmt_name
+ 

@@ -841,4 +841,7 @@ av_strerror.argtypes = [c_int, STRING, size_t]
 av_log_set_level = _libraries['libavcodec.so'].av_log_set_level
 av_log_set_level.restype = None
 av_log_set_level.argtypes = [c_int]
+av_get_sample_fmt_name = _libraries['libavcodec.so'].av_get_sample_fmt_name
+av_get_sample_fmt_name.restype = STRING
+av_get_sample_fmt_name.argtypes = [AVSampleFormat]
 
