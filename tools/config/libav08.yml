@@ -28,9 +28,19 @@ type:
 define:
     - AV_DICT_IGNORE_SUFFIX
     - AVMEDIA_TYPE_VIDEO
+    - AVMEDIA_TYPE_AUDIO
     - AV_TIME_BASE
     - PIX_FMT_NONE
+    - PIX_FMT_RGB24
+    - PIX_FMT_YUV420P
+    - SWS_BILINEAR
     - AV_LOG_QUIET
+    # encode
+    - CODEC_ID_MPEG2VIDEO
+    - CODEC_ID_MPEG1VIDEO
+    - CODEC_FLAG_GLOBAL_HEADER
+    - CODEC_ID_NONE
+    - AVFMT_GLOBALHEADER
 
 alias:
     - ByteIOContext
@@ -70,12 +80,17 @@ class:
     - AVChapter
     - AVPacketList
     - AVFormatContext
+    - AVPicture
+    - SwsContext
+    - SwsFilter
+    - SwsVector
     # 0.8
     - AVCodecInternal
     - AVFieldOrder
     - AVCodecDefault
     - AVIOInterruptCB
     - AVDictionaryEntry
+
 
 import:
     - from ctypes import CDLL, RTLD_GLOBAL
@@ -99,12 +114,10 @@ cdll:
     - _libraries['libswscale.so'] = CDLL('libswscale.so', mode=RTLD_GLOBAL)
 
 function:
+    # TODO: sort by lib - avcodec, avformat...
     - av_register_all
     - avformat_open_input
     - avformat_find_stream_info
-    #- av_open_input_file
-    #- av_find_stream_info
-    #- dump_format
     - av_dict_get
     - av_oformat_next
     - avcodec_find_decoder
@@ -113,3 +126,27 @@ function:
     - avcodec_get_pix_fmt_name
     - av_log_set_level
     - av_strerror
+    - av_read_frame
+    - avcodec_decode_audio4
+    - av_samples_get_buffer_size
+    - avcodec_decode_video2
+    - av_find_stream_info
+    - avcodec_open
+    # sws
+    - sws_getContext
+    - avpicture_alloc
+    - sws_scale
+    - avcodec_alloc_frame
+    # test
+    - avpicture_get_size
+    - avpicture_alloc
+    - avpicture_fill
+    - av_malloc
+    - av_guess_format
+    - avformat_alloc_context
+    - av_dup_packet
+    # encoding
+    - avcodec_find_encoder
+    - avformat_new_stream
+    - av_get_sample_fmt_name
+

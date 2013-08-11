@@ -8,24 +8,29 @@ import av
 
 class Media():
 
-    def __init__(self, mediaName):
-
+    def __init__(self, mediaName, mode='r'):
+        
         av.lib.av_log_set_level(av.lib.AV_LOG_QUIET)
 
-        # TODO: init lib in a singleton?
         av.lib.av_register_all()
         self.pFormatCtx = ctypes.POINTER(av.lib.AVFormatContext)()
- 
-        # open media
-        res = av.lib.avformat_open_input(self.pFormatCtx, mediaName, None, None)
-        if res: 
-            raise IOError(avError(res))
-        
-        # get stream info
-        # need this call in order to retrieve duration
-        res = av.lib.avformat_find_stream_info(self.pFormatCtx, None)
-        if res < 0:
-            raise IOError(avError(res))
+
+        if mode == 'r':
+            # open media for reading
+            res = av.lib.avformat_open_input(self.pFormatCtx, mediaName, None, None)
+            if res: 
+                raise IOError(avError(res))
+            
+            # get stream info
+            # need this call in order to retrieve duration
+            res = av.lib.avformat_find_stream_info(self.pFormatCtx, None)
+            if res < 0:
+                raise IOError(avError(res))
+       
+        elif mode == 'w':
+            raise NotImplementedError('no write support') 
+
+        self.pkt = None
 
     def info(self):
 
@@ -64,6 +69,11 @@ class Media():
         if streamInfo['type'] == 'video':
             streamInfo['width'] = cCodecCtx.contents.width
             streamInfo['height'] = cCodecCtx.contents.height
+        elif streamInfo['type'] == 'audio':
+            streamInfo['sample_rate'] = cCodecCtx.contents.sample_rate
+            streamInfo['channels'] = cCodecCtx.contents.channels
+            streamInfo['frame_size'] = cCodecCtx.contents.frame_size
+            streamInfo['sample_fmt'] = av.lib.av_get_sample_fmt_name(cCodecCtx.contents.sample_fmt)
 
         return streamInfo
 
@@ -140,6 +150,7 @@ class Media():
             ci['decoder'] = None
             ci['name'] = c.contents.name
             ci['longName'] = c.contents.long_name
+            # FIXME
             ci['threads'] = None
 
             ci['framerates'] = []
@@ -165,8 +176,194 @@ class Media():
         # TODO --> http://new.libav.org/doxygen/master/cmdutils_8c_source.html#l00598
 
         return ci
+   
+    # read
+    def __iter__(self):
+        return self
 
+    def next(self):
+        
+        '''
+        iter over packet in media, return a Packet object
+        '''
+        
+        if self.pkt is None:
+            self.pkt = Packet(self.pFormatCtx) 
+        
+        while av.lib.av_read_frame(self.pFormatCtx, self.pkt.pktRef) >= 0:
+            return self.pkt
 
+        # end of generator
+        raise StopIteration
+
+    # TODO: rename to addScaler
+    def addScaler2(self, streamIndex, width, height):
+
+        '''
+        add a scaler for given stream
+        '''
+        
+        if self.pkt is None:
+            self.pkt = Packet(self.pFormatCtx)
+      
+        # support default scaler?
+        # FIXME: varying width, height
+        scaler = (streamIndex, width, height)
+
+        self.pkt.scaler[streamIndex] = scaler         
+        self.pkt.addScaler(*scaler)
+
+class Packet():
+
+    def __init__(self, formatCtx):
+
+        # alloc packet and keep a ref (for Media.__next__)
+        self.pkt = av.lib.AVPacket()
+        self.pktRef = ctypes.byref(self.pkt)
+        # alloc frame 
+        self.frame = av.lib.avcodec_alloc_frame()
+        self.decoded = ctypes.c_int(-1)
+        self.decodedRef = ctypes.byref(self.decoded)
+        
+        # frame after conversion by scaler
+        self.swsFrame = None
+        
+        # after decode
+        self.dataSize = -1
+        
+        # retrieve a list of codec context for each stream in file
+        self.codecCtx = []
+        self.swsCtx = []
+        self.scaler = []
+
+        self.f = formatCtx
+        formatCtxCt = formatCtx.contents
+        streamCount = formatCtxCt.nb_streams
+        for i in xrange(streamCount):
+            
+            cStream = formatCtxCt.streams[i]
+            cCodecCtx = cStream.contents.codec
+            cCodec = av.lib.avcodec_find_decoder(cCodecCtx.contents.codec_id)
+            
+            if not cCodec:
+                self.codecCtx.append(None)
+            else:
+                av.lib.avcodec_open(cCodecCtx, cCodec)
+                self.codecCtx.append(cCodecCtx)
+            
+            self.swsCtx.append(None)
+            self.scaler.append(None)
+
+    def addScaler(self, streamIndex, width=None, height=None):
+
+        '''
+        '''
+
+        scalerTuple = (width, height)
+        if self.scaler[streamIndex] != scalerTuple:
+
+            self.scaler[streamIndex] = scalerTuple
+            
+            codecCtx = self.codecCtx[streamIndex]
+           
+            if width:
+                newWidth = width
+            else:
+                newWidth = codecCtx.contents.width
+            
+            if height:
+                newHeight = height
+            else:
+                newHeight = codecCtx.contents.height
+
+            self.swsCtx[streamIndex] = av.lib.sws_getContext(
+                codecCtx.contents.width,
+                codecCtx.contents.height,
+                codecCtx.contents.pix_fmt,
+                newWidth,
+                newHeight,
+                av.lib.PIX_FMT_RGB24,
+                av.lib.SWS_BILINEAR,
+                None,
+                None,
+                None)
+            
+            self.swsFrame = av.lib.avcodec_alloc_frame()
+            if not self.swsFrame:
+                raise RuntimeError('Could not alloc frame')
+
+            # FIXME perf - let the user alloc a buffer?
+            av.lib.avpicture_alloc(
+                    ctypes.cast(self.swsFrame, ctypes.POINTER(av.lib.AVPicture)), 
+                    av.lib.PIX_FMT_RGB24,
+                    newWidth, 
+                    newHeight)
+
+    def __copy__(self):
+
+        p = Packet(self.f)
+        ctypes.memmove(p.pktRef, self.pktRef, ctypes.sizeof(av.lib.AVPacket))
+
+        # scaler copy
+        for streamIndex, scaler in enumerate(self.scaler):
+            if scaler:
+                p.scaler.append(scaler)
+                p.addScaler(streamIndex, scaler[0], scaler[1])
+
+        return p
+
+    def __del__(self):
+
+        # free packet - WARNING -> double free error
+        #if self.pkt and self.pkt.destruct:
+            #self.pkt.destruct(self.pktRef)
+
+        pass
+
+    def streamIndex(self):
+        return self.pkt.stream_index
+
+    def decode(self):
+        
+        codecCtx = self.codecCtx[self.pkt.stream_index]
+        #print 'c ctx', codecCtx
+        if codecCtx is not None:
+           
+            codecType = codecCtx.contents.codec_type
+            #print 'c type', codecType, av.lib.AVMEDIA_TYPE_AUDIO
+
+            if codecType == av.lib.AVMEDIA_TYPE_AUDIO:
+                result = av.lib.avcodec_decode_audio4(codecCtx, self.frame, 
+                        self.decodedRef, self.pktRef)
+                if result > 0 and self.decoded:
+                    self.dataSize = av.lib.av_samples_get_buffer_size(None, 
+                            codecCtx.contents.channels, self.frame.contents.nb_samples, 
+                            codecCtx.contents.sample_fmt, 1)
+                else:
+                    # FIXME: raise?
+                    print 'failed decode...'
+
+            elif codecType == av.lib.AVMEDIA_TYPE_VIDEO:
+                # FIXME: avcodec_decode_video2 return result?
+                av.lib.avcodec_decode_video2(codecCtx, self.frame, 
+                        self.decodedRef, self.pktRef)
+
+                if self.decoded:
+                    swsCtx = self.swsCtx[self.pkt.stream_index]
+
+                    if swsCtx:
+                        av.lib.sws_scale(swsCtx,
+                                self.frame.contents.data,
+                                self.frame.contents.linesize,
+                                0,
+                                codecCtx.contents.height,
+                                self.swsFrame.contents.data,
+                                self.swsFrame.contents.linesize)
+
+            else:
+                # unsupported codec type - subtitle?
+                pass
+    
 def avError(res):
 
     '''
@@ -188,6 +385,4 @@ def avError(res):
         return msg
     else:
         return buf.value
-
-
 

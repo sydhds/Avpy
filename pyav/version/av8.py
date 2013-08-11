@@ -43,10 +43,19 @@ uint16_t = c_uint16
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
+CODEC_ID_MPEG2VIDEO = 2
+PIX_FMT_RGB24 = 2
+CODEC_ID_NONE = 0
+CODEC_ID_MPEG1VIDEO = 1
+PIX_FMT_YUV420P = 0
 PIX_FMT_NONE = -1
+AVMEDIA_TYPE_AUDIO = 1
 AVMEDIA_TYPE_VIDEO = 0
 AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
+SWS_BILINEAR = 2 # Variable c_int '2'
+AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
 AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
+CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
 AV_TIME_BASE = 1000000 # Variable c_int '1000000'
 
 class N8AVPacket4DOT_30E(Structure):
@@ -146,6 +155,18 @@ class AVPacketList(Structure):
 	pass
 
 class AVFormatContext(Structure):
+	pass
+
+class AVPicture(Structure):
+	pass
+
+class SwsContext(Structure):
+	pass
+
+class SwsFilter(Structure):
+	pass
+
+class SwsVector(Structure):
 	pass
 
 class AVCodecInternal(Structure):
@@ -517,6 +538,10 @@ AVHWAccel._fields_ = [
     ('end_frame', CFUNCTYPE(c_int, POINTER(AVCodecContext))),
     ('priv_data_size', c_int),
 ]
+AVPicture._fields_ = [
+    ('data', POINTER(uint8_t) * 4),
+    ('linesize', c_int * 4),
+]
 AVPaletteControl._fields_ = [
     ('palette_changed', c_int),
     ('palette', c_uint * 256),
@@ -796,10 +821,43 @@ AVClass._fields_ = [
     ('child_next', CFUNCTYPE(c_void_p, c_void_p, c_void_p)),
     ('child_class_next', CFUNCTYPE(POINTER(AVClass), POINTER(AVClass))),
 ]
+SwsVector._fields_ = [
+    ('coeff', POINTER(c_double)),
+    ('length', c_int),
+]
+SwsFilter._fields_ = [
+    ('lumH', POINTER(SwsVector)),
+    ('lumV', POINTER(SwsVector)),
+    ('chrH', POINTER(SwsVector)),
+    ('chrV', POINTER(SwsVector)),
+]
+SwsContext._fields_ = [
+]
 
+av_dup_packet = _libraries['libavcodec.so'].av_dup_packet
+av_dup_packet.restype = c_int
+av_dup_packet.argtypes = [POINTER(AVPacket)]
+avpicture_alloc = _libraries['libavcodec.so'].avpicture_alloc
+avpicture_alloc = _libraries['libavcodec.so'].avpicture_alloc
+avpicture_alloc.restype = c_int
+avpicture_alloc.restype = c_int
+avpicture_alloc.argtypes = [POINTER(AVPicture), PixelFormat, c_int, c_int]
+avpicture_alloc.argtypes = [POINTER(AVPicture), PixelFormat, c_int, c_int]
+avpicture_fill = _libraries['libavcodec.so'].avpicture_fill
+avpicture_fill.restype = c_int
+avpicture_fill.argtypes = [POINTER(AVPicture), POINTER(uint8_t), PixelFormat, c_int, c_int]
+avpicture_get_size = _libraries['libavcodec.so'].avpicture_get_size
+avpicture_get_size.restype = c_int
+avpicture_get_size.argtypes = [PixelFormat, c_int, c_int]
 avcodec_get_pix_fmt_name = _libraries['libavcodec.so'].avcodec_get_pix_fmt_name
 avcodec_get_pix_fmt_name.restype = STRING
 avcodec_get_pix_fmt_name.argtypes = [PixelFormat]
+avcodec_find_encoder = _libraries['libavcodec.so'].avcodec_find_encoder
+avcodec_find_encoder.restype = POINTER(AVCodec)
+avcodec_find_encoder.argtypes = [CodecID]
+avcodec_find_encoder_by_name = _libraries['libavcodec.so'].avcodec_find_encoder_by_name
+avcodec_find_encoder_by_name.restype = POINTER(AVCodec)
+avcodec_find_encoder_by_name.argtypes = [STRING]
 avcodec_find_decoder = _libraries['libavcodec.so'].avcodec_find_decoder
 avcodec_find_decoder.restype = POINTER(AVCodec)
 avcodec_find_decoder.argtypes = [CodecID]
@@ -809,6 +867,21 @@ avcodec_find_decoder_by_name.restype = POINTER(AVCodec)
 avcodec_find_decoder_by_name.restype = POINTER(AVCodec)
 avcodec_find_decoder_by_name.argtypes = [STRING]
 avcodec_find_decoder_by_name.argtypes = [STRING]
+avcodec_alloc_frame = _libraries['libavcodec.so'].avcodec_alloc_frame
+avcodec_alloc_frame.restype = POINTER(AVFrame)
+avcodec_alloc_frame.argtypes = []
+avcodec_open = _libraries['libavcodec.so'].avcodec_open
+avcodec_open.restype = c_int
+avcodec_open.argtypes = [POINTER(AVCodecContext), POINTER(AVCodec)]
+avcodec_open2 = _libraries['libavcodec.so'].avcodec_open2
+avcodec_open2.restype = c_int
+avcodec_open2.argtypes = [POINTER(AVCodecContext), POINTER(AVCodec), POINTER(POINTER(AVDictionary))]
+avcodec_decode_audio4 = _libraries['libavcodec.so'].avcodec_decode_audio4
+avcodec_decode_audio4.restype = c_int
+avcodec_decode_audio4.argtypes = [POINTER(AVCodecContext), POINTER(AVFrame), POINTER(c_int), POINTER(AVPacket)]
+avcodec_decode_video2 = _libraries['libavcodec.so'].avcodec_decode_video2
+avcodec_decode_video2.restype = c_int
+avcodec_decode_video2.argtypes = [POINTER(AVCodecContext), POINTER(AVFrame), POINTER(c_int), POINTER(AVPacket)]
 av_register_all = _libraries['libavformat.so'].av_register_all
 av_register_all.restype = None
 av_register_all.argtypes = []
@@ -818,12 +891,27 @@ av_iformat_next.argtypes = [POINTER(AVInputFormat)]
 av_oformat_next = _libraries['libavformat.so'].av_oformat_next
 av_oformat_next.restype = POINTER(AVOutputFormat)
 av_oformat_next.argtypes = [POINTER(AVOutputFormat)]
+avformat_alloc_context = _libraries['libavformat.so'].avformat_alloc_context
+avformat_alloc_context.restype = POINTER(AVFormatContext)
+avformat_alloc_context.argtypes = []
+avformat_new_stream = _libraries['libavformat.so'].avformat_new_stream
+avformat_new_stream.restype = POINTER(AVStream)
+avformat_new_stream.argtypes = [POINTER(AVFormatContext), POINTER(AVCodec)]
 avformat_open_input = _libraries['libavformat.so'].avformat_open_input
 avformat_open_input.restype = c_int
 avformat_open_input.argtypes = [POINTER(POINTER(AVFormatContext)), STRING, POINTER(AVInputFormat), POINTER(POINTER(AVDictionary))]
+av_find_stream_info = _libraries['libavformat.so'].av_find_stream_info
+av_find_stream_info.restype = c_int
+av_find_stream_info.argtypes = [POINTER(AVFormatContext)]
 avformat_find_stream_info = _libraries['libavformat.so'].avformat_find_stream_info
 avformat_find_stream_info.restype = c_int
 avformat_find_stream_info.argtypes = [POINTER(AVFormatContext), POINTER(POINTER(AVDictionary))]
+av_read_frame = _libraries['libavformat.so'].av_read_frame
+av_read_frame.restype = c_int
+av_read_frame.argtypes = [POINTER(AVFormatContext), POINTER(AVPacket)]
+av_guess_format = _libraries['libavformat.so'].av_guess_format
+av_guess_format.restype = POINTER(AVOutputFormat)
+av_guess_format.argtypes = [STRING, STRING, STRING]
 av_dict_get = _libraries['libavcodec.so'].av_dict_get
 av_dict_get.restype = POINTER(AVDictionaryEntry)
 av_dict_get.argtypes = [POINTER(AVDictionary), STRING, POINTER(AVDictionaryEntry), c_int]
@@ -833,4 +921,25 @@ av_strerror.argtypes = [c_int, STRING, size_t]
 av_log_set_level = _libraries['libavcodec.so'].av_log_set_level
 av_log_set_level.restype = None
 av_log_set_level.argtypes = [c_int]
+av_malloc = _libraries['libavcodec.so'].av_malloc
+av_malloc.restype = c_void_p
+av_malloc.argtypes = [size_t]
+av_mallocz = _libraries['libavcodec.so'].av_mallocz
+av_mallocz.restype = c_void_p
+av_mallocz.argtypes = [size_t]
+av_get_sample_fmt_name = _libraries['libavcodec.so'].av_get_sample_fmt_name
+av_get_sample_fmt_name.restype = STRING
+av_get_sample_fmt_name.argtypes = [AVSampleFormat]
+av_samples_get_buffer_size = _libraries['libavcodec.so'].av_samples_get_buffer_size
+av_samples_get_buffer_size.restype = c_int
+av_samples_get_buffer_size.argtypes = [POINTER(c_int), c_int, c_int, AVSampleFormat, c_int]
+sws_getContext = _libraries['libswscale.so'].sws_getContext
+sws_getContext.restype = POINTER(SwsContext)
+sws_getContext.argtypes = [c_int, c_int, PixelFormat, c_int, c_int, PixelFormat, c_int, POINTER(SwsFilter), POINTER(SwsFilter), POINTER(c_double)]
+sws_scale = _libraries['libswscale.so'].sws_scale
+sws_scale.restype = c_int
+sws_scale.argtypes = [POINTER(SwsContext), POINTER(POINTER(uint8_t)), POINTER(c_int), c_int, c_int, POINTER(POINTER(uint8_t)), POINTER(c_int)]
+sws_scaleVec = _libraries['libswscale.so'].sws_scaleVec
+sws_scaleVec.restype = None
+sws_scaleVec.argtypes = [POINTER(SwsVector), c_double]
 
