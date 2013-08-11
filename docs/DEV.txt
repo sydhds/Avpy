@@ -27,7 +27,7 @@ Generate bindings
 -------------
 
 python gen.py -l libav -v 0.8.3
-python genClean.py -s av08.py -d av8.py -c config/libav08.yaml  
+python genClean.py -s av08.py -d av8.py -c config/libav08.yml  
 cp -v ../pyav/version/
 
 note: running genClean.py script is not mandatory. You can directly copy av08.py script: cp -v av08.py ../pyav/version/av8.py. See Generate binding config for detailed information.

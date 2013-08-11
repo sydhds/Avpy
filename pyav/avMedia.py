@@ -65,14 +65,14 @@ class Media():
         streamInfo['codec'] = c.contents.name
 
         streamInfo['type'] = 'video' if cCodecCtx.contents.codec_type == av.lib.AVMEDIA_TYPE_VIDEO else 'audio'
-
+        
         if streamInfo['type'] == 'video':
             streamInfo['width'] = cCodecCtx.contents.width
             streamInfo['height'] = cCodecCtx.contents.height
         elif streamInfo['type'] == 'audio':
             streamInfo['sample_rate'] = cCodecCtx.contents.sample_rate
             streamInfo['channels'] = cCodecCtx.contents.channels
-            streamInfo['frame_size'] = cCodecCtx.contents.frame_size
+            #streamInfo['frame_size'] = cCodecCtx.contents.frame_size
             streamInfo['sample_fmt'] = av.lib.av_get_sample_fmt_name(cCodecCtx.contents.sample_fmt)
 
         return streamInfo
@@ -138,42 +138,96 @@ class Media():
         set decode to False to get codec encoder info
         '''
 
+        # from http://new.libav.org/doxygen/master/cmdutils_8c_source.html#l00598
+        # examples
+        # framerates -> Media.codecInfo('mpeg1video', decode=False)
+        # samplerates -> Media.codecInfo('mp2', decode=False)
+        # pix_fmt -> Media.codecInfo('ffv1', decode=False)
+        # profiles -> Media.codecInfo('mpeg4', decode=True)
+        # image -> Media.codecInfo('png', decode=True) - Media.codecInfo('gif', decode=True)
+        # subtitle -> Media.codecInfo('ass', decode=True)
+        
         ci = {}
-
+        
+        # init lib
         av.lib.av_register_all()
+
         if decode:
             c = av.lib.avcodec_find_decoder_by_name(name)
         else:
             c = av.lib.avcodec_find_encoder_by_name(name)
 
         if c:
-            ci['decoder'] = None
             ci['name'] = c.contents.name
             ci['longName'] = c.contents.long_name
-            # FIXME
-            ci['threads'] = None
-
+            
+            codecType = c.contents.type
+            if codecType == av.lib.AVMEDIA_TYPE_VIDEO:
+                ci['type'] = 'video'
+            elif codecType == av.lib.AVMEDIA_TYPE_AUDIO:
+                ci['type'] = 'audio'
+            elif codecType == av.lib.AVMEDIA_TYPE_SUBTITLE:
+                ci['type'] = 'subtitle'
+            else:
+                ci['type'] = 'unknown'
+            
+            # thread caps
+            ci['thread'] = None
             ci['framerates'] = []
+            ci['samplerates'] = [] 
+            ci['pix_fmt'] = []
+            ci['profiles'] = []
+            
+            # thread caps
+            caps = c.contents.capabilities & (av.lib.CODEC_CAP_FRAME_THREADS|av.lib.CODEC_CAP_SLICE_THREADS)
+            if caps == (av.lib.CODEC_CAP_FRAME_THREADS|av.lib.CODEC_CAP_SLICE_THREADS):
+                ci['thread'] = 'frame and slice'
+            elif caps == av.lib.CODEC_CAP_FRAME_THREADS:
+                ci['thread'] = 'frame'
+            elif caps == av.lib.CODEC_CAP_SLICE_THREADS:
+                ci['thread'] = 'slice'
+
+            # support auto thread
+            ci['auto_thread'] = False
+            caps = c.contents.capabilities & (av.lib.CODEC_CAP_AUTO_THREADS)
+            if caps == av.lib.CODEC_CAP_AUTO_THREADS:
+                ci['auto_thread'] = True
+
+            # supported frame rates
             fps = c.contents.supported_framerates
             if fps:
-                i=0
-                f = fps[i]
-                while f.num:
-                    ci['framerates'].append('%d/%d' % (f.num, f.den))
-
-            ci['pix_fmt'] = []
+                for f in fps:
+                    if not f.num and not f.den:
+                        break
+                    ci['framerates'].append((f.num, f.den))
+                
+            # supported sample rates
+            srates = c.contents.supported_samplerates
+            if srates:
+                for r in srates:
+                    if r==0:
+                        break
+                    ci['samplerates'].append(r)
+            
+            # supported pixel formats
             pixFmts = c.contents.pix_fmts 
             if pixFmts:
-                i = 0
-                p = pixFmts[i]
-                while p != av.lib.PIX_FMT_NONE:
+                for p in pixFmts:
+                    if p == av.lib.PIX_FMT_NONE:
+                        break
                     ci['pix_fmt'].append(av.lib.avcodec_get_pix_fmt_name(p))
-                    i += 1
-                    p = pixFmts[i]
+
+            # profiles
+            pf = c.contents.profiles
+            if pf:
+                for p in pf:
+                    if not p.name:
+                        break
+                    ci['profiles'].append(p.name)
+
         else:
             raise ValueError('Unable to find codec %s' % name)
         
-        # TODO --> http://new.libav.org/doxygen/master/cmdutils_8c_source.html#l00598
 
         return ci
    

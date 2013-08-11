@@ -43,20 +43,24 @@ uint16_t = c_uint16
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
-CODEC_ID_MPEG2VIDEO = 2
-PIX_FMT_RGB24 = 2
-CODEC_ID_NONE = 0
-CODEC_ID_MPEG1VIDEO = 1
-PIX_FMT_YUV420P = 0
-PIX_FMT_NONE = -1
+AVMEDIA_TYPE_SUBTITLE = 3
 AVMEDIA_TYPE_AUDIO = 1
 AVMEDIA_TYPE_VIDEO = 0
+PIX_FMT_NONE = -1
+PIX_FMT_RGB24 = 2
+CODEC_ID_MPEG1VIDEO = 1
+CODEC_ID_NONE = 0
 AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
+CODEC_ID_MPEG2VIDEO = 2
+PIX_FMT_YUV420P = 0
 SWS_BILINEAR = 2 # Variable c_int '2'
 AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
 AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
+CODEC_CAP_AUTO_THREADS = 32768 # Variable c_int '32768'
 CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
 AV_TIME_BASE = 1000000 # Variable c_int '1000000'
+CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
+CODEC_CAP_SLICE_THREADS = 8192 # Variable c_int '8192'
 
 class N8AVPacket4DOT_30E(Structure):
 	pass
@@ -856,7 +860,10 @@ avcodec_find_encoder = _libraries['libavcodec.so'].avcodec_find_encoder
 avcodec_find_encoder.restype = POINTER(AVCodec)
 avcodec_find_encoder.argtypes = [CodecID]
 avcodec_find_encoder_by_name = _libraries['libavcodec.so'].avcodec_find_encoder_by_name
+avcodec_find_encoder_by_name = _libraries['libavcodec.so'].avcodec_find_encoder_by_name
 avcodec_find_encoder_by_name.restype = POINTER(AVCodec)
+avcodec_find_encoder_by_name.restype = POINTER(AVCodec)
+avcodec_find_encoder_by_name.argtypes = [STRING]
 avcodec_find_encoder_by_name.argtypes = [STRING]
 avcodec_find_decoder = _libraries['libavcodec.so'].avcodec_find_decoder
 avcodec_find_decoder.restype = POINTER(AVCodec)
