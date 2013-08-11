@@ -12,6 +12,24 @@ looks like this:
     m = Media('test.avi')
     print m.info()
 
+More examples can be found in the examples folder.
+
+FeatureMatrix:
+- libav: 
+    - version < 0.8: to be discussed
+    - version 0.8: done
+    - version 0.9: planned
+    - ffmpeg: to be discussed
+- OS: 
+    - Linux - BSD: done
+    - others: planned
+- pyav:
+    - media info: done
+    - basic video decoding: wip
+    - basic audio decoding: wip
+    - sync video player: planned
+    - subtitle support: planned
+
 Install
 ========
 
