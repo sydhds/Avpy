@@ -29,6 +29,7 @@ FeatureMatrix:
     - basic audio decoding: wip
     - sync video player: planned
     - subtitle support: planned
+    - encoding: planned
 
 Install
 ========
