@@ -50,3 +50,8 @@ Install from source:
 - python setup.py sdist
 - pip install dist/Pyav-*.tar.gz
 
+Contact
+========
+
+sydhds __at__ gmail __dot__ com
+
