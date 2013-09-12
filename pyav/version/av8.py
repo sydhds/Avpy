@@ -9,13 +9,19 @@ from ctypes import c_int32, c_uint32
 from ctypes import c_int64, c_uint64
 from ctypes import c_float
 from ctypes import c_double
+from ctypes import util
 
-CDLL('libavutil.so', RTLD_GLOBAL)
+libavutil = util.find_library('avutil')
+CDLL(libavutil, RTLD_GLOBAL)
 _libraries = {}
-_libraries['libavcodec.so'] = CDLL('libavcodec.so', mode=RTLD_GLOBAL)
-_libraries['libavdevice.so'] = CDLL('libavdevice.so', mode=RTLD_GLOBAL)
-_libraries['libavformat.so'] = CDLL('libavformat.so', mode=RTLD_GLOBAL)
-_libraries['libswscale.so'] = CDLL('libswscale.so', mode=RTLD_GLOBAL)
+libavcodec = util.find_library('avcodec')
+_libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)
+libavdevice = util.find_library('avdevice')
+_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
+libavformat = util.find_library('avformat')
+_libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)
+libswscale = util.find_library('swscale')
+_libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)
 
 STRING = c_char_p
 size_t = c_ulong
