@@ -81,13 +81,22 @@ def main(options):
         y = yaml.load(f.read())
 
     fd = open(options.dst, 'w')	
+    print 'writing:'
+    print 'header...'
     wHeader(fd, y)
+    print 'type...'
     wAssignement(fd, y, options.src, 'type')
+    print 'define...'
     wAssignement(fd, y, options.src, 'define')
+    print 'class...'
     wClass(fd, y)
+    print 'alias...'
     wAssignement(fd, y, options.src, 'alias')
+    print 'class data...'
     wClassFields(fd, y, options.src)
+    print 'functions'
     wFunctions(fd, y, options.src)
+    print 'done: %s' % options.dst
 
 if __name__ == '__main__':
 
