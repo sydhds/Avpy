@@ -22,7 +22,8 @@ FeatureMatrix:
     - ffmpeg: to be discussed
 - OS: 
     - Linux - BSD: done
-    - others: planned
+    - MacOS: please report!
+    - Windows: please report!
 - pyav:
     - media info: done
     - basic video decoding: wip
