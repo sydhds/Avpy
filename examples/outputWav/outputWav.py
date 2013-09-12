@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-Decode 5000 packets of the first audio stream
+Decode 90 seconds of the first audio stream
 and output it into a wav file
 '''
 
@@ -40,6 +40,10 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option('-m', '--media', 
             help='play media')
+    parser.add_option('--length', 
+            help='decode at max seconds of audio',
+            type='int',
+            default=90)
     
     (options, args) = parser.parse_args()
 
@@ -72,7 +76,11 @@ if __name__ == '__main__':
         print 'wrong parameters for wav file: %s' % e
         sys.exit(1)
 
-    for i, p in enumerate(m):
+    # size in bytes required for 1 second of audio
+    secondSize = astreamInfo['channels'] * astreamInfo['bytes_per_sample'] * astreamInfo['sample_rate']
+    decodedSize = 0
+
+    for p in m:
 
         if p.streamIndex() == astream:
             p.decode()
@@ -80,7 +88,11 @@ if __name__ == '__main__':
                 # find a way to retrieve data after decoding
                 print 'writing %s bytes...' % p.dataSize
                 audioDump(p.frame.contents.data[0], p.dataSize)
-                if i > 5000:
+                
+                decodedSize += p.dataSize
+                # stop after ~ 90s (default)
+                # exact size will vary depending on dataSize
+                if decodedSize >= options.length*secondSize:
                     break
 
     writeWav(wp)
