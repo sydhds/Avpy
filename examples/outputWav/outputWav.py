@@ -47,17 +47,29 @@ if __name__ == '__main__':
     # dump info
     mediaInfo = m.info()
 
-    # prepare wav file
-    wp = wave.open('out.wav', 'w')
-    # FIXME: hardcoded value
-    wp.setparams( (2, 2, 48000, 0, 'NONE', 'not compressed') )
-
     # select first audio stream
     astreams = [ i for i, s in enumerate(mediaInfo['stream']) if s['type'] == 'audio' ]
     if astreams:
         astream = astreams[0]
     else:
         print 'No audio stream in %s' % mediaInfo['name']
+        sys.exit(2)
+    
+    # prepare wav file
+    wp = wave.open('out.wav', 'w')
+    
+    astreamInfo = mediaInfo['stream'][astream]
+    
+    try:
+        # nchannels, sampwidth, framerate, nframes, comptype, compname 
+        wp.setparams( (astreamInfo['channels'], 
+           astreamInfo['bytes_per_sample'], 
+           astreamInfo['sample_rate'], 
+           0, 
+           'NONE', 
+           'not compressed') )
+    except wave.Error, e:
+        print 'wrong parameters for wav file: %s' % e
         sys.exit(1)
 
     for i, p in enumerate(m):

@@ -161,4 +161,4 @@ function:
     - avcodec_find_encoder
     - avformat_new_stream
     - av_get_sample_fmt_name
-
+    - av_get_bytes_per_sample

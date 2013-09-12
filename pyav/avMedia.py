@@ -74,6 +74,7 @@ class Media():
             streamInfo['channels'] = cCodecCtx.contents.channels
             #streamInfo['frame_size'] = cCodecCtx.contents.frame_size
             streamInfo['sample_fmt'] = av.lib.av_get_sample_fmt_name(cCodecCtx.contents.sample_fmt)
+            streamInfo['bytes_per_sample'] = av.lib.av_get_bytes_per_sample(cCodecCtx.contents.sample_fmt)
 
         return streamInfo
 

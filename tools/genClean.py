@@ -94,7 +94,7 @@ def main(options):
     wAssignement(fd, y, options.src, 'alias')
     print 'class data...'
     wClassFields(fd, y, options.src)
-    print 'functions'
+    print 'functions...'
     wFunctions(fd, y, options.src)
     print 'done: %s' % options.dst
 
