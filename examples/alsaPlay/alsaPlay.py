@@ -15,11 +15,21 @@ import alsaaudio
 from pyav import Media
 
 if __name__ == '__main__':
-    
+   
+    # cmdline
     from optparse import OptionParser
 
-    parser = OptionParser()
-    parser.add_option('-m', '--media', help='play media')
+    usage = "usage: %prog -m foo.avi"
+    parser = OptionParser(usage=usage)
+    parser.add_option('-m', '--media', 
+            help='play media')
+    parser.add_option('--length', 
+            help='decode at max seconds of audio',
+            type='int',
+            default=90)    
+    parser.add_option('--copyPacket', 
+            action='store_true',
+            help='copy packet (debug only)')
 
     (options, args) = parser.parse_args()
 
@@ -52,11 +62,21 @@ if __name__ == '__main__':
     out.setrate(fe)
     out.setformat(aformat)
 
+    # size in bytes required for 1 second of audio
+    secondSize = si['channels'] * si['bytes_per_sample'] * si['sample_rate']
+    decodedSize = 0
+
+    print 'playing sound of %s (%s seconds)...' % (options.media, options.length)
+
     # let's play!
     for i, p2 in enumerate(m):
         
         # TODO: add --copyPacket option (debug only)
-        p = copy(p2)
+        
+        if options.copyPacket:
+            p = copy(p2)
+        else:
+            p = p2
 
         if p.streamIndex() == astream:
             p.decode()
@@ -64,7 +84,9 @@ if __name__ == '__main__':
                 buf = p.frame.contents.data[0]
                 bufLen = p.dataSize
                 out.write(ctypes.string_at(buf, bufLen))
-                
-                # TODO: stop after a given number of seconds            
-                if i > 5000:
+               
+                decodedSize += bufLen
+                # stop after ~ 90s (default)
+                # exact time will vary depending on dataSize
+                if decodedSize >= options.length*secondSize:
                     break
