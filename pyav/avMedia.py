@@ -16,6 +16,11 @@ class Media():
         self.pFormatCtx = ctypes.POINTER(av.lib.AVFormatContext)()
 
         if mode == 'r':
+            
+            # prevent coredump
+            if mediaName is None:
+                mediaName = ''
+            
             # open media for reading
             res = av.lib.avformat_open_input(self.pFormatCtx, mediaName, None, None)
             if res: 
