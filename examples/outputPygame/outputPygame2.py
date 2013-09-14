@@ -25,6 +25,12 @@ if __name__ == '__main__':
     parser.add_option('--copyPacket', 
             action='store_true',
             help='copy packet (debug only)')
+    parser.add_option('--scaleWidth',
+        type='float', default=1.0,
+        help='width scale (default: %default)')
+    parser.add_option('--scaleHeight',
+        type='float', default=1.0,
+        help='height scale (default: %default)')
 
     (options, args) = parser.parse_args()
 
@@ -51,9 +57,10 @@ if __name__ == '__main__':
     print 'video stream index: %d' % vstream
     print 'video stream resolution: %dx%d' % (size[0], size[1])
 
-    # XXX
-    # /2 size
-    size = [ i/2 for i in size ]
+    size = ( int(round(size[0]*options.scaleWidth)), 
+            int(round(size[1]*options.scaleHeight)) )
+
+    print 'output resolution: %dx%d' % (size) 
 
     m.addScaler2(vstream, *size)
 
@@ -64,6 +71,8 @@ if __name__ == '__main__':
 
     decodedCount = 0
     mainLoop = True
+
+    print 'Press Esc to quit...'
 
     while mainLoop:
         
