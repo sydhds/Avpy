@@ -17,11 +17,15 @@ if __name__ == '__main__':
     
     # cmdline
     from optparse import OptionParser
-
-    parser = OptionParser()
+    
+    usage = "usage: %prog -m foo.avi"
+    parser = OptionParser(usage=usage)
     parser.add_option('-m', '--media', 
             help='play media')
-    
+    parser.add_option('--copyPacket', 
+            action='store_true',
+            help='copy packet (debug only)')
+
     (options, args) = parser.parse_args()
 
     try:
@@ -70,8 +74,12 @@ if __name__ == '__main__':
             continue
 
         if p.streamIndex() == vstream:
-            
-            p2 = copy.copy(p)
+           
+            if options.copyPacket:
+                p2 = copy.copy(p)
+            else:
+                p2 = p
+
             p2.decode()
             if p2.decoded:
                 decodedCount += 1

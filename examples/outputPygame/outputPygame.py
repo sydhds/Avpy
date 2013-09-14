@@ -20,7 +20,8 @@ if __name__ == '__main__':
     # cmdline
     from optparse import OptionParser
 
-    parser = OptionParser()
+    usage = "usage: %prog -m foo.avi -o 140"
+    parser = OptionParser(usage=usage)
     parser.add_option('-m', '--media', 
             help='play media')
     parser.add_option('-o', '--offset', 
@@ -29,6 +30,9 @@ if __name__ == '__main__':
     parser.add_option('-c', '--frameCount', 
             type='int',
             help='number of image to save (default: %default)', default=5)
+    parser.add_option('--copyPacket', 
+            action='store_true',
+            help='copy packet (debug only)')
 
     (options, args) = parser.parse_args()
 
@@ -65,9 +69,12 @@ if __name__ == '__main__':
     for p in m:
         
         if p.streamIndex() == vstream:
-            
-            p2 = copy.copy(p) 
-            
+           
+            if options.copyPacket:
+                p2 = copy.copy(p) 
+            else:
+                p2 = p
+
             p2.decode()
             if p2.decoded:
 

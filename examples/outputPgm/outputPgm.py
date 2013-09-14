@@ -32,7 +32,8 @@ if __name__ == '__main__':
     # cmdline
     from optparse import OptionParser
 
-    parser = OptionParser()
+    usage = "usage: %prog -m foo.avi -o 140"
+    parser = OptionParser(usage=usage)
     parser.add_option('-m', '--media', 
             help='play media')
     parser.add_option('-o', '--offset', 

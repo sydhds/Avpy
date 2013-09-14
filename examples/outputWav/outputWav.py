@@ -37,7 +37,8 @@ if __name__ == '__main__':
     # cmdline
     from optparse import OptionParser
 
-    parser = OptionParser()
+    usage = "usage: %prog -m foo.avi"
+    parser = OptionParser(usage=usage)
     parser.add_option('-m', '--media', 
             help='play media')
     parser.add_option('--length', 
@@ -91,7 +92,7 @@ if __name__ == '__main__':
                 
                 decodedSize += p.dataSize
                 # stop after ~ 90s (default)
-                # exact size will vary depending on dataSize
+                # exact time will vary depending on dataSize
                 if decodedSize >= options.length*secondSize:
                     break
 
