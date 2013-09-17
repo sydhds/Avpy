@@ -66,12 +66,13 @@ if __name__ == '__main__':
 
     from optparse import OptionParser
 
-    parser = OptionParser()
+    usage = 'build.py -l libav -v 0.8.1'
+    parser = OptionParser(usage=usage)
     parser.add_option('-l', '--lib', 
             help='lib to build: ffmpeg or libav (default: %default)',
             default='libav')
     parser.add_option('-v', '--version',
-            help='libav version to build (ex: 0.8.3)')
+            help='libav version to build (ex: 0.8.1)')
 
     (options, args) = parser.parse_args()
 

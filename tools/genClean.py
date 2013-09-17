@@ -63,16 +63,17 @@ def wFunctions(fp, yamlDict, src):
 
     with open(src, 'r') as f:
 
-        #write_line = False
         line = f.readline()
         while line:
             for fct in yamlDict['function']:
                 if line.startswith(fct):
                     fp.write(line)
-        
+
+
             line = f.readline()
 
     fp.write('\n')
+
 
 def main(options):
 
@@ -101,8 +102,9 @@ def main(options):
 if __name__ == '__main__':
 
     from optparse import OptionParser
-
-    parser = OptionParser()
+    
+    usage = '%prog -s av08.py -d av8.py -c config/libav08.yml'
+    parser = OptionParser(usage=usage)
 
     parser.add_option('-s', '--src', help='python source')
     parser.add_option('-d', '--dst', help='python destination')

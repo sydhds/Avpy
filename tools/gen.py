@@ -35,7 +35,7 @@ def main(options):
     print 'generating xml...'
     xmlCmd = 'h2xml -I {0}/include -c libavcodec/avcodec.h'\
             ' libavdevice/avdevice.h libavformat/avformat.h libavutil/avutil.h'\
-            ' libavutil/mathematics.h libswscale/swscale.h -o {1}'\
+            ' libavutil/mathematics.h libavutil/rational.h libswscale/swscale.h -o {1}'\
             ' -D__STDC_CONSTANT_MACROS'.format(buildDir, xmlFile)
     run(xmlCmd)
 
@@ -55,13 +55,14 @@ def main(options):
 if __name__ == '__main__':
 
     from optparse import OptionParser
-
-    parser = OptionParser()
+    
+    usage = '%prog -l libav -v 0.8.1'
+    parser = OptionParser(usage=usage)
     parser.add_option('-l', '--lib', 
             help='gen python binding for lib: ffmpeg or libav (default: %default)',
             default='libav')
     parser.add_option('-v', '--version',
-            help='gen python binding for libav version (ex: 0.8.3)')
+            help='gen python binding for libav version (ex: 0.8.1)')
 
     (options, args) = parser.parse_args()
 
