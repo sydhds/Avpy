@@ -19,7 +19,7 @@ FeatureMatrix:
     - version < 0.8: to be discussed
     - version 0.8: done
     - version 0.9: planned
-    - ffmpeg: to be discussed
+- ffmpeg: to be discussed
 - OS: 
     - Linux - BSD: done
     - MacOS: please report!
@@ -28,7 +28,7 @@ FeatureMatrix:
     - media info: done
     - basic video decoding: wip
     - basic audio decoding: wip
-    - sync video player: planned
+    - sync video player: wip 
     - subtitle support: planned
     - encoding: planned
 
