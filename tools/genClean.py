@@ -6,6 +6,8 @@ pyav tools/build.py
 Generate clean binding
 '''
 
+import re
+
 import yaml
 
 def wHeader(fp, yamlDict):
@@ -66,15 +68,23 @@ def wFunctions(fp, yamlDict, src):
     with open(src, 'r') as f:
 
         line = f.readline()
+        functionFound = set()
         while line:
             for fct in yamlDict['function']:
-                if line.startswith(fct):
+                if re.search('%s(\ =|\.argtypes|\.restype)' % fct, 
+                        line):
                     fp.write(line)
-
+                    functionFound.add(fct)
 
             line = f.readline()
 
     fp.write('\n')
+
+    notFound = set(yamlDict['function']) - functionFound
+    if notFound:
+        print 'Could not find function(s):'
+        for f in notFound:
+            print '- %s' % f
 
 
 def main(options):
