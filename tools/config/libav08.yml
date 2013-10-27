@@ -36,6 +36,7 @@ define:
     - PIX_FMT_YUV420P
     - SWS_BILINEAR
     - AV_LOG_QUIET
+    - AV_NOPTS_VALUE
     # encode
     - CODEC_ID_MPEG2VIDEO
     - CODEC_ID_MPEG1VIDEO
@@ -151,7 +152,6 @@ function:
     - avcodec_alloc_frame
     # test
     - avpicture_get_size
-    - avpicture_alloc
     - avpicture_fill
     - av_malloc
     - av_guess_format
