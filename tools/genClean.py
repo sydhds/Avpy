@@ -65,12 +65,17 @@ def wClassFields(fp, yamlDict, src):
 
 def wFunctions(fp, yamlDict, src):
 
+    fcts = yamlDict['function']
+    dupFunctions = set([x for x in fcts if fcts.count(x) > 1])
+    for f in dupFunctions:
+        print 'Warning: duplicated functions in config: %s' % f
+
     with open(src, 'r') as f:
 
         line = f.readline()
         functionFound = set()
         while line:
-            for fct in yamlDict['function']:
+            for fct in fcts:
                 if re.search('%s(\ =|\.argtypes|\.restype)' % fct, 
                         line):
                     fp.write(line)
