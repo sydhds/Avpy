@@ -53,6 +53,12 @@ def buildGit(options):
     print 'configure log: %s' % os.path.join(buildDir, 'config.log')
     print 'make log: %s' % os.path.join(buildDir, 'make.log')
 
+    if options.doc:
+        run('doxygen Doxyfile')
+        # pseudo install
+        run('cp -r doxy {0}'.format(buildDir))
+
+
 def main(options):
 
     try:
@@ -75,6 +81,8 @@ if __name__ == '__main__':
             default='libav')
     parser.add_option('-v', '--version',
             help='libav version to build (ex: 0.8.1)')
+    parser.add_option('-d', '--doc',
+            help='generate documentation (require doxygen)')
 
     (options, args) = parser.parse_args()
 
