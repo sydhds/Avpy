@@ -10,6 +10,7 @@ import os
 import errno
 import sys
 import subprocess
+import shutil
 
 def run(cmd):
 
@@ -54,9 +55,31 @@ def buildGit(options):
     print 'make log: %s' % os.path.join(buildDir, 'make.log')
 
     if options.doc:
-        run('doxygen Doxyfile')
+        basedir = ''
+        basefile = 'Doxyfile'
+        if not os.path.isfile(os.path.join(basedir, basefile)): 
+            basedir = 'doc'
+            if not os.path.isfile(os.path.join(basedir, basefile)):
+                print 'Could not find doxygen configuration file: %s' % basefile
+                sys.exit(2)        
+
+        doxyf = os.path.join(basedir, basefile)
+        doxyDst = os.path.join(basedir, 'doxy', 'html')
+        try:
+            # clean
+            print 'removing %s...' % doxyDst
+            shutil.rmtree(doxyDst)
+            print 'done.'
+        except OSError, e:
+            if e.errno == errno.ENOENT:
+                pass
+            else:
+                raise
+
+        # gen
+        run('doxygen %s > %s 2>&1' % (doxyf, os.path.join(buildDir, 'doxygen.log')))
         # pseudo install
-        run('cp -r doxy {0}'.format(buildDir))
+        run('cp -r {0} {1}'.format(doxyDst, buildDir))
 
 
 def main(options):
@@ -82,6 +105,8 @@ if __name__ == '__main__':
     parser.add_option('-v', '--version',
             help='libav version to build (ex: 0.8.1)')
     parser.add_option('-d', '--doc',
+            action='store_true',
+            default=False,
             help='generate documentation (require doxygen)')
 
     (options, args) = parser.parse_args()
