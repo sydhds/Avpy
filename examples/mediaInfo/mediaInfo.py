@@ -14,30 +14,34 @@ if __name__ == '__main__':
     parser = OptionParser(usage=usage)
     parser.add_option('-m', '--media', 
             help='play media')
+    parser.add_option('-i', '--info', 
+            action='store_true',
+            help='print codec info')
     (options, args) = parser.parse_args() 
 
-    # print a dict with available formats to encode and decode
-    print 'available formats:'
     formats = Media.formats()
-    print formats
+    codecs = Media.codecs() 
 
-    # print mp3 codec information
-    codecName = 'mp3'
-    printSep()
-    print '%s (%s) information:' % (codecName, formats['decoding'].get(codecName, ''))
-    print Media.codecInfo('mp3')
-    
     # open
     if options.media:
+        
         m = Media(options.media)
-        printSep()
-        print '%s info:' % options.media
         infoDict = m.info()
 
+        print '%s info:' % options.media
+        print ' metadata:', infoDict['metadata']
+        print ' duration:', infoDict['duration']
+
+        printSep() 
         print 'stream(s):'
         for stream in infoDict['stream']:
-            print stream
+            print '-', stream
 
+            if options.info:
+                print '  %s info:' % stream['codec']
+                for k, v in Media.codecInfo(stream['codec']).iteritems():
+                    print '    %s: %s' % (k, v)
+                printSep()
     else:
         print 'please provide a movie or sound file'
 

@@ -56,7 +56,8 @@ class Media():
         for i in range(self.pFormatCtx.contents.nb_streams):
             cStream = self.pFormatCtx.contents.streams[i]
             cStreamInfo = self._streamInfo(cStream)
-            infoDict['stream'].append(cStreamInfo)
+            if cStreamInfo:
+                infoDict['stream'].append(cStreamInfo)
 
         return infoDict
 
@@ -66,21 +67,31 @@ class Media():
         cCodecCtx = stream.contents.codec
         
         # cCodecCtx.contents.codec is NULL so retrieve codec using id  
+        # avcodec_find_decoder can return a null value: AV_CODEC_ID_FIRST_UNKNOWN 
         c = av.lib.avcodec_find_decoder(cCodecCtx.contents.codec_id)
-        streamInfo['codec'] = c.contents.name
-
-        streamInfo['type'] = 'video' if cCodecCtx.contents.codec_type == av.lib.AVMEDIA_TYPE_VIDEO else 'audio'
         
-        if streamInfo['type'] == 'video':
+        if c:
+            streamInfo['codec'] = c.contents.name
+
+        codecType = cCodecCtx.contents.codec_type
+        if codecType == av.lib.AVMEDIA_TYPE_VIDEO:
+            streamInfo['type'] = 'video'
             streamInfo['width'] = cCodecCtx.contents.width
             streamInfo['height'] = cCodecCtx.contents.height
-        elif streamInfo['type'] == 'audio':
+        elif codecType == av.lib.AVMEDIA_TYPE_AUDIO:
+            streamInfo['type'] = 'audio'
             streamInfo['sample_rate'] = cCodecCtx.contents.sample_rate
             streamInfo['channels'] = cCodecCtx.contents.channels
-            #streamInfo['frame_size'] = cCodecCtx.contents.frame_size
             streamInfo['sample_fmt'] = av.lib.av_get_sample_fmt_name(cCodecCtx.contents.sample_fmt)
             streamInfo['bytes_per_sample'] = av.lib.av_get_bytes_per_sample(cCodecCtx.contents.sample_fmt)
-
+        elif codecType == av.lib.AVMEDIA_TYPE_SUBTITLE:
+            streamInfo['type'] = 'subtitle'
+            streamInfo['subtitle_header'] = ctypes.string_at(cCodecCtx.contents.subtitle_header,
+                    cCodecCtx.contents.subtitle_header_size)
+        else:
+            pass
+            #streamInfo['type'] = 'unknown'
+        
         return streamInfo
 
     def metadata(self):
@@ -105,17 +116,60 @@ class Media():
         return metaDict
 
     @staticmethod
+    def codecs():
+
+        codecs = {
+                'audio': {'decoding': [], 'encoding': []},
+                'video': {'decoding': [], 'encoding': []},
+                'subtitle': {'decoding': [], 'encoding': []},
+            } 
+        
+        av.lib.av_register_all()
+        c  = None
+        #previousName = ''
+        
+        while 1:
+            c = av.lib.av_codec_next(c)
+            if c :
+
+                codecName = c.contents.name
+
+                #if previousName == codecName:
+                    #continue
+
+                key1 = ''
+                if c.contents.type == av.lib.AVMEDIA_TYPE_VIDEO:
+                    key1 = 'video'                  
+                elif c.contents.type == av.lib.AVMEDIA_TYPE_AUDIO:
+                    key1 = 'audio'
+                elif c.contents.type == av.lib.AVMEDIA_TYPE_SUBTITLE:
+                    key1 = 'subtitle'
+
+                if key1:
+                    if c.contents.decode:
+                        codecs[key1]['decoding'].append(codecName)
+                    elif c.contents.encode:
+                        codecs[key1]['encoding'].append(codecName)
+
+                #previousName = codecName
+
+            else:
+                break
+
+        return codecs
+
+    @staticmethod
     def formats():
 
         '''
-        return a dict with 2 keys: encoding & decoding
+        return a dict with 2 keys: muxing & demuxing
 
         each key value is a dict: key=format name, value: format long name
         '''
 
         # port of show_formats function (cf cmdutils.c)
 
-        f = {'encoding': {}, 'decoding': {}}
+        f = {'muxing': {}, 'demuxing': {}}
 
         av.lib.av_register_all()
         ifmt  = None
@@ -124,14 +178,14 @@ class Media():
         while 1:
             ofmt = av.lib.av_oformat_next(ofmt)
             if ofmt:
-                f['encoding'][ofmt.contents.name] = ofmt.contents.long_name
+                f['muxing'][ofmt.contents.name] = ofmt.contents.long_name
             else:
                 break
 
         while 1:
             ifmt = av.lib.av_iformat_next(ifmt)
             if ifmt:
-                f['decoding'][ifmt.contents.name] = ifmt.contents.long_name
+                f['demuxing'][ifmt.contents.name] = ifmt.contents.long_name
             else:
                 break
 

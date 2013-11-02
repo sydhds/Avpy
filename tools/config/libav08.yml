@@ -145,6 +145,7 @@ function:
     - avcodec_decode_video2
     - av_find_stream_info
     - avcodec_open
+    - av_codec_next
     # sws
     - sws_getContext
     - avpicture_alloc
