@@ -46,6 +46,7 @@ uint64_t = c_uint64
 PixelFormat = c_int # enum
 AVMediaType = c_int # enum
 uint16_t = c_uint16
+AVSubtitleType = c_int # enum
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
@@ -193,6 +194,12 @@ class AVIOInterruptCB(Structure):
 	pass
 
 class AVDictionaryEntry(Structure):
+	pass
+
+class AVSubtitle(Structure):
+	pass
+
+class AVSubtitleRect(Structure):
 	pass
 
 AVMetadata = AVDictionary
@@ -557,6 +564,25 @@ AVPaletteControl._fields_ = [
     ('palette_changed', c_int),
     ('palette', c_uint * 256),
 ]
+AVSubtitleRect._fields_ = [
+    ('x', c_int),
+    ('y', c_int),
+    ('w', c_int),
+    ('h', c_int),
+    ('nb_colors', c_int),
+    ('pict', AVPicture),
+    ('type', AVSubtitleType),
+    ('text', STRING),
+    ('ass', STRING),
+]
+AVSubtitle._fields_ = [
+    ('format', uint16_t),
+    ('start_display_time', uint32_t),
+    ('end_display_time', uint32_t),
+    ('num_rects', c_uint),
+    ('rects', POINTER(POINTER(AVSubtitleRect))),
+    ('pts', int64_t),
+]
 AVCodecParserContext._fields_ = [
     ('priv_data', c_void_p),
     ('parser', POINTER(AVCodecParser)),
@@ -887,6 +913,12 @@ avcodec_decode_audio4.argtypes = [POINTER(AVCodecContext), POINTER(AVFrame), POI
 avcodec_decode_video2 = _libraries['libavcodec.so'].avcodec_decode_video2
 avcodec_decode_video2.restype = c_int
 avcodec_decode_video2.argtypes = [POINTER(AVCodecContext), POINTER(AVFrame), POINTER(c_int), POINTER(AVPacket)]
+avcodec_decode_subtitle2 = _libraries['libavcodec.so'].avcodec_decode_subtitle2
+avcodec_decode_subtitle2.restype = c_int
+avcodec_decode_subtitle2.argtypes = [POINTER(AVCodecContext), POINTER(AVSubtitle), POINTER(c_int), POINTER(AVPacket)]
+avsubtitle_free = _libraries['libavcodec.so'].avsubtitle_free
+avsubtitle_free.restype = None
+avsubtitle_free.argtypes = [POINTER(AVSubtitle)]
 av_register_all = _libraries['libavformat.so'].av_register_all
 av_register_all.restype = None
 av_register_all.argtypes = []

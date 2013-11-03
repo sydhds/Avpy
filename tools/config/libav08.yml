@@ -24,6 +24,7 @@ type:
     - AVMediaType
     - PixelFormat
     - AVPictureType
+    - AVSubtitleType
 
 define:
     - AV_DICT_IGNORE_SUFFIX
@@ -95,7 +96,8 @@ class:
     - AVCodecDefault
     - AVIOInterruptCB
     - AVDictionaryEntry
-
+    - AVSubtitle
+    - AVSubtitleRect
 
 import:
     - from ctypes import CDLL, RTLD_GLOBAL
@@ -163,3 +165,6 @@ function:
     - avformat_new_stream
     - av_get_sample_fmt_name
     - av_get_bytes_per_sample
+    # subtitle
+    - avcodec_decode_subtitle2
+    - avsubtitle_free

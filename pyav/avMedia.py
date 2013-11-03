@@ -338,7 +338,9 @@ class Packet():
         self.frame = av.lib.avcodec_alloc_frame()
         self.decoded = ctypes.c_int(-1)
         self.decodedRef = ctypes.byref(self.decoded)
-        
+        # subtitle
+        self.subtitle = av.lib.AVSubtitle()
+
         # frame after conversion by scaler
         self.swsFrame = None
         
@@ -473,6 +475,26 @@ class Packet():
                                 codecCtx.contents.height,
                                 self.swsFrame.contents.data,
                                 self.swsFrame.contents.linesize)
+            elif codecType == av.lib.AVMEDIA_TYPE_SUBTITLE:
+                av.lib.avcodec_decode_subtitle2(codecCtx, self.subtitle, 
+                        self.decodedRef, self.pktRef)
+                
+                if self.decoded:
+                    self.subtitleCount = self.subtitle.num_rects 
+                    self.subtitleTypes = []
+
+                    for i in xrange(self.subtitleCount):
+
+                        cType = self.subtitle.rects[i].contents.type
+                        cTypeName = ''
+                        # FIXME: AVSubtitleType is an enum 
+                        if cType == 1:
+                            cTypeName = 'bitmap'
+                        elif cType == 2:
+                            cTypeName = 'text'
+                        elif cType == 3:
+                            cTypeName = 'ass'
+                        self.subtitleTypes.append(cTypeName)
 
             else:
                 # unsupported codec type - subtitle?
