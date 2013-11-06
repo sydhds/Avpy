@@ -29,16 +29,24 @@ def wClass(fp, yamlDict):
 def wAssignement(fp, yamlDict, src, key):
 
     with open(src, 'r') as f:
-		
+	
+        found = set()
 	#write_line = False
         line = f.readline()
         while line:
             for t in yamlDict[key]:
                 if line.startswith( '%s =' % t ):
                     fp.write(line)
-		    break
+		    found.add(t)
+                    break
 	    line = f.readline()
         fp.write('\n')
+
+    notFound = set(yamlDict[key]) - found
+    if notFound:
+        print 'Could not find:'
+        for t in notFound:
+            print '- %s' % t
 
 def wClassFields(fp, yamlDict, src):
 
