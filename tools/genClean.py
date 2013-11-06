@@ -46,10 +46,12 @@ def wClassFields(fp, yamlDict, src):
 
         write_line = False
         line = f.readline()
+        classFound = set()
         while line:
             for c in yamlDict['class']:
                 if line.startswith( '%s._fields_' % c ):
                     write_line = True
+                    classFound.add(c)
                     break
 
             if line.startswith(']'):
@@ -62,6 +64,13 @@ def wClassFields(fp, yamlDict, src):
 
             line = f.readline()
     fp.write('\n')
+
+    notFound = set(yamlDict['class']) - classFound
+    if notFound:
+        print 'Could not find class(es):'
+        for c in notFound:
+            print '- %s' % c
+
 
 def wFunctions(fp, yamlDict, src):
 

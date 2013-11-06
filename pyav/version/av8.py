@@ -43,6 +43,7 @@ AVPictureType = c_int # enum
 int8_t = c_int8
 uint32_t = c_uint32
 uint64_t = c_uint64
+AVFieldOrder = c_int # enum
 PixelFormat = c_int # enum
 AVMediaType = c_int # enum
 uint16_t = c_uint16
@@ -182,9 +183,6 @@ class SwsVector(Structure):
 	pass
 
 class AVCodecInternal(Structure):
-	pass
-
-class AVFieldOrder(Structure):
 	pass
 
 class AVCodecDefault(Structure):

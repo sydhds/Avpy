@@ -25,6 +25,7 @@ type:
     - PixelFormat
     - AVPictureType
     - AVSubtitleType
+    - AVFieldOrder
 
 define:
     - AV_DICT_IGNORE_SUFFIX
@@ -92,7 +93,6 @@ class:
     - SwsVector
     # 0.8
     - AVCodecInternal
-    - AVFieldOrder
     - AVCodecDefault
     - AVIOInterruptCB
     - AVDictionaryEntry
