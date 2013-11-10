@@ -39,6 +39,11 @@ define:
     - SWS_BILINEAR
     - AV_LOG_QUIET
     - AV_NOPTS_VALUE
+    # subtitle
+    - SUBTITLE_NONE
+    - SUBTITLE_BITMAP
+    - SUBTITLE_TEXT
+    - SUBTITLE_ASS
     # encode
     - CODEC_ID_MPEG2VIDEO
     - CODEC_ID_MPEG1VIDEO
@@ -48,6 +53,11 @@ define:
     - CODEC_CAP_FRAME_THREADS
     - CODEC_CAP_SLICE_THREADS
     - CODEC_CAP_AUTO_THREADS
+    # seek
+    - AVSEEK_FLAG_FRAME 
+    - AVSEEK_FLAG_BACKWARD 
+    - AVSEEK_FLAG_ANY 
+    - AVSEEK_FLAG_BYTE 
 
 alias:
     - ByteIOContext
@@ -168,3 +178,5 @@ function:
     # subtitle
     - avcodec_decode_subtitle2
     - avsubtitle_free
+    # seek
+    - av_seek_frame

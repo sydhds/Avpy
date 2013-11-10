@@ -57,10 +57,15 @@ CODEC_ID_MPEG1VIDEO = 1
 AVMEDIA_TYPE_SUBTITLE = 3
 AVMEDIA_TYPE_VIDEO = 0
 PIX_FMT_NONE = -1
+SUBTITLE_ASS = 3
+SUBTITLE_BITMAP = 1
 AVMEDIA_TYPE_AUDIO = 1
+SUBTITLE_NONE = 0
 AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
 PIX_FMT_YUV420P = 0
+SUBTITLE_TEXT = 2
 PIX_FMT_RGB24 = 2
+AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
 AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
 AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
@@ -69,7 +74,10 @@ CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
 AV_TIME_BASE = 1000000 # Variable c_int '1000000'
 CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
 AV_NOPTS_VALUE = 9223372036854775808L # Variable c_ulong '-9223372036854775808ul'
+AVSEEK_FLAG_FRAME = 8 # Variable c_int '8'
 CODEC_CAP_SLICE_THREADS = 8192 # Variable c_int '8192'
+AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
+AVSEEK_FLAG_BYTE = 2 # Variable c_int '2'
 
 class N8AVPacket4DOT_30E(Structure):
 	pass
@@ -944,6 +952,9 @@ avformat_find_stream_info.argtypes = [POINTER(AVFormatContext), POINTER(POINTER(
 av_read_frame = _libraries['libavformat.so'].av_read_frame
 av_read_frame.restype = c_int
 av_read_frame.argtypes = [POINTER(AVFormatContext), POINTER(AVPacket)]
+av_seek_frame = _libraries['libavformat.so'].av_seek_frame
+av_seek_frame.restype = c_int
+av_seek_frame.argtypes = [POINTER(AVFormatContext), c_int, int64_t, c_int]
 av_guess_format = _libraries['libavformat.so'].av_guess_format
 av_guess_format.restype = POINTER(AVOutputFormat)
 av_guess_format.argtypes = [STRING, STRING, STRING]

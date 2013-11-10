@@ -78,6 +78,9 @@ class Media():
             streamInfo['type'] = 'video'
             streamInfo['width'] = cCodecCtx.contents.width
             streamInfo['height'] = cCodecCtx.contents.height
+            streamInfo['fps'] = (cCodecCtx.contents.time_base.num, 
+                    cCodecCtx.contents.time_base.den, 
+                    cCodecCtx.contents.ticks_per_frame) 
         elif codecType == av.lib.AVMEDIA_TYPE_AUDIO:
             streamInfo['type'] = 'audio'
             streamInfo['sample_rate'] = cCodecCtx.contents.sample_rate
@@ -327,6 +330,26 @@ class Media():
         self.pkt.scaler[streamIndex] = scaler         
         self.pkt.addScaler(*scaler)
 
+    def seek(self, time, direction='forward', streamIndex=-1):
+
+        '''
+        seek to given time in direction
+        :time (float): in seconds
+        '''
+
+        flags = 0
+        if direction == 'backward':
+            flags = av.lib.AVSEEK_FLAG_BACKWARD
+        
+        if streamIndex >= 0:
+            # FIXME: should be stream time base... 
+            timestamp = time * av.lib.AV_TIME_BASE
+        else:
+            timestamp = time * av.lib.AV_TIME_BASE
+        timestamp = int(round(time * av.lib.AV_TIME_BASE)) 
+        
+        return av.lib.av_seek_frame(self.pFormatCtx, -1, timestamp, flags)
+
 class Packet():
 
     def __init__(self, formatCtx):
@@ -488,11 +511,11 @@ class Packet():
                         cType = self.subtitle.rects[i].contents.type
                         cTypeName = ''
                         # FIXME: AVSubtitleType is an enum 
-                        if cType == 1:
+                        if cType == av.lib.SUBTITLE_BITMAP:
                             cTypeName = 'bitmap'
-                        elif cType == 2:
+                        elif cType == av.lib.SUBTITLE_TEXT:
                             cTypeName = 'text'
-                        elif cType == 3:
+                        elif cType == av.lib.SUBTITLE_ASS:
                             cTypeName = 'ass'
                         self.subtitleTypes.append(cTypeName)
 
