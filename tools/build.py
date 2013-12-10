@@ -24,7 +24,9 @@ def buildGit(options):
 
     buildDir = os.path.abspath(os.path.join('build', '%s_%s' % (options.lib, options.version)))
 
-    print buildDir
+    if options.suffix:
+        buildDir += '_%s' % options.suffix
+
     try:
         os.makedirs(buildDir)
     except OSError, e:
@@ -42,7 +44,7 @@ def buildGit(options):
     run('git checkout v%s' % options.version)
     run('git describe --tags')
 
-    run('./configure --prefix={0} --enable-shared --enable-swscale --logfile={0}/config.log'.format(buildDir))
+    run('./configure --prefix={0} {1} --logfile={0}/config.log'.format(buildDir, ' '.join(c for c in options.configure_options)))
 
     # in case we rebuild
     run('make clean')
@@ -108,6 +110,15 @@ if __name__ == '__main__':
             action='store_true',
             default=False,
             help='generate documentation (require doxygen)')
+    parser.add_option('-c', '--configure_options',
+            action='append',
+            default=['--enable-shared', '--enable-swscale'],
+            help='configure options (default: %default)'
+            )
+    parser.add_option('-s', '--suffix',
+            default='',
+            help='install folder suffix, ex: libav_0.8.1_SUFFIX'
+            )
 
     (options, args) = parser.parse_args()
 
