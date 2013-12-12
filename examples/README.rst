@@ -25,10 +25,16 @@
 * outputPygame
 
   Decode first video stream of media
+  
   * outputPygame.py -> write jpg images
+  
   * outputPygame2.py -> dumb video player
 
 * dumpSubtitle
 
   Decode first subtitle stream of media
   Dump to a text file
+
+* videoPlayer
+
+  simple video player (WIP, linux/alsa only) 
