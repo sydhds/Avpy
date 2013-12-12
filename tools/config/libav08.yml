@@ -141,6 +141,7 @@ function:
     # TODO: sort by lib - avcodec, avformat...
     - av_register_all
     - avformat_open_input
+    - avformat_close_input
     - avformat_find_stream_info
     - av_dict_get
     - av_oformat_next
@@ -157,6 +158,7 @@ function:
     - avcodec_decode_video2
     - av_find_stream_info
     - avcodec_open
+    - avcodec_close
     - av_codec_next
     # sws
     - sws_getContext

@@ -37,6 +37,14 @@ class Media(object):
 
         self.pkt = None
 
+    def __del__(self):
+
+        for i in range(self.pFormatCtx.contents.nb_streams):
+            cStream = self.pFormatCtx.contents.streams[i]
+            av.lib.avcodec_close(cStream.contents.codec)
+
+        av.lib.avformat_close_input(self.pFormatCtx)
+
     def info(self):
 
         '''
@@ -114,7 +122,7 @@ class Media(object):
                 metaDict[tag.contents.key] = tag.contents.value
             else:
                 done = True
-
+        
         return metaDict
 
     @staticmethod
