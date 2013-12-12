@@ -6,7 +6,7 @@ import os
 import ctypes
 import av
 
-class Media():
+class Media(object):
 
     def __init__(self, mediaName, mode='r'):
         
@@ -93,7 +93,6 @@ class Media():
                     cCodecCtx.contents.subtitle_header_size)
         else:
             pass
-            #streamInfo['type'] = 'unknown'
         
         return streamInfo
 
@@ -129,16 +128,12 @@ class Media():
         
         av.lib.av_register_all()
         c  = None
-        #previousName = ''
         
         while 1:
             c = av.lib.av_codec_next(c)
             if c :
 
                 codecName = c.contents.name
-
-                #if previousName == codecName:
-                    #continue
 
                 key1 = ''
                 if c.contents.type == av.lib.AVMEDIA_TYPE_VIDEO:
@@ -153,8 +148,6 @@ class Media():
                         codecs[key1]['decoding'].append(codecName)
                     elif c.contents.encode:
                         codecs[key1]['encoding'].append(codecName)
-
-                #previousName = codecName
 
             else:
                 break
@@ -323,8 +316,6 @@ class Media():
         if self.pkt is None:
             self.pkt = Packet(self.pFormatCtx)
       
-        # support default scaler?
-        # FIXME: varying width, height
         scaler = (streamIndex, width, height)
 
         self.pkt.scaler[streamIndex] = scaler         
@@ -350,7 +341,7 @@ class Media():
         
         return av.lib.av_seek_frame(self.pFormatCtx, -1, timestamp, flags)
 
-class Packet():
+class Packet(object):
 
     def __init__(self, formatCtx):
 

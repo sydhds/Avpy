@@ -29,7 +29,7 @@ if __name__ == '__main__':
     mediaInfo = m.info()
 
     # select first subtitle stream
-    stStreams = [ i for i, s in enumerate(mediaInfo['stream']) if s['type'] == 'subtitle' ]
+    stStreams = [i for i, s in enumerate(mediaInfo['stream']) if s['type'] == 'subtitle']
     if stStreams:
         stStream = stStreams[0]
     else:

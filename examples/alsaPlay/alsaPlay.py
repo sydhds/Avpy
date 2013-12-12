@@ -71,8 +71,6 @@ if __name__ == '__main__':
     # let's play!
     for i, p2 in enumerate(m):
         
-        # TODO: add --copyPacket option (debug only)
-        
         if options.copyPacket:
             p = copy(p2)
         else:
