@@ -5,6 +5,7 @@ print subtitle (text based subtitles only)
 '''
 
 import sys
+import copy
 
 from pyav import Media
 
@@ -21,6 +22,9 @@ if __name__ == '__main__':
             type='int',
             default=5,
             help='limit of packet to process (default: %default)')
+    parser.add_option('--copyPacket', 
+            action='store_true',
+            help='copy packet (debug only)')
 
     (options, args) = parser.parse_args()
 
@@ -42,15 +46,20 @@ if __name__ == '__main__':
     for p in m:
         if p.streamIndex() == stStream:
             
-            p.decode()
-            if p.decoded:
+            if options.copyPacket:
+                p2 = copy.copy(p) 
+            else:
+                p2 = p
 
-                for i in xrange(p.subtitle.num_rects):
+            p2.decode()
+            if p2.decoded:
+
+                for i in xrange(p2.subtitle.num_rects):
                     
-                    if p.subtitleTypes[i] == 'text':
-                        print p.subtitle.rects[i].contents.text
-                    elif p.subtitleTypes[i] == 'ass':
-                        print p.subtitle.rects[i].contents.ass
+                    if p2.subtitleTypes[i] == 'text':
+                        print p2.subtitle.rects[i].contents.text
+                    elif p2.subtitleTypes[i] == 'ass':
+                        print p2.subtitle.rects[i].contents.ass
 
                 count += 1
                 if count != -1 and count > options.count:

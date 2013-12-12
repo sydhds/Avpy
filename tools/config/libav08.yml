@@ -162,16 +162,20 @@ function:
     - av_codec_next
     # sws
     - sws_getContext
+    - sws_freeContext
     - avpicture_alloc
+    - avpicture_free
     - sws_scale
     - avcodec_alloc_frame
     # test
     - avpicture_get_size
     - avpicture_fill
     - av_malloc
+    - av_free
     - av_guess_format
     - avformat_alloc_context
     - av_dup_packet
+    - av_free_packet
     # encoding
     - avcodec_find_encoder
     - avformat_new_stream

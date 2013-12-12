@@ -91,6 +91,6 @@ if __name__ == '__main__':
 
                     surface = pygame.image.fromstring(surfaceStr, size, 'RGB')
                     pygame.image.save(surface, 'frame.%d.jpg' % decodedCount)
-                    
+                
                 if decodedCount >= options.offset + options.frameCount:
                     break 
