@@ -39,7 +39,7 @@ class Media(object):
 
     def __del__(self):
 
-        for i in range(self.pFormatCtx.contents.nb_streams):
+        for i in xrange(self.pFormatCtx.contents.nb_streams):
             cStream = self.pFormatCtx.contents.streams[i]
             av.lib.avcodec_close(cStream.contents.codec)
 
@@ -61,7 +61,7 @@ class Media(object):
         infoDict['stream'] = [] 
         infoDict['duration'] = self.pFormatCtx.contents.duration / av.lib.AV_TIME_BASE
 
-        for i in range(self.pFormatCtx.contents.nb_streams):
+        for i in xrange(self.pFormatCtx.contents.nb_streams):
             cStream = self.pFormatCtx.contents.streams[i]
             cStreamInfo = self._streamInfo(cStream)
             if cStreamInfo:
