@@ -39,6 +39,9 @@ define:
     - SWS_BILINEAR
     - AV_LOG_QUIET
     - AV_NOPTS_VALUE
+    - CODEC_CAP_FRAME_THREADS
+    - CODEC_CAP_SLICE_THREADS
+    - CODEC_CAP_AUTO_THREADS
     # subtitle
     - SUBTITLE_NONE
     - SUBTITLE_BITMAP
@@ -50,9 +53,6 @@ define:
     - CODEC_FLAG_GLOBAL_HEADER
     - CODEC_ID_NONE
     - AVFMT_GLOBALHEADER
-    - CODEC_CAP_FRAME_THREADS
-    - CODEC_CAP_SLICE_THREADS
-    - CODEC_CAP_AUTO_THREADS
     # seek
     - AVSEEK_FLAG_FRAME 
     - AVSEEK_FLAG_BACKWARD 
@@ -101,7 +101,6 @@ class:
     - SwsContext
     - SwsFilter
     - SwsVector
-    # 0.8
     - AVCodecInternal
     - AVCodecDefault
     - AVIOInterruptCB
@@ -124,7 +123,6 @@ import:
     - from ctypes import util
 
 cdll:
-    
     - libavutil = util.find_library('avutil')
     - CDLL(libavutil, RTLD_GLOBAL)
     - _libraries = {}
@@ -138,51 +136,52 @@ cdll:
     - _libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)
     
 function:
-    # TODO: sort by lib - avcodec, avformat...
+    ## avformat
     - av_register_all
+    - av_iformat_next
+    - av_oformat_next
+    - av_find_stream_info
+    - avformat_alloc_context
+    - avformat_new_stream
     - avformat_open_input
     - avformat_close_input
     - avformat_find_stream_info
+    - av_guess_format
+    - av_read_frame
+    # seek
+    - av_seek_frame
+    ## avocodec
     - av_dict_get
-    - av_oformat_next
     - avcodec_find_decoder
     - avcodec_find_decoder_by_name
     - avcodec_find_encoder_by_name
-    - av_iformat_next
     - avcodec_get_pix_fmt_name
     - av_log_set_level
     - av_strerror
-    - av_read_frame
     - avcodec_decode_audio4
     - av_samples_get_buffer_size
     - avcodec_decode_video2
-    - av_find_stream_info
     - avcodec_open
     - avcodec_close
     - av_codec_next
-    # sws
-    - sws_getContext
-    - sws_freeContext
     - avpicture_alloc
     - avpicture_free
-    - sws_scale
     - avcodec_alloc_frame
     # test
     - avpicture_get_size
     - avpicture_fill
     - av_malloc
     - av_free
-    - av_guess_format
-    - avformat_alloc_context
-    - av_dup_packet
+    #- av_dup_packet
     - av_free_packet
     # encoding
     - avcodec_find_encoder
-    - avformat_new_stream
     - av_get_sample_fmt_name
     - av_get_bytes_per_sample
     # subtitle
     - avcodec_decode_subtitle2
     - avsubtitle_free
-    # seek
-    - av_seek_frame
+    ## swsscale
+    - sws_getContext
+    - sws_freeContext
+    - sws_scale

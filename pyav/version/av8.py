@@ -877,12 +877,6 @@ SwsFilter._fields_ = [
 SwsContext._fields_ = [
 ]
 
-av_destruct_packet = _libraries['libavcodec.so'].av_destruct_packet
-av_destruct_packet.restype = None
-av_destruct_packet.argtypes = [POINTER(AVPacket)]
-av_dup_packet = _libraries['libavcodec.so'].av_dup_packet
-av_dup_packet.restype = c_int
-av_dup_packet.argtypes = [POINTER(AVPacket)]
 av_free_packet = _libraries['libavcodec.so'].av_free_packet
 av_free_packet.restype = None
 av_free_packet.argtypes = [POINTER(AVPacket)]
