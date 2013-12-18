@@ -25,12 +25,18 @@ if __name__ == '__main__':
     parser.add_option('--copyPacket', 
             action='store_true',
             help='copy packet (debug only)')
-    parser.add_option('--scaleWidth',
+    parser.add_option('--scaleWidth', 
         type='float', default=1.0,
         help='width scale (default: %default)')
     parser.add_option('--scaleHeight',
         type='float', default=1.0,
         help='height scale (default: %default)')
+    parser.add_option('-o', '--overlay',
+        action='store_true', 
+        help='EXPERIMENTAL: use pygame overlay')
+    parser.add_option('-f', '--fullscreen', 
+            action='store_true',
+            help='turn on full screen mode')
 
     (options, args) = parser.parse_args()
 
@@ -44,7 +50,7 @@ if __name__ == '__main__':
     mediaInfo = m.info()
 
     # select first video stream
-    vstreams = [ i for i, s in enumerate(mediaInfo['stream']) if s['type'] == 'video' ]
+    vstreams = [i for i, s in enumerate(mediaInfo['stream']) if s['type'] == 'video']
     if vstreams:
         vstream = vstreams[0]
     else:
@@ -62,12 +68,21 @@ if __name__ == '__main__':
 
     print 'output resolution: %dx%d' % (size) 
 
-    m.addScaler2(vstream, *size)
-
     pygame.init()
  
-    screen = pygame.display.set_mode(size)
-    surfaces = []
+    if options.fullscreen:
+        screen = pygame.display.set_mode(size, pygame.DOUBLEBUF|pygame.HWSURFACE|pygame.FULLSCREEN)
+    else:
+        screen = pygame.display.set_mode(size)
+
+    # TODO: should check for stream pixel format - overlay is ok only for PIX_FMT_YUV420P
+    if options.overlay:
+        # ok with format YUV420p
+        overlay = pygame.Overlay(pygame.YV12_OVERLAY, size)
+        overlay.set_location(0, 0, size[0], size[1]) 
+    else:
+        # add scaler to convert to rgb
+        m.addScaler2(vstream, *size)
 
     decodedCount = 0
     mainLoop = True
@@ -93,14 +108,32 @@ if __name__ == '__main__':
             if p2.decoded:
                 decodedCount += 1
 
-                buf = p2.swsFrame.contents.data[0]
-                bufLen = size[0]*size[1]*3
-                surfaceStr = ctypes.string_at(buf, bufLen)
-                cSurface = pygame.image.fromstring(surfaceStr, size, 'RGB')
+                if options.overlay:
+                    
+                    size0 = p2.frame.contents.linesize[0] * p2.frame.contents.height
+                    size1 = p2.frame.contents.linesize[1] * (p2.frame.contents.height/2)
+                    size2 = p2.frame.contents.linesize[2] * (p2.frame.contents.height/2)
 
-                pygame.display.set_caption('Press Esc to quit...')
-                screen.blit(cSurface, (0, 0))
-                
+                    yuv = (ctypes.string_at(p2.frame.contents.data[0], size0),
+                            ctypes.string_at(p2.frame.contents.data[1], size1),
+                            ctypes.string_at(p2.frame.contents.data[2], size2))
+                    
+                    overlay.display(yuv)
+                    
+                    # add a small delay otherwise pygame will crash
+                    pygame.time.wait(20)
+
+                else:
+                    buf = p2.swsFrame.contents.data[0]
+                    bufLen = size[0]*size[1]*3
+                    surfaceStr = ctypes.string_at(buf, bufLen)
+                    cSurface = pygame.image.fromstring(surfaceStr, size, 'RGB')
+
+                    pygame.display.set_caption('Press Esc to quit...')
+                    screen.blit(cSurface, (0, 0))
+               
+                    pygame.display.flip()
+
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         mainLoop = False
@@ -108,4 +141,3 @@ if __name__ == '__main__':
                         if event.key == pygame.K_ESCAPE:
                             mainLoop = False
     
-                pygame.display.update()
