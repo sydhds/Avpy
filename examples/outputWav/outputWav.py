@@ -57,7 +57,7 @@ if __name__ == '__main__':
     if astreams:
         astream = astreams[0]
     else:
-        print 'No audio stream in %s' % mediaInfo['name']
+        print('No audio stream in %s' % mediaInfo['name'])
         sys.exit(2)
     
     # prepare wav file
@@ -73,8 +73,8 @@ if __name__ == '__main__':
            0, 
            'NONE', 
            'not compressed') )
-    except wave.Error, e:
-        print 'wrong parameters for wav file: %s' % e
+    except wave.Error as e:
+        print('wrong parameters for wav file: %s' % e)
         sys.exit(1)
 
     # size in bytes required for 1 second of audio
@@ -87,7 +87,7 @@ if __name__ == '__main__':
             p.decode()
             if p.decoded:
                 # find a way to retrieve data after decoding
-                print 'writing %s bytes...' % p.dataSize
+                print('writing %s bytes...' % p.dataSize)
                 audioDump(p.frame.contents.data[0], p.dataSize)
                 
                 decodedSize += p.dataSize

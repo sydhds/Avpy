@@ -42,8 +42,8 @@ if __name__ == '__main__':
 
     try:
         m = Media(options.media)
-    except IOError, e:
-        print 'Unable to open %s: %s' % (options.media, e)
+    except IOError as e:
+        print('Unable to open %s: %s' % (options.media, e))
         sys.exit(1)
 
     # dump info
@@ -54,19 +54,19 @@ if __name__ == '__main__':
     if vstreams:
         vstream = vstreams[0]
     else:
-        print 'No video stream in %s' % mediaInfo['name'] 
+        print('No video stream in %s' % mediaInfo['name'])
         sys.exit(2)
 
     streamInfo = mediaInfo['stream'][vstream]
     size = streamInfo['width'], streamInfo['height']
 
-    print 'video stream index: %d' % vstream
-    print 'video stream resolution: %dx%d' % (size[0], size[1])
+    print('video stream index: %d' % vstream)
+    print('video stream resolution: %dx%d' % (size[0], size[1]))
 
     size = ( int(round(size[0]*options.scaleWidth)), 
             int(round(size[1]*options.scaleHeight)) )
 
-    print 'output resolution: %dx%d' % (size) 
+    print('output resolution: %dx%d' % (size)) 
 
     pygame.init()
  
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     decodedCount = 0
     mainLoop = True
 
-    print 'Press Esc to quit...'
+    print('Press Esc to quit...')
 
     while mainLoop:
         

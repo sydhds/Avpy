@@ -37,12 +37,12 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     if not options.media:
-        print 'Please provide a media to play with -m or --media option'
+        print('Please provide a media to play with -m or --media option')
         sys.exit(1)
     try:
         m = Media(options.media)
-    except IOError, e:
-        print 'Unable to open %s: %s' % (options.media, e)
+    except IOError as e:
+        print('Unable to open %s: %s' % (options.media, e))
         sys.exit(1)
 
     # dump info
@@ -53,14 +53,14 @@ if __name__ == '__main__':
     if vstreams:
         vstream = vstreams[0]
     else:
-        print 'No video stream in %s' % mediaInfo['name'] 
+        print('No video stream in %s' % mediaInfo['name'])
         sys.exit(2)
 
     streamInfo = mediaInfo['stream'][vstream]
     size = streamInfo['width'], streamInfo['height']
 
-    print 'video stream index: %d' % vstream
-    print 'video stream resolution: %dx%d' % (size[0], size[1])
+    print('video stream index: %d' % vstream)
+    print('video stream resolution: %dx%d' % (size[0], size[1]))
 
     #m.addScaler(vstream)
     m.addScaler2(vstream, *size)
@@ -79,10 +79,10 @@ if __name__ == '__main__':
             if p2.decoded:
 
                 decodedCount += 1
-                print 'decoded frame %d' % decodedCount
+                print('decoded frame %d' % decodedCount)
 
                 if decodedCount >= options.offset:
-                    print 'saving frame...'
+                    print('saving frame...')
                     
                     buf = p2.swsFrame.contents.data[0]
                     

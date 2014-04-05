@@ -2,7 +2,7 @@
 
 '''
 WIP video player (pygame + alsa)
-Warning: unsynced + memory leak
+Warning: unsynced
 python videoPlayer.py -m file.avi -f
 '''
 
@@ -196,7 +196,7 @@ def main(options):
     pt = playerThread(options.media, options.fullscreen) 
     pt.start()
    
-    print 'Playing "%s" ...' % options.media
+    print('Playing "%s" ...' % options.media)
 
     mainLoop = True 
     
@@ -210,7 +210,7 @@ def main(options):
     
     pt.stop()
     pt.join()
-    print 'Bye!'
+    print('Bye!')
 
 if __name__ == '__main__':
 
@@ -225,7 +225,7 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     if not options.media:
-        print 'Please provide a media to play with -m option'
+        print('Please provide a media to play with -m option')
         sys.exit(1)
 
     main(options)
