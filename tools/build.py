@@ -14,7 +14,7 @@ import shutil
 
 def run(cmd):
 
-    print cmd
+    print(cmd)
 
     retCode = subprocess.call(cmd, shell=True)	
     if retCode != 0:
@@ -29,7 +29,7 @@ def buildGit(options):
 
     try:
         os.makedirs(buildDir)
-    except OSError, e:
+    except OSError as e:
         if e.errno == errno.EEXIST:
             pass
         else:
@@ -38,7 +38,7 @@ def buildGit(options):
     try:
         os.chdir('build/%s_git' % options.lib)
     except OSError:
-        print 'Could not find libav repo: %s_git' % options.lib
+        print('Could not find libav repo: ./build/%s_git' % options.lib)
         sys.exit(1)
 
     run('git checkout v%s' % options.version)
@@ -48,13 +48,13 @@ def buildGit(options):
 
     # in case we rebuild
     run('make clean')
-    print 'now building...'
+    print('now building...')
     run('make -j 2 -k > {0}/make.log 2>&1'.format(buildDir))
     run('make install > {0}/make_install.log 2>&1'.format(buildDir))
 
-    print 'build done!'
-    print 'configure log: %s' % os.path.join(buildDir, 'config.log')
-    print 'make log: %s' % os.path.join(buildDir, 'make.log')
+    print('build done!')
+    print('configure log: %s' % os.path.join(buildDir, 'config.log'))
+    print('make log: %s' % os.path.join(buildDir, 'make.log'))
 
     if options.doc:
         basedir = ''
@@ -62,17 +62,17 @@ def buildGit(options):
         if not os.path.isfile(os.path.join(basedir, basefile)): 
             basedir = 'doc'
             if not os.path.isfile(os.path.join(basedir, basefile)):
-                print 'Could not find doxygen configuration file: %s' % basefile
+                print('Could not find doxygen configuration file: %s' % basefile)
                 sys.exit(2)        
 
         doxyf = os.path.join(basedir, basefile)
         doxyDst = os.path.join(basedir, 'doxy', 'html')
         try:
             # clean
-            print 'removing %s...' % doxyDst
+            print('removing %s...' % doxyDst)
             shutil.rmtree(doxyDst)
-            print 'done.'
-        except OSError, e:
+            print('done.')
+        except OSError as e:
             if e.errno == errno.ENOENT:
                 pass
             else:
@@ -88,11 +88,11 @@ def main(options):
 
     try:
         os.mkdir('build')
-    except OSError, e:
+    except OSError as e:
         if e.errno == errno.EEXIST:
             buildGit(options)
         else:
-            print 'Could not create folder: build'
+            print('Could not create folder: build')
             sys.exit(1)
 
 if __name__ == '__main__':
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     if not options.version:
-        print 'Please provide a version using -v flag'
+        print('Please provide a version using -v flag')
     else:
         main(options)
 

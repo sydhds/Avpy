@@ -3,8 +3,9 @@ High-level libav python API
 '''
 
 import os
+import sys
 import ctypes
-import av
+from . import av
 
 class Media(object):
 
@@ -20,9 +21,17 @@ class Media(object):
             # prevent coredump
             if mediaName is None:
                 mediaName = ''
-            
+           
             # open media for reading
-            res = av.lib.avformat_open_input(self.pFormatCtx, mediaName, None, None)
+            
+            # XXX: ok for python3 and python2 with special characters
+            # not sure this is a right/elegant solution 
+            if sys.version_info.major >= 3:
+                _mediaName = mediaName.encode('utf-8')
+            else:
+                _mediaName = mediaName
+            
+            res = av.lib.avformat_open_input(self.pFormatCtx, _mediaName, None, None)
             if res: 
                 raise IOError(avError(res))
             
@@ -39,11 +48,12 @@ class Media(object):
 
     def __del__(self):
 
-        for i in xrange(self.pFormatCtx.contents.nb_streams):
-            cStream = self.pFormatCtx.contents.streams[i]
-            av.lib.avcodec_close(cStream.contents.codec)
+        if self.pFormatCtx:
+            for i in range(self.pFormatCtx.contents.nb_streams):
+                cStream = self.pFormatCtx.contents.streams[i]
+                av.lib.avcodec_close(cStream.contents.codec)
 
-        av.lib.avformat_close_input(self.pFormatCtx)
+            av.lib.avformat_close_input(self.pFormatCtx)
 
     def info(self):
 
@@ -59,9 +69,9 @@ class Media(object):
         infoDict['name'] = self.pFormatCtx.contents.filename
         infoDict['metadata'] = self.metadata()
         infoDict['stream'] = [] 
-        infoDict['duration'] = self.pFormatCtx.contents.duration / av.lib.AV_TIME_BASE
+        infoDict['duration'] = float(self.pFormatCtx.contents.duration)/av.lib.AV_TIME_BASE
 
-        for i in xrange(self.pFormatCtx.contents.nb_streams):
+        for i in range(self.pFormatCtx.contents.nb_streams):
             cStream = self.pFormatCtx.contents.streams[i]
             cStreamInfo = self._streamInfo(cStream)
             if cStreamInfo:
@@ -117,7 +127,7 @@ class Media(object):
         tag = ctypes.POINTER(av.lib.AVDictionaryEntry)()
 
         while not done:
-            tag = av.lib.av_dict_get(self.pFormatCtx.contents.metadata, "", tag, av.lib.AV_DICT_IGNORE_SUFFIX)
+            tag = av.lib.av_dict_get(self.pFormatCtx.contents.metadata, ''.encode('ascii'), tag, av.lib.AV_DICT_IGNORE_SUFFIX)
             if tag:
                 metaDict[tag.contents.key] = tag.contents.value
             else:
@@ -298,6 +308,10 @@ class Media(object):
     # read
     def __iter__(self):
         return self
+    
+    def __next__(self):
+        # python3 require __next__, python2 next
+        return self.next()
 
     def next(self):
         
@@ -377,7 +391,7 @@ class Packet(object):
         self.f = formatCtx
         formatCtxCt = formatCtx.contents
         streamCount = formatCtxCt.nb_streams
-        for i in xrange(streamCount):
+        for i in range(streamCount):
             
             cStream = formatCtxCt.streams[i]
             cCodecCtx = cStream.contents.codec
@@ -509,7 +523,7 @@ class Packet(object):
                             codecCtx.contents.sample_fmt, 1)
                 else:
                     # FIXME: raise?
-                    print 'failed decode...'
+                    print('failed decode...')
 
             elif codecType == av.lib.AVMEDIA_TYPE_VIDEO:
                 # FIXME: avcodec_decode_video2 return result?

@@ -1,2 +1,2 @@
-import av
-from avMedia import Media
+from . import av
+from .avMedia import Media

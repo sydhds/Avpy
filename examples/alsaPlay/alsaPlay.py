@@ -34,7 +34,7 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     if not options.media:
-        print 'Please provide a media to play with -m or --media option'
+        print('Please provide a media to play with -m or --media option')
         sys.exit(1)
 
     # open media
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     if astreams:
         astream = astreams[0]
     else:
-        print 'No audio stream in %s' % mediaInfo['name']
+        print('No audio stream in %s' % mediaInfo['name'])
         sys.exit(2)
     
     # setup alsa output
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     secondSize = si['channels'] * si['bytes_per_sample'] * si['sample_rate']
     decodedSize = 0
 
-    print 'playing sound of %s (%s seconds)...' % (options.media, options.length)
+    print('playing sound of %s (%s seconds)...' % (options.media, options.length))
 
     # let's play!
     for i, p2 in enumerate(m):

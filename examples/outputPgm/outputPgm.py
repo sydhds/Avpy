@@ -8,9 +8,13 @@ python outputPgm.py -m file.avi -o 140 -c 8 -> save frame 140 to 148
 '''
 
 import sys
+import itertools
 import array
 import ctypes
 from pyav import Media
+
+if sys.version_info.major >= 3:
+    xrange = range
 
 def ptr_add(ptr, offset):
     address = ctypes.addressof(ptr.contents) + offset
@@ -18,10 +22,17 @@ def ptr_add(ptr, offset):
 
 def saveFrame(frame, w, h, i):
 
-    a = array.array('B', '\0'*(w*3))
+    #a = array.array('B', [0]*(w*3))
+    a = array.array('B', itertools.repeat(0, (w*3)))
+
+    header = 'P6\n%d %d\n255\n' % (w, h)
+
+    if sys.version_info.major >= 3:
+        header = bytes(header, 'ascii')
+
     with open('frame.%d.ppm' % i, 'wb') as f:
         #header
-        f.write('P6\n%d %d\n255\n' % (w, h))
+        f.write(header)
         for i in xrange(h):
             ptr = ptr_add(frame.contents.data[0], i*frame.contents.linesize[0])
             ctypes.memmove(a.buffer_info()[0], ptr, w*3)	
@@ -58,13 +69,13 @@ if __name__ == '__main__':
         options.seek = True
 
     if not options.media:
-        print 'Please provide a media to play with -m or --media option'
+        print('Please provide a media to play with -m or --media option')
         sys.exit(1)
 
     try:
         m = Media(options.media)
-    except IOError, e:
-        print 'Unable to open %s: %s' % (options.media, e)
+    except IOError as e:
+        print('Unable to open %s: %s' % (options.media, e))
         sys.exit(1)
 
     # dump info
@@ -75,13 +86,13 @@ if __name__ == '__main__':
     if vstreams:
         vstream = vstreams[0]
     else:
-        print 'No video stream in %s' % mediaInfo['name'] 
+        print('No video stream in %s' % mediaInfo['name'])
         sys.exit(2)
 
     streamInfo = mediaInfo['stream'][vstream]
     w, h = streamInfo['width'], streamInfo['height']
 
-    print 'video stream resolution: %dx%d' % (w, h)
+    print('video stream resolution: %dx%d' % (w, h))
 
     m.addScaler2(vstream, w, h)
 
@@ -108,10 +119,10 @@ if __name__ == '__main__':
             if p.decoded:
 
                 decodedCount += 1
-                print 'decoded frame %d' % (decodedCount+seekOffset)
+                print('decoded frame %d' % (decodedCount+seekOffset))
 
                 if decodedCount >= options.offset:
-                    print 'saving frame...'
+                    print('saving frame...')
                     saveFrame(p.swsFrame, w, h, decodedCount+seekOffset)
 
                 if decodedCount >= options.offset+options.frameCount:

@@ -37,10 +37,10 @@ if __name__ == '__main__':
     if stStreams:
         stStream = stStreams[0]
     else:
-        print 'No subtitle stream in %s' % mediaInfo['name']
+        print('No subtitle stream in %s' % mediaInfo['name'])
         sys.exit(2)
 
-    print mediaInfo['stream'][stStream]['subtitle_header']
+    print(mediaInfo['stream'][stStream]['subtitle_header'])
 
     count = 0
     for p in m:
@@ -57,9 +57,9 @@ if __name__ == '__main__':
                 for i in xrange(p2.subtitle.num_rects):
                     
                     if p2.subtitleTypes[i] == 'text':
-                        print p2.subtitle.rects[i].contents.text
+                        print(p2.subtitle.rects[i].contents.text)
                     elif p2.subtitleTypes[i] == 'ass':
-                        print p2.subtitle.rects[i].contents.ass
+                        print(p2.subtitle.rects[i].contents.ass)
 
                 count += 1
                 if count != -1 and count > options.count:
