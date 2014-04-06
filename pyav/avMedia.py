@@ -494,12 +494,14 @@ class Packet(object):
     def __del__(self):
 
         av.lib.avsubtitle_free(ctypes.byref(self.subtitle))
+        
         for ctx in self.swsCtx:
             av.lib.sws_freeContext(ctx)
-
-        av.lib.avpicture_free(ctypes.cast(self.swsFrame, ctypes.POINTER(av.lib.AVPicture)))
+        
+        if self.swsFrame:
+            av.lib.avpicture_free(ctypes.cast(self.swsFrame, ctypes.POINTER(av.lib.AVPicture)))
+        
         av.lib.av_free(self.frame)
-
         av.lib.av_free_packet(ctypes.byref(self.pkt))
 
     def streamIndex(self):

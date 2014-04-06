@@ -9,6 +9,9 @@ import copy
 
 from pyav import Media
 
+if sys.version_info.major >= 3:
+    xrange = range
+
 if __name__ == '__main__':
     
     # cmdline
@@ -40,6 +43,7 @@ if __name__ == '__main__':
         print('No subtitle stream in %s' % mediaInfo['name'])
         sys.exit(2)
 
+    print('header:')
     print(mediaInfo['stream'][stStream]['subtitle_header'])
 
     count = 0
@@ -53,13 +57,15 @@ if __name__ == '__main__':
 
             p2.decode()
             if p2.decoded:
-
+                
                 for i in xrange(p2.subtitle.num_rects):
                     
                     if p2.subtitleTypes[i] == 'text':
                         print(p2.subtitle.rects[i].contents.text)
                     elif p2.subtitleTypes[i] == 'ass':
                         print(p2.subtitle.rects[i].contents.ass)
+                    else:
+                        print('non text subtitle...')
 
                 count += 1
                 if count != -1 and count > options.count:
