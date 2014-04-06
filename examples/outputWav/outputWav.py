@@ -28,8 +28,11 @@ def audioDump(buf, bufLen):
 def writeWav(wp):
 
     global waveData
+   
+    sep = ''.encode('ascii')
+
     # write data to wav object
-    wp.writeframes(''.join(waveData))
+    wp.writeframes(sep.join(waveData))
     wp.close()
 
 if __name__ == '__main__':
