@@ -18,7 +18,8 @@ FeatureMatrix:
 - libav: 
     - version < 0.8: to be discussed
     - version 0.8: done
-    - version 0.9: planned
+    - version 0.9: done
+    - version 0.10: todo
 - ffmpeg: to be discussed
 - OS: 
     - Linux - BSD: done
@@ -30,7 +31,8 @@ FeatureMatrix:
     - basic audio decoding: wip
     - sync video player: wip 
     - subtitle support: wip
-    - encoding: planned
+    - encoding: todo
+    - filter: todo
 
 Install
 ========
