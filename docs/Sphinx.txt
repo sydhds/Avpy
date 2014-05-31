@@ -1,0 +1,5 @@
+Generate Sphinx documentation
+-----------------------------
+
+cd doc
+PYTHONPATH=../:$PYTHONPATH sphinx-build -b html source/ build/

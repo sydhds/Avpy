@@ -11,6 +11,15 @@ class Media(object):
 
     def __init__(self, mediaName, mode='r'):
         
+        '''Command constructor
+
+	:param mediaName: media to open for reading or writing
+        :type label: str
+        :param mode: 'r' or 'w' (not yet supported)
+	:type icon: str
+
+	'''
+ 
         av.lib.av_log_set_level(av.lib.AV_LOG_QUIET)
 
         av.lib.av_register_all()
@@ -57,12 +66,14 @@ class Media(object):
 
     def info(self):
 
-        '''
-        return a dict with media information
+        ''' get media information
 
-        duration: media duration in seconds
-        name: media filename
-        stream: list of stream info (dict)
+        :return: dict with the following fields: name, metadata, stream, duration
+        :rtype: dict
+
+        * duration: media duration in seconds
+        * name: media filename
+        * stream: list of stream info (dict)
         '''
 
         infoDict = {}
@@ -116,10 +127,11 @@ class Media(object):
 
     def metadata(self):
 
-        '''
-        get metadata
+        ''' get media metadata
 
-        @return : a dict with key, value = metadata key, metadata value
+        :return: a dict with key, value = metadata key, metadata value
+
+        .. note:: method is used to fullfill the metadata entry in :meth:`info`
         '''
 
         done = False
@@ -137,6 +149,12 @@ class Media(object):
 
     @staticmethod
     def codecs():
+
+        ''' get all supported codecs
+
+        :return: a dict with 3 keys (audio, video and subtitle). For each key, the value is a dict with 2 keys (encoding and decoding).
+        :rtype: dict
+        '''
 
         codecs = {
                 'audio': {'decoding': [], 'encoding': []},
@@ -175,8 +193,7 @@ class Media(object):
     @staticmethod
     def formats():
 
-        '''
-        return a dict with 2 keys: muxing & demuxing
+        ''' return a dict with 2 keys: muxing & demuxing
 
         each key value is a dict: key=format name, value: format long name
         '''
@@ -208,8 +225,15 @@ class Media(object):
     @staticmethod
     def codecInfo(name, decode=True):
 
-        '''
-        set decode to False to get codec encoder info
+        ''' retrieve specific codec information
+        
+        :param name: codec name
+	:type name: str
+        :param decode: codec decoder info. Set decode to False to get codec encoder info.
+	:type name: bool
+        :return: codec information as a dict with the following keys -> name, longname, type
+        :rtype: dict
+
         '''
 
         # from http://new.libav.org/doxygen/master/cmdutils_8c_source.html#l00598
@@ -315,8 +339,9 @@ class Media(object):
 
     def next(self):
         
-        '''
-        iter over packet in media, return a Packet object
+        ''' iter over packet in media
+        
+        :rtype: :class:`Packet`
         '''
         
         if self.pkt is None:
@@ -331,8 +356,14 @@ class Media(object):
     # TODO: rename to addScaler
     def addScaler2(self, streamIndex, width, height):
 
-        '''
-        add a scaler for given stream
+        ''' add a scaler for given stream
+
+        :param streamIndex: stream index
+	:type streamIndex: int
+	:param with: new stream width
+	:type width: int
+	:param height: new stream height
+	:type height: int
         '''
         
         if self.pkt is None:
@@ -345,10 +376,8 @@ class Media(object):
 
     def seek(self, time, direction='forward', streamIndex=-1):
 
-        '''
-        seek to given time in direction
-        :time (float): in seconds
-        '''
+        # seek to given time in direction
+        # :time (float): in seconds
 
         flags = 0
         if direction == 'backward':
@@ -407,9 +436,6 @@ class Packet(object):
             self.scaler.append(None)
 
     def addScaler(self, streamIndex, width=None, height=None):
-
-        '''
-        '''
 
         scalerTuple = (width, height)
         if self.scaler[streamIndex] != scalerTuple:
@@ -508,7 +534,10 @@ class Packet(object):
         return self.pkt.stream_index
 
     def decode(self):
-        
+       
+        ''' decode data
+        '''
+
         codecCtx = self.codecCtx[self.pkt.stream_index]
         #print 'c ctx', codecCtx
         if codecCtx is not None:
