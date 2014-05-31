@@ -39,7 +39,7 @@ if __name__ == '__main__':
             help='turn on full screen mode')
 
     (options, args) = parser.parse_args()
-
+    
     try:
         m = Media(options.media)
     except IOError as e:

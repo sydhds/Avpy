@@ -10,6 +10,12 @@ import re
 
 import yaml
 
+def longCb(line):
+
+    # handle long value and remove L at the end of line
+    # for python3 support
+    return re.sub('(\d+)L', '\g<1>', line)
+
 def wHeader(fp, yamlDict):
 
     for l in yamlDict['import']:
@@ -26,7 +32,7 @@ def wClass(fp, yamlDict):
     for l in yamlDict['class']:
         fp.write('class %s(Structure):\n\tpass\n\n' % l)
 
-def wAssignement(fp, yamlDict, src, key):
+def wAssignement(fp, yamlDict, src, key, cb=None):
 
     with open(src, 'r') as f:
 	
@@ -36,7 +42,11 @@ def wAssignement(fp, yamlDict, src, key):
         while line:
             for t in yamlDict[key]:
                 if line.startswith( '%s =' % t ):
-                    fp.write(line)
+                    
+                    if cb:
+                        fp.write(cb(line))
+                    else:
+                        fp.write(line)
 		    found.add(t)
                     break
 	    line = f.readline()
@@ -123,6 +133,8 @@ def main(options):
     wAssignement(fd, y, options.src, 'type')
     print 'define...'
     wAssignement(fd, y, options.src, 'define')
+    print 'define long...'
+    wAssignement(fd, y, options.src, 'defineLong', longCb)
     print 'class...'
     wClass(fd, y)
     print 'alias...'

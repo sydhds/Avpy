@@ -1,3 +1,5 @@
+import os
+import re
 from ctypes import CDLL, RTLD_GLOBAL, util
 
 def version():
@@ -5,8 +7,17 @@ def version():
     '''
     Return libavcodec version as a tuple: major, minor, patch version
     '''
-    
-    libavcodec = util.find_library('avcodec')
+  
+    # find_library does not support LD_LIBRARY_PATH for python < 3.4
+    if 'PYAV_AVCODEC' in os.environ:
+        fold, base = os.path.split(os.environ['PYAV_AVCODEC'])
+        libavutil = os.path.join(fold, re.sub('avcodec', 'avutil', base))
+        libavcodec = os.environ['PYAV_AVCODEC']
+    else:
+        libavutil = util.find_library('avutil')
+        libavcodec = util.find_library('avcodec')
+        
+    CDLL(libavutil, RTLD_GLOBAL)
     version = CDLL(libavcodec, mode=RTLD_GLOBAL).avcodec_version() 
     
     return version >> 16 & 0xFF, version >> 8 & 0xFF, version & 0xFF
@@ -20,18 +31,24 @@ def findModuleName():
     '''
 
     versionDict = { 
-            52: { 
-                # libav 0.5.9
-                # ffmpeg 0.5.10 ~ libav 0.5.9
-                (20, 40): 'av5', 
-                # libav 0.6.6
-                # ffmpeg 0.6.6 ~ libav 0.6.6
-                (70, 75): 'av6',
-                },
+            #52: { 
+                ## libav 0.5.9
+                ## ffmpeg 0.5.10 ~ libav 0.5.9
+                #(20, 40): 'av5', 
+                ## libav 0.6.6
+                ## ffmpeg 0.6.6 ~ libav 0.6.6
+                #(70, 75): 'av6',
+                #},
             53: {
-                (0, 10): 'av7',
+                #(0, 10): 'av7',
                 (30, 40): 'av8',
-                }
+                },
+            54: {
+                (35, 55): 'av9',
+                },
+            55: {
+                (34, 54): 'av10',
+                },
             }
 
     major, minor, micro = version()	

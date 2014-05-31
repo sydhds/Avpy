@@ -180,9 +180,17 @@ class Media(object):
                     key1 = 'subtitle'
 
                 if key1:
+                    
+                    # libav8 has encode attribute but libav9 has encode2
+                    encodeAttr = None
+                    if hasattr(c.contents, 'encode'):
+                        encodeAttr = 'encode'
+                    elif hasattr(c.contents, 'encode2'):
+                        encodeAttr = 'encode2'
+                    
                     if c.contents.decode:
                         codecs[key1]['decoding'].append(codecName)
-                    elif c.contents.encode:
+                    elif getattr(c.contents, encodeAttr):
                         codecs[key1]['encoding'].append(codecName)
 
             else:
@@ -429,7 +437,7 @@ class Packet(object):
             if not cCodec:
                 self.codecCtx.append(None)
             else:
-                av.lib.avcodec_open(cCodecCtx, cCodec)
+                av.lib.avcodec_open2(cCodecCtx, cCodec, None)
                 self.codecCtx.append(cCodecCtx)
             
             self.swsCtx.append(None)
