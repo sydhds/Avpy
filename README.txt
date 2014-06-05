@@ -20,7 +20,7 @@ FeatureMatrix:
     - version 0.8: done
     - version 0.9: done
     - version 0.10: todo
-- ffmpeg: to be discussed
+- ffmpeg: todo 
 - OS: 
     - Linux - BSD: done
     - MacOS: please report!
@@ -33,12 +33,14 @@ FeatureMatrix:
     - subtitle support: wip
     - encoding: todo
     - filter: todo
+- doc:
+    - sphinx doc: wip
 
 Install
-========
+=======
 
 Requirements
--------------
+------------
 
 libav
 
@@ -47,14 +49,14 @@ for ubuntu users, please run the following command:
 sudo apt-get install ffmpeg
 
 Install from source:
--------------
+--------------------
 
 - Clone this repository
 - python setup.py sdist
 - pip install dist/Pyav-*.tar.gz
 
 Contact
-========
+=======
 
 sydhds __at__ gmail __dot__ com
 

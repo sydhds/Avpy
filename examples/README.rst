@@ -25,7 +25,8 @@
 * outputPygame
 
   Decode first video stream of media
-  
+  Require Pygame
+
   * outputPygame.py -> write jpg images
   
   * outputPygame2.py -> dumb video player
@@ -38,3 +39,8 @@
 * videoPlayer
 
   simple video player (WIP, linux/alsa only) 
+
+* outputPil
+
+  Decode first video stream of media and write greyscale png
+  Require PIL or pillow (> 1.1.4)
