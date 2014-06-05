@@ -26,7 +26,7 @@ if __name__ == '__main__':
     parser.add_option('--length', 
             help='decode at max seconds of audio',
             type='int',
-            default=90)    
+            default=20)    
     parser.add_option('--copyPacket', 
             action='store_true',
             help='copy packet (debug only)')
@@ -84,7 +84,7 @@ if __name__ == '__main__':
                 out.write(ctypes.string_at(buf, bufLen))
                
                 decodedSize += bufLen
-                # stop after ~ 90s (default)
+                # stop after ~ 20s (default)
                 # exact time will vary depending on dataSize
                 if decodedSize >= options.length*secondSize:
                     break
