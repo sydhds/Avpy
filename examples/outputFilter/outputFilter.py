@@ -1,10 +1,17 @@
 #!/usr/bin/env python
 
 '''
-Decode the 5th first frame of the first video stream and write pgm file
+Decode the 5th first frame of the first video stream, apply a filter 
+and then write pgm file
 
-python outputPgm.py -m file.avi -> save frame 1 to 5
-python outputPgm.py -m file.avi -o 140 -c 8 -> save frame 140 to 148
+python outputFilter.py -m file.avi -> save frame 1 to 5
+python outputFilter.py -m file.avi -o 140 -c 8 -> save frame 140 to 148
+
+python outputFilter.py -m file.avi -f vflip -> use vflip filter
+python outputFilter.py -m file.avi -f hflip
+python outputFilter.py -m file.avi -f drawbox -a '10:20:200:60:red' 
+python outputFilter.py -m file.avi -f drawbox -a '10:20:200:60:0x00FF000A'
+
 '''
 
 import sys
@@ -54,19 +61,14 @@ if __name__ == '__main__':
             type='int',
             default=5,
             help='number of image to save (default: %default)')
-    #parser.add_option('-s', '--seek', 
-            #action='store_true',
-            #default=False,
-            #help='(EXPERIMENTAL) use seek if an offset is given (default: %default)')
-    #parser.add_option('--seek_index', 
-            #action='store_true',
-            #default=False,
-            #help='(EXPERIMENTAL) pass video stream index to seek function - DEBUG only (default: %default)')
-
+    parser.add_option('-f', '--filterName',
+            default='negate',
+            help='filter name')
+    parser.add_option('-a', '--filterArguments',
+            default='',
+            help='filter arguments')
+    
     (options, args) = parser.parse_args()
-
-    #if options.seek_index:
-        #options.seek = True
 
     if not options.media:
         print('Please provide a media to play with -m or --media option')
@@ -95,35 +97,19 @@ if __name__ == '__main__':
     print('video stream resolution: %dx%d' % (w, h))
 
     m.addScaler2(vstream, w, h)
-    
-    print Media.filters()
-    print Media.filterInfo('buffer') 
-    #print Media.filterInfo('ffbuffersink') 
-    print Media.filterInfo('nullsink') 
-    print Media.filterInfo('negate') 
-    
-    # from ffmpeg documentation
-    filterArgs = 'drawbox=x=10:y=20:w=200:h=60:color=red@0.5'
-    filterArgs2 = 'movie=my_logo.png[wm];[in][wm]overlay=5:5[out]'
-    filterArgs3 = 'negate'
-    filterArgs4 = 'hflip'
-    m.addFilter(vstream, filterArgs4)
-
-    #seekOffset = 0
-    #if options.offset and options.seek:
-        
-        #fpsTuple = streamInfo['fps']
-        #fps = fpsTuple[1]/float(fpsTuple[0] * fpsTuple[2])
-        #seekTime = options.offset / fps
-        #seekStreamIndex = vstream if options.seek_index else -1
-        #seekResult = m.seek(seekTime, streamIndex=seekStreamIndex)
-        #if seekResult < 0:
-            #raise RuntimeError('Could not seek to given offset')
-        
-        #seekOffset = options.offset - 1
-        ## reset offset
-        #options.offset = 0
    
+    filters = Media.filters()
+
+    if options.filterName in filters:
+        m.addFilter(vstream, options.filterName, 
+                options.filterArguments)
+    else:
+        print('Could not find filter %s' % options.filterName)
+        print('Valid filters: %s' % filters)
+        sys.exit(3)
+
+    print Media.filterInfo(options.filterName)
+
     decodedCount = 0
     for p in m:
         
@@ -132,12 +118,11 @@ if __name__ == '__main__':
             if p.decoded:
 
                 decodedCount += 1
-                print('decoded frame %d' % (decodedCount))
+                #print('decoded frame %d' % (decodedCount))
 
                 if decodedCount >= options.offset:
-                    print('saving frame...')
+                    print('saving frame %d' % (decodedCount))
                     saveFrame(p.swsFrame, w, h, decodedCount)
-                    #saveFrame(p.filtered_frame, w, h, decodedCount)
 
                 if decodedCount >= options.offset+options.frameCount:
                     break 

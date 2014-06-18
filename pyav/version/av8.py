@@ -19,6 +19,7 @@ if 'PYAV_AVCODEC' in os.environ:
     libavdevice = os.path.join(fold, re.sub('avcodec', 'avdevice', base))
     libavformat = os.path.join(fold, re.sub('avcodec', 'avformat', base))
     libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))
+    libavfilter = os.path.join(fold, re.sub('avcodec', 'avfilter', base))
     libavcodec = os.environ['PYAV_AVCODEC']
 else:
     libavutil = util.find_library('avutil')
@@ -26,6 +27,7 @@ else:
     libavdevice = util.find_library('avdevice')
     libavformat = util.find_library('avformat')
     libswscale = util.find_library('swscale')
+    libavfilter = util.find_library('avfilter')
 
 CDLL(libavutil, RTLD_GLOBAL)
 _libraries = {}
@@ -33,6 +35,7 @@ _libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)
 _libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
 _libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)
 _libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)
+_libraries['libavfilter.so'] = CDLL(libavfilter, mode=RTLD_GLOBAL)
 
 STRING = c_char_p
 AVSampleFormat = c_int # enum
@@ -62,31 +65,32 @@ AVSubtitleType = c_int # enum
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
-CODEC_ID_MPEG2VIDEO = 2
-CODEC_ID_NONE = 0
+AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
+PIX_FMT_RGB24 = 2
+SUBTITLE_BITMAP = 1
+AVMEDIA_TYPE_AUDIO = 1
+PIX_FMT_YUV420P = 0
+SUBTITLE_NONE = 0
 SUBTITLE_ASS = 3
 SUBTITLE_TEXT = 2
-SUBTITLE_BITMAP = 1
+CODEC_ID_MPEG2VIDEO = 2
 CODEC_ID_MPEG1VIDEO = 1
-SUBTITLE_NONE = 0
-AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
-PIX_FMT_YUV420P = 0
+CODEC_ID_NONE = 0
 PIX_FMT_NONE = -1
 AVMEDIA_TYPE_SUBTITLE = 3
-AVMEDIA_TYPE_AUDIO = 1
-PIX_FMT_RGB24 = 2
 AVMEDIA_TYPE_VIDEO = 0
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
+AV_PERM_READ = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
-AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
 AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
 CODEC_CAP_AUTO_THREADS = 32768 # Variable c_int '32768'
 CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
 CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
+AV_TIME_BASE = 1000000 # Variable c_int '1000000'
+AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
 AVSEEK_FLAG_FRAME = 8 # Variable c_int '8'
 CODEC_CAP_SLICE_THREADS = 8192 # Variable c_int '8192'
 AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
-AV_TIME_BASE = 1000000 # Variable c_int '1000000'
 AVSEEK_FLAG_BYTE = 2 # Variable c_int '2'
 
 AV_NOPTS_VALUE = 9223372036854775808 # Variable c_ulong '-9223372036854775808ul'
@@ -218,6 +222,39 @@ class AVSubtitle(Structure):
 	pass
 
 class AVSubtitleRect(Structure):
+	pass
+
+class AVFilter(Structure):
+	pass
+
+class AVFilterInOut(Structure):
+	pass
+
+class AVFilterContext(Structure):
+	pass
+
+class AVFilterPad(Structure):
+	pass
+
+class AVFilterLink(Structure):
+	pass
+
+class AVFilterBufferRef(Structure):
+	pass
+
+class AVFilterBuffer(Structure):
+	pass
+
+class AVFilterBufferRefVideoProps(Structure):
+	pass
+
+class AVFilterBufferRefAudioProps(Structure):
+	pass
+
+class AVFilterFormats(Structure):
+	pass
+
+class AVFilterGraph(Structure):
 	pass
 
 AVMetadata = AVDictionary
@@ -639,6 +676,118 @@ AVCodecParser._fields_ = [
     ('split', CFUNCTYPE(c_int, POINTER(AVCodecContext), POINTER(uint8_t), c_int)),
     ('next', POINTER(AVCodecParser)),
 ]
+AVFilterBuffer._fields_ = [
+    ('data', POINTER(uint8_t) * 8),
+    ('linesize', c_int * 8),
+    ('refcount', c_uint),
+    ('priv', c_void_p),
+    ('free', CFUNCTYPE(None, POINTER(AVFilterBuffer))),
+    ('format', c_int),
+    ('w', c_int),
+    ('h', c_int),
+]
+AVFilterBufferRefAudioProps._fields_ = [
+    ('channel_layout', uint64_t),
+    ('nb_samples', c_int),
+    ('size', c_int),
+    ('sample_rate', uint32_t),
+    ('planar', c_int),
+]
+AVFilterBufferRefVideoProps._fields_ = [
+    ('w', c_int),
+    ('h', c_int),
+    ('pixel_aspect', AVRational),
+    ('interlaced', c_int),
+    ('top_field_first', c_int),
+    ('pict_type', AVPictureType),
+    ('key_frame', c_int),
+]
+AVFilterBufferRef._fields_ = [
+    ('buf', POINTER(AVFilterBuffer)),
+    ('data', POINTER(uint8_t) * 8),
+    ('linesize', c_int * 8),
+    ('format', c_int),
+    ('pts', int64_t),
+    ('pos', int64_t),
+    ('perms', c_int),
+    ('type', AVMediaType),
+    ('video', POINTER(AVFilterBufferRefVideoProps)),
+    ('audio', POINTER(AVFilterBufferRefAudioProps)),
+]
+AVFilterFormats._fields_ = [
+    ('format_count', c_uint),
+    ('formats', POINTER(c_int)),
+    ('refcount', c_uint),
+    ('refs', POINTER(POINTER(POINTER(AVFilterFormats)))),
+]
+AVFilterPad._fields_ = [
+    ('name', STRING),
+    ('type', AVMediaType),
+    ('min_perms', c_int),
+    ('rej_perms', c_int),
+    ('start_frame', CFUNCTYPE(None, POINTER(AVFilterLink), POINTER(AVFilterBufferRef))),
+    ('get_video_buffer', CFUNCTYPE(POINTER(AVFilterBufferRef), POINTER(AVFilterLink), c_int, c_int, c_int)),
+    ('get_audio_buffer', CFUNCTYPE(POINTER(AVFilterBufferRef), POINTER(AVFilterLink), c_int, AVSampleFormat, c_int, uint64_t, c_int)),
+    ('end_frame', CFUNCTYPE(None, POINTER(AVFilterLink))),
+    ('draw_slice', CFUNCTYPE(None, POINTER(AVFilterLink), c_int, c_int, c_int)),
+    ('filter_samples', CFUNCTYPE(None, POINTER(AVFilterLink), POINTER(AVFilterBufferRef))),
+    ('poll_frame', CFUNCTYPE(c_int, POINTER(AVFilterLink))),
+    ('request_frame', CFUNCTYPE(c_int, POINTER(AVFilterLink))),
+    ('config_props', CFUNCTYPE(c_int, POINTER(AVFilterLink))),
+]
+AVFilter._fields_ = [
+    ('name', STRING),
+    ('priv_size', c_int),
+    ('init', CFUNCTYPE(c_int, POINTER(AVFilterContext), STRING, c_void_p)),
+    ('uninit', CFUNCTYPE(None, POINTER(AVFilterContext))),
+    ('query_formats', CFUNCTYPE(c_int, POINTER(AVFilterContext))),
+    ('inputs', POINTER(AVFilterPad)),
+    ('outputs', POINTER(AVFilterPad)),
+    ('description', STRING),
+]
+AVFilterContext._fields_ = [
+    ('av_class', POINTER(AVClass)),
+    ('filter', POINTER(AVFilter)),
+    ('name', STRING),
+    ('input_count', c_uint),
+    ('input_pads', POINTER(AVFilterPad)),
+    ('inputs', POINTER(POINTER(AVFilterLink))),
+    ('output_count', c_uint),
+    ('output_pads', POINTER(AVFilterPad)),
+    ('outputs', POINTER(POINTER(AVFilterLink))),
+    ('priv', c_void_p),
+]
+AVFilterLink._fields_ = [
+    ('src', POINTER(AVFilterContext)),
+    ('srcpad', POINTER(AVFilterPad)),
+    ('dst', POINTER(AVFilterContext)),
+    ('dstpad', POINTER(AVFilterPad)),
+    ('init_state', c_int),
+    ('type', AVMediaType),
+    ('w', c_int),
+    ('h', c_int),
+    ('sample_aspect_ratio', AVRational),
+    ('channel_layout', uint64_t),
+    ('sample_rate', int64_t),
+    ('format', c_int),
+    ('in_formats', POINTER(AVFilterFormats)),
+    ('out_formats', POINTER(AVFilterFormats)),
+    ('src_buf', POINTER(AVFilterBufferRef)),
+    ('cur_buf', POINTER(AVFilterBufferRef)),
+    ('out_buf', POINTER(AVFilterBufferRef)),
+    ('time_base', AVRational),
+]
+AVFilterGraph._fields_ = [
+    ('filter_count', c_uint),
+    ('filters', POINTER(POINTER(AVFilterContext))),
+    ('scale_sws_opts', STRING),
+]
+AVFilterInOut._fields_ = [
+    ('name', STRING),
+    ('filter_ctx', POINTER(AVFilterContext)),
+    ('pad_idx', c_int),
+    ('next', POINTER(AVFilterInOut)),
+]
 AVMetadataConv._fields_ = [
 ]
 AVDictionaryEntry._fields_ = [
@@ -922,6 +1071,9 @@ avcodec_find_decoder.argtypes = [CodecID]
 avcodec_find_decoder_by_name = _libraries['libavcodec.so'].avcodec_find_decoder_by_name
 avcodec_find_decoder_by_name.restype = POINTER(AVCodec)
 avcodec_find_decoder_by_name.argtypes = [STRING]
+avcodec_get_frame_defaults = _libraries['libavcodec.so'].avcodec_get_frame_defaults
+avcodec_get_frame_defaults.restype = None
+avcodec_get_frame_defaults.argtypes = [POINTER(AVFrame)]
 avcodec_alloc_frame = _libraries['libavcodec.so'].avcodec_alloc_frame
 avcodec_alloc_frame.restype = POINTER(AVFrame)
 avcodec_alloc_frame.argtypes = []
@@ -943,6 +1095,42 @@ avsubtitle_free.argtypes = [POINTER(AVSubtitle)]
 avcodec_close = _libraries['libavcodec.so'].avcodec_close
 avcodec_close.restype = c_int
 avcodec_close.argtypes = [POINTER(AVCodecContext)]
+avfilter_link = _libraries['libavfilter.so'].avfilter_link
+avfilter_link.restype = c_int
+avfilter_link.argtypes = [POINTER(AVFilterContext), c_uint, POINTER(AVFilterContext), c_uint]
+avfilter_request_frame = _libraries['libavfilter.so'].avfilter_request_frame
+avfilter_request_frame.restype = c_int
+avfilter_request_frame.argtypes = [POINTER(AVFilterLink)]
+avfilter_poll_frame = _libraries['libavfilter.so'].avfilter_poll_frame
+avfilter_poll_frame.restype = c_int
+avfilter_poll_frame.argtypes = [POINTER(AVFilterLink)]
+avfilter_register_all = _libraries['libavfilter.so'].avfilter_register_all
+avfilter_register_all.restype = None
+avfilter_register_all.argtypes = []
+avfilter_get_by_name = _libraries['libavfilter.so'].avfilter_get_by_name
+avfilter_get_by_name.restype = POINTER(AVFilter)
+avfilter_get_by_name.argtypes = [STRING]
+av_filter_next = _libraries['libavfilter.so'].av_filter_next
+av_filter_next.restype = POINTER(POINTER(AVFilter))
+av_filter_next.argtypes = [POINTER(POINTER(AVFilter))]
+avfilter_graph_alloc = _libraries['libavfilter.so'].avfilter_graph_alloc
+avfilter_graph_alloc.restype = POINTER(AVFilterGraph)
+avfilter_graph_alloc.argtypes = []
+avfilter_graph_create_filter = _libraries['libavfilter.so'].avfilter_graph_create_filter
+avfilter_graph_create_filter.restype = c_int
+avfilter_graph_create_filter.argtypes = [POINTER(POINTER(AVFilterContext)), POINTER(AVFilter), STRING, STRING, c_void_p, POINTER(AVFilterGraph)]
+avfilter_graph_config = _libraries['libavfilter.so'].avfilter_graph_config
+avfilter_graph_config.restype = c_int
+avfilter_graph_config.argtypes = [POINTER(AVFilterGraph), c_void_p]
+avfilter_graph_free = _libraries['libavfilter.so'].avfilter_graph_free
+avfilter_graph_free.restype = None
+avfilter_graph_free.argtypes = [POINTER(POINTER(AVFilterGraph))]
+avfilter_graph_parse = _libraries['libavfilter.so'].avfilter_graph_parse
+avfilter_graph_parse.restype = c_int
+avfilter_graph_parse.argtypes = [POINTER(AVFilterGraph), STRING, POINTER(AVFilterInOut), POINTER(AVFilterInOut), c_void_p]
+av_vsrc_buffer_add_frame = _libraries['libavfilter.so'].av_vsrc_buffer_add_frame
+av_vsrc_buffer_add_frame.restype = c_int
+av_vsrc_buffer_add_frame.argtypes = [POINTER(AVFilterContext), POINTER(AVFrame), int64_t, AVRational]
 av_register_all = _libraries['libavformat.so'].av_register_all
 av_register_all.restype = None
 av_register_all.argtypes = []

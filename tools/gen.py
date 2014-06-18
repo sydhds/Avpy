@@ -33,18 +33,27 @@ def main(options):
     xmlFile = 'av%s.xml' % (pyLibVersion)
     pyFileTmp = 'av%s_tmp.py' % (pyLibVersion)
     pyFile = 'av%s.py' % (pyLibVersion)
+    
+    # file is not present in libav9 includes 
+    _addInclude = 'libavfilter/vsrc_buffer.h'
+    addInclude = ''
+
+    if os.path.isfile(os.path.join(buildDir, 'include', addInclude)):
+        addInclude = _addInclude
 
     print 'generating xml...'
     xmlCmd = 'h2xml -I {0}/include -c libavcodec/avcodec.h'\
             ' libavdevice/avdevice.h libavformat/avformat.h libavutil/avutil.h'\
-            ' libavutil/mathematics.h libavutil/rational.h libswscale/swscale.h -o {1}'\
-            ' -D__STDC_CONSTANT_MACROS'.format(buildDir, xmlFile)
+            ' libavutil/mathematics.h libavutil/rational.h libswscale/swscale.h'\
+            ' libavfilter/avfilter.h libavfilter/avfiltergraph.h {2} -o {1}'\
+            ' -D__STDC_CONSTANT_MACROS'.format(buildDir, xmlFile, addInclude)
     run(xmlCmd)
 
     print 'generating python module'
     xml2pyCmd = 'xml2py {0} -o {1} -l {2}/lib/libavcodec.so'\
             ' -l {2}/lib/libavformat.so -l {2}/lib/libavdevice.so'\
             ' -l {2}/lib/libavutil.so -l {2}/lib/libswscale.so'\
+            ' -l {2}/lib/libavfilter.so'\
             ' --preload {2}/lib/libavutil.so'.format(xmlFile, pyFileTmp, buildDir) 
     run(xml2pyCmd)
 

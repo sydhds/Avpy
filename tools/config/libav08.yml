@@ -60,6 +60,8 @@ define:
     - AVSEEK_FLAG_BACKWARD 
     - AVSEEK_FLAG_ANY 
     - AVSEEK_FLAG_BYTE 
+    # filter
+    - AV_PERM_READ
 
 alias:
     - ByteIOContext
@@ -109,6 +111,18 @@ class:
     - AVDictionaryEntry
     - AVSubtitle
     - AVSubtitleRect
+    # filter
+    - AVFilter
+    - AVFilterInOut
+    - AVFilterContext 
+    - AVFilterPad 
+    - AVFilterLink
+    - AVFilterBufferRef
+    - AVFilterBuffer
+    - AVFilterBufferRefVideoProps
+    - AVFilterBufferRefAudioProps
+    - AVFilterFormats
+    - AVFilterGraph
 
 import:
     - import os
@@ -133,6 +147,7 @@ cdll:
     - "    libavdevice = os.path.join(fold, re.sub('avcodec', 'avdevice', base))"
     - "    libavformat = os.path.join(fold, re.sub('avcodec', 'avformat', base))"
     - "    libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))"
+    - "    libavfilter = os.path.join(fold, re.sub('avcodec', 'avfilter', base))"
     - "    libavcodec = os.environ['PYAV_AVCODEC']"
     - "else:"
     - "    libavutil = util.find_library('avutil')"
@@ -140,6 +155,7 @@ cdll:
     - "    libavdevice = util.find_library('avdevice')"
     - "    libavformat = util.find_library('avformat')"
     - "    libswscale = util.find_library('swscale')"
+    - "    libavfilter = util.find_library('avfilter')"
     - ""
     - "CDLL(libavutil, RTLD_GLOBAL)"
     - "_libraries = {}"
@@ -147,6 +163,7 @@ cdll:
     - "_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)"
     - "_libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)"
     - "_libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)"
+    - "_libraries['libavfilter.so'] = CDLL(libavfilter, mode=RTLD_GLOBAL)"
 
 function:
     ## avformat
@@ -198,3 +215,19 @@ function:
     - sws_getContext
     - sws_freeContext
     - sws_scale
+    # filter
+    - avfilter_register_all
+    - av_filter_next 
+    - avfilter_get_by_name
+    - avfilter_graph_alloc
+    - avfilter_graph_free
+    - avfilter_graph_create_filter
+    - avfilter_graph_parse
+    - avfilter_graph_config
+    - avfilter_link
+    - av_vsrc_buffer_add_frame
+    - avfilter_poll_frame
+    - avcodec_get_frame_defaults 
+    - avfilter_request_frame
+
+
