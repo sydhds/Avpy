@@ -1,0 +1,19 @@
+Libav useful
+------------
+
+http://www.libav.org/doxygen/release/0.8/deprecated.html
+http://www.libav.org/doxygen/release/9/deprecated.html
+
+https://wiki.libav.org/Migration/10
+https://wiki.libav.org/Migration/11
+
+https://github.com/libav/libav/blob/release/9/doc/APIchanges
+https://github.com/libav/libav/blob/release/10/doc/APIchanges
+https://github.com/libav/libav/blob/master/doc/APIchanges
+
+FFmpeg
+------
+
+https://github.com/FFmpeg/FFmpeg/tree/master/doc
+--> https://github.com/FFmpeg/FFmpeg/blob/master/doc/writing_filters.txt
+
