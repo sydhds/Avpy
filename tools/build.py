@@ -49,7 +49,7 @@ def buildGit(options):
     # in case we rebuild
     run('make clean')
     print('now building...')
-    run('make -j 2 -k > {0}/make.log 2>&1'.format(buildDir))
+    run('make -j {1} -k > {0}/make.log 2>&1'.format(buildDir, options.jobs))
     run('make install > {0}/make_install.log 2>&1'.format(buildDir))
 
     print('build done!')
@@ -118,6 +118,11 @@ if __name__ == '__main__':
     parser.add_option('-s', '--suffix',
             default='',
             help='install folder suffix, ex: libav_0.8.1_SUFFIX'
+            )
+    parser.add_option('-j', '--jobs', 
+            default=2,
+            type='int',
+            help='allow N jobs at once (default: %default)'
             )
 
     (options, args) = parser.parse_args()
