@@ -70,9 +70,9 @@ if __name__ == '__main__':
     print('video stream resolution: %dx%d' % (size[0], size[1]))
 
     if options.mode == 'string':
-        print 'Using PIL fromstring method...'
+        print('Using PIL fromstring method...')
     else:
-        print 'Using PIL frombuffer method...'
+        print('Using PIL frombuffer method...')
         
     m.addScaler2(vstream, *size)
 
