@@ -45,7 +45,7 @@ def main(options):
     xmlCmd = 'h2xml -I {0}/include -c libavcodec/avcodec.h'\
             ' libavdevice/avdevice.h libavformat/avformat.h libavutil/avutil.h'\
             ' libavutil/mathematics.h libavutil/rational.h libswscale/swscale.h'\
-            ' libavfilter/avfilter.h libavfilter/avfiltergraph.h {2} -o {1}'\
+            ' {2} -o {1}'\
             ' -D__STDC_CONSTANT_MACROS'.format(buildDir, xmlFile, addInclude)
     run(xmlCmd)
    
@@ -59,7 +59,6 @@ def main(options):
     xml2pyCmd = 'xml2py {0} -o {1} -l {2}/lib/libavcodec.so'\
             ' -l {2}/lib/libavformat.so -l {2}/lib/libavdevice.so'\
             ' -l {2}/lib/libavutil.so -l {2}/lib/libswscale.so'\
-            ' -l {2}/lib/libavfilter.so'\
             ' {3}'.format(xmlFile, pyFileTmp, buildDir, preloads) 
     run(xml2pyCmd)
 

@@ -19,7 +19,6 @@ if 'PYAV_AVCODEC' in os.environ:
     libavdevice = os.path.join(fold, re.sub('avcodec', 'avdevice', base))
     libavformat = os.path.join(fold, re.sub('avcodec', 'avformat', base))
     libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))
-    libavfilter = os.path.join(fold, re.sub('avcodec', 'avfilter', base))
     libavcodec = os.environ['PYAV_AVCODEC']
 else:
     libavutil = util.find_library('avutil')
@@ -27,7 +26,6 @@ else:
     libavdevice = util.find_library('avdevice')
     libavformat = util.find_library('avformat')
     libswscale = util.find_library('swscale')
-    libavfilter = util.find_library('avfilter')
 
 CDLL(libavutil, RTLD_GLOBAL)
 _libraries = {}
@@ -35,7 +33,6 @@ _libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)
 _libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)
 _libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
 _libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)
-_libraries['libavfilter.so'] = CDLL(libavfilter, mode=RTLD_GLOBAL)
 
 STRING = c_char_p
 size_t = c_ulong
@@ -64,19 +61,19 @@ AVSubtitleType = c_int # enum
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
-PIX_FMT_RGB24 = 2
-PIX_FMT_YUV420P = 0
 AVMEDIA_TYPE_VIDEO = 0
-PIX_FMT_NONE = -1
-CODEC_ID_MPEG1VIDEO = 1
-SUBTITLE_ASS = 3
-SUBTITLE_TEXT = 2
-AVMEDIA_TYPE_SUBTITLE = 3
-AVMEDIA_TYPE_AUDIO = 1
-CODEC_ID_MPEG2VIDEO = 2
+PIX_FMT_RGB24 = 2
 CODEC_ID_NONE = 0
+PIX_FMT_NONE = -1
+PIX_FMT_YUV420P = 0
+AVMEDIA_TYPE_AUDIO = 1
+CODEC_ID_MPEG1VIDEO = 1
+CODEC_ID_MPEG2VIDEO = 2
+AVMEDIA_TYPE_SUBTITLE = 3
+SUBTITLE_TEXT = 2
 SUBTITLE_BITMAP = 1
 SUBTITLE_NONE = 0
+SUBTITLE_ASS = 3
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
 AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
@@ -211,39 +208,6 @@ class AVSubtitle(Structure):
 	pass
 
 class AVSubtitleRect(Structure):
-	pass
-
-class AVFilter(Structure):
-	pass
-
-class AVFilterInOut(Structure):
-	pass
-
-class AVFilterContext(Structure):
-	pass
-
-class AVFilterPad(Structure):
-	pass
-
-class AVFilterLink(Structure):
-	pass
-
-class AVFilterBufferRef(Structure):
-	pass
-
-class AVFilterBuffer(Structure):
-	pass
-
-class AVFilterBufferRefVideoProps(Structure):
-	pass
-
-class AVFilterBufferRefAudioProps(Structure):
-	pass
-
-class AVFilterFormats(Structure):
-	pass
-
-class AVFilterGraph(Structure):
 	pass
 
 PixelFormat = AVPixelFormat # alias
@@ -867,9 +831,6 @@ av_codec_next.argtypes = [POINTER(AVCodec)]
 avcodec_alloc_frame = _libraries['libavcodec.so'].avcodec_alloc_frame
 avcodec_alloc_frame.restype = POINTER(AVFrame)
 avcodec_alloc_frame.argtypes = []
-avcodec_get_frame_defaults = _libraries['libavcodec.so'].avcodec_get_frame_defaults
-avcodec_get_frame_defaults.restype = None
-avcodec_get_frame_defaults.argtypes = [POINTER(AVFrame)]
 avcodec_open2 = _libraries['libavcodec.so'].avcodec_open2
 avcodec_open2.restype = c_int
 avcodec_open2.argtypes = [POINTER(AVCodecContext), POINTER(AVCodec), POINTER(POINTER(AVDictionary))]
