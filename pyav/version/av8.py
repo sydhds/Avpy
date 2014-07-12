@@ -16,22 +16,22 @@ from ctypes import util
 if 'PYAV_AVCODEC' in os.environ:
     fold, base = os.path.split(os.environ['PYAV_AVCODEC'])
     libavutil = os.path.join(fold, re.sub('avcodec', 'avutil', base))
-    libavdevice = os.path.join(fold, re.sub('avcodec', 'avdevice', base))
     libavformat = os.path.join(fold, re.sub('avcodec', 'avformat', base))
+    libavdevice = os.path.join(fold, re.sub('avcodec', 'avdevice', base))
     libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))
     libavcodec = os.environ['PYAV_AVCODEC']
 else:
     libavutil = util.find_library('avutil')
     libavcodec = util.find_library('avcodec')
-    libavdevice = util.find_library('avdevice')
     libavformat = util.find_library('avformat')
+    libavdevice = util.find_library('avdevice')
     libswscale = util.find_library('swscale')
 
 CDLL(libavutil, RTLD_GLOBAL)
 _libraries = {}
 _libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)
-_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
 _libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)
+_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
 _libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)
 
 STRING = c_char_p

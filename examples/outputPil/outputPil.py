@@ -10,7 +10,6 @@ python outputPil.py -m file.avi -o 140 -> save frame 140 to 145
 import sys
 import ctypes
 import copy
-import array
 
 from PIL import Image
 
@@ -18,7 +17,7 @@ from pyav import Media
 
 if __name__ == '__main__':
 
-    modeChoices = ['string', 'buffer', 'array']
+    modeChoices = ['string', 'buffer']
     
     from optparse import OptionParser
 
@@ -39,7 +38,7 @@ if __name__ == '__main__':
             type='choice',
             choices=modeChoices,
             default='buffer',
-            help='transfer from Pyav to PIL: %s' % modeChoices)
+            help='transfer from Pyav to PIL: %s (default: %default)' % modeChoices)
 
     (options, args) = parser.parse_args()
 

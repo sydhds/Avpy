@@ -41,7 +41,12 @@ def buildGit(options):
         print('Could not find libav repo: ./build/%s_git' % options.lib)
         sys.exit(1)
 
-    run('git checkout v%s' % options.version)
+    if options.lib == 'ffmpeg':
+        tagChar = 'n'
+    else:
+        tagChar = 'v'
+
+    run('git checkout %s%s' % (tagChar, options.version))
     run('git describe --tags')
 
     run('./configure --prefix={0} {1} --logfile={0}/config.log'.format(buildDir, ' '.join(c for c in options.configure_options)))

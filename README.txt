@@ -35,8 +35,15 @@ FeatureMatrix:
     - filter: todo
 - doc:
     - sphinx doc: wip
+- examples:
+    - dump image/wav/subtitle: done
+    - alsaaudio: done
+    - Pygame: wip
+    - PIL, pillow: done
+    - PySDL2: todo
+    - PyAL: todo
 - misc:
-    - python3: done
+    - Python3: done
 
 Install
 =======

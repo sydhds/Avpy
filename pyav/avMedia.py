@@ -35,7 +35,7 @@ class Media(object):
             
             # XXX: ok for python3 and python2 with special characters
             # not sure this is a right/elegant solution 
-            if sys.version_info.major >= 3:
+            if sys.version_info >= (3, 0):
                 _mediaName = mediaName.encode('utf-8')
             else:
                 _mediaName = mediaName
@@ -75,9 +75,10 @@ class Media(object):
         * name: media filename
         * stream: list of stream info (dict)
         '''
-
+        
         infoDict = {}
         infoDict['name'] = self.pFormatCtx.contents.filename
+        infoDict['format'] = self.pFormatCtx.contents.iformat.contents.name
         infoDict['metadata'] = self.metadata()
         infoDict['stream'] = [] 
         infoDict['duration'] = float(self.pFormatCtx.contents.duration)/av.lib.AV_TIME_BASE

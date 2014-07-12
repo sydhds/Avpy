@@ -28,6 +28,14 @@ python build.py -l libav -v 0.8.1
 
 note: use option -j to compile faster
 
+Build ffmpeg from git
+---------------------
+
+cd tools
+mkdir build
+git clone https://github.com/FFmpeg/FFmpeg build/ffmpeg_git
+python build.py -l ffmpeg -v 1.2.1
+
 Generate bindings
 -----------------
 

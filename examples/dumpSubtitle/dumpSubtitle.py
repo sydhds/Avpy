@@ -9,9 +9,6 @@ import copy
 
 from pyav import Media
 
-if sys.version_info.major >= 3:
-    xrange = range
-
 if __name__ == '__main__':
     
     # cmdline
@@ -58,7 +55,7 @@ if __name__ == '__main__':
             p2.decode()
             if p2.decoded:
                 
-                for i in xrange(p2.subtitle.num_rects):
+                for i in range(p2.subtitle.num_rects):
                     
                     if p2.subtitleTypes[i] == 'text':
                         print(p2.subtitle.rects[i].contents.text)

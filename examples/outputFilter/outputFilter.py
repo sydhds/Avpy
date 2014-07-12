@@ -22,9 +22,6 @@ from pyav import Media
 
 raise NotImplementedError
 
-if sys.version_info.major >= 3:
-    xrange = range
-
 def ptr_add(ptr, offset):
     address = ctypes.addressof(ptr.contents) + offset
     return ctypes.pointer(type(ptr.contents).from_address(address))
@@ -42,7 +39,7 @@ def saveFrame(frame, w, h, i):
     with open('frame.%d.ppm' % i, 'wb') as f:
         #header
         f.write(header)
-        for i in xrange(h):
+        for i in range(h):
             ptr = ptr_add(frame.contents.data[0], i*frame.contents.linesize[0])
             ctypes.memmove(a.buffer_info()[0], ptr, w*3)	
             a.tofile(f)
@@ -128,3 +125,4 @@ if __name__ == '__main__':
 
                 if decodedCount >= options.offset+options.frameCount:
                     break 
+
