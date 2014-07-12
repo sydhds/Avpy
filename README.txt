@@ -16,25 +16,28 @@ More examples can be found in the examples folder.
 
 FeatureMatrix:
 - libav: 
-    - version < 0.8: to be discussed
     - version 0.8: done
     - version 0.9: done
-    - version 0.10: todo
-- ffmpeg: todo 
+    - version 0.10: done
+- ffmpeg:
+    - version 1.2: todo
+    - version 2.1: todo
+    - version 2.2: todo
 - OS: 
     - Linux - BSD: done
     - MacOS: please report!
     - Windows: please report!
 - pyav:
     - media info: done
-    - basic video decoding: wip
-    - basic audio decoding: wip
+    - basic video decoding: done
+    - basic audio decoding: done
     - sync video player: wip 
     - subtitle support: wip
     - encoding: todo
     - filter: todo
+    - accurate seeking: todo
 - doc:
-    - sphinx doc: wip
+    - sphinx doc: done
 - examples:
     - dump image/wav/subtitle: done
     - alsaaudio: done
