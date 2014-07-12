@@ -20,6 +20,8 @@ import array
 import ctypes
 from pyav import Media
 
+raise NotImplementedError
+
 def ptr_add(ptr, offset):
     address = ctypes.addressof(ptr.contents) + offset
     return ctypes.pointer(type(ptr.contents).from_address(address))
@@ -123,3 +125,4 @@ if __name__ == '__main__':
 
                 if decodedCount >= options.offset+options.frameCount:
                     break 
+

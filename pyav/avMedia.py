@@ -338,50 +338,6 @@ class Media(object):
 
         return ci
 
-    @staticmethod
-    def filters():
-        ''' get all supported codecs
-
-        :return: available filters.
-        :rtype: frozenset
-        '''
-
-        filters = [] 
-        av.lib.avfilter_register_all()
-        cf  = None
-
-        while 1:
-            cf = av.lib.av_filter_next(cf)
-            if cf.contents:
-                filters.append(cf.contents.contents.name)
-            else:
-                break
-        
-        return frozenset(filters)
-
-    @staticmethod
-    def filterInfo(name):
-        
-        # FIXME: should really do something about enum...
-        mediaTypeDict = {
-                av.lib.AVMEDIA_TYPE_VIDEO: 'video',
-                av.lib.AVMEDIA_TYPE_AUDIO: 'audio',
-                av.lib.AVMEDIA_TYPE_SUBTITLE: 'subtitle',
-                }
-
-        av.lib.avfilter_register_all()
-        cf = av.lib.avfilter_get_by_name(name)
-        cfi = {}
-        if cf:
-            cfi['name'] = cf.contents.name
-            cfi['description'] = cf.contents.description
-            cfi['inputs'] = mediaTypeDict[cf.contents.inputs.contents.type]
-            cfi['outputs'] = mediaTypeDict[cf.contents.outputs.contents.type]
-        else:
-            raise ValueError('Unable to find filter %s' % name)
-
-        return cfi
-
     # read
     def __iter__(self):
         return self
@@ -427,15 +383,6 @@ class Media(object):
         self.pkt.scaler[streamIndex] = scaler         
         self.pkt.addScaler(*scaler)
 
-    def addFilter(self, streamIndex, filterName, filterArgs):
-        
-        #av.lib.avfilter_register_all()
-
-        if self.pkt is None:
-            self.pkt = Packet(self.pFormatCtx)
-
-        self.pkt.addFilter(streamIndex, filterName, filterArgs)
-
     def seek(self, time, direction='forward', streamIndex=-1):
 
         # seek to given time in direction
@@ -474,11 +421,6 @@ class Packet(object):
         # after decode
         self.dataSize = -1
 
-        # filter
-        self.filterGraph = None
-        self.picRef = av.lib.AVFilterBufferRef();
-        self.filteredFrame = None
-        
         # retrieve a list of codec context for each stream in file
         self.codecCtx = []
         self.swsCtx = []
@@ -501,147 +443,6 @@ class Packet(object):
             
             self.swsCtx.append(None)
             self.scaler.append(None)
-
-    def _sinkFilter(self):
-
-        # AVSinkContext struct
-        class AVSinkContext(ctypes.Structure):
-	    pass
-
-        AVSinkContext._fields_ = [
-                ('pix_fmt', av.lib.PixelFormat),
-                ]
-
-        # avsink filter
-        avsink = av.lib.AVFilter()
-        avsink.name = 'avsink'
-        avsink.priv_size = ctypes.sizeof(AVSinkContext)
-      
-        def null_end_frame(inlink):
-            pass
-        NULLENDFRAMEFUNC = ctypes.CFUNCTYPE(None, 
-                ctypes.POINTER(av.lib.AVFilterLink))
-
-        inPad0 = av.lib.AVFilterPad()
-        inPad0.name = 'default'
-        inPad0.type = av.lib.AVMEDIA_TYPE_VIDEO
-        inPad0.end_frame = NULLENDFRAMEFUNC(null_end_frame) 
-        inPad0.min_perms = av.lib.AV_PERM_READ
-        inPad1 = av.lib.AVFilterPad()
-        inPad1.name = None
-        inPad = (av.lib.AVFilterPad * 2)(inPad0, inPad1)
-
-        outPad0 = av.lib.AVFilterPad()
-        outPad0.name = None
-        outPad = (av.lib.AVFilterPad * 1)(outPad0)
-
-        def sinkInit(ctx, args, opaque):
-
-            print 'sink init...'
-
-            #priv = ctx.contents.priv;
-            if(not opaque):
-                # TODO: return fix
-                return -1
-            ctx.contents.priv = ctypes.cast(opaque, ctypes.POINTER(AVSinkContext)) 
-            return 0;
-
-        def sinkQueryFormats(ctx):
-
-            print 'sink query formats...'
-
-            pix_fmts = av.lib.PixelFormat * 2
-            pix_fmts[0] = ctx.contents.priv.contents.pix_fmt
-            pix_fmts[1] = av.lib.PIX_FMT_NONE
-
-            av.lib.avfilter_set_common_formats(ctx, 
-                    av.lib.avfilter_make_format_list(pix_fmts))
-            return 0;
-
-        INITFUNC = ctypes.CFUNCTYPE(ctypes.c_int, 
-                ctypes.POINTER(av.lib.AVFilterContext), 
-                av.lib.STRING, ctypes.c_void_p)
-        QUERYFMTFUNC = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(av.lib.AVFilterContext))
-
-        avsink.init = INITFUNC(sinkInit) 
-        avsink.query_formats = QUERYFMTFUNC(sinkQueryFormats)
-        #print '$$ ', ctypes.pointer(inPad) 
-        #avsink.inputs = ctypes.pointer(inPad) 
-        #avsink.outputs = ctypes.pointer(outPad)
-        avsink.inputs = ctypes.cast(inPad, ctypes.POINTER(av.lib.AVFilterPad))
-        avsink.outputs = ctypes.cast(outPad, ctypes.POINTER(av.lib.AVFilterPad))
-       
-        ## end AVSink filter
-
-    def addFilter(self, streamIndex, filterName, filterArgs): 
-        
-        codecCtx = self.codecCtx[streamIndex]
-        
-        self.filterGraph = av.lib.avfilter_graph_alloc()
-        if not self.filterGraph:
-            raise MemoryError('Could not alloc filter graph')
-        
-        # TODO: rename to inFilter and outFilter
-        self.inFilterCtx = ctypes.POINTER(av.lib.AVFilterContext)()
-        self.outFilterCtx = ctypes.POINTER(av.lib.AVFilterContext)()
-
-        bufferFilter = av.lib.avfilter_get_by_name('buffer')
-        bufferSinkFilter = av.lib.avfilter_get_by_name('nullsink')  
-        
-        inArgs = '%d:%d:%d:%d:%d:%d:%d' % (
-                codecCtx.contents.width, codecCtx.contents.height,
-                codecCtx.contents.pix_fmt,
-                codecCtx.contents.time_base.num, codecCtx.contents.time_base.den,
-                codecCtx.contents.sample_aspect_ratio.num, 
-                codecCtx.contents.sample_aspect_ratio.den)
-
-        self.inputFilter = ctypes.byref(self.inFilterCtx)
-
-        result = av.lib.avfilter_graph_create_filter(self.inputFilter, bufferFilter, 'src', inArgs, None, self.filterGraph)
-        if result < 0:
-            av.lib.avfilter_graph_free(ctypes.byref(self.filterGraph))
-            self.filterGraph = None
-            raise RuntimeError('Could not create input filter: %s' % avError(result))
-
-        self.outputFilter = ctypes.byref(self.outFilterCtx)
-        ret = av.lib.avfilter_graph_create_filter(self.outputFilter, bufferSinkFilter, 
-                'out', None, None, self.filterGraph)
-        
-        if result < 0:
-            av.lib.avfilter_graph_free(ctypes.byref(self.filterGraph))
-            self.filterGraph = None
-            raise RuntimeError('Could not create output filter %s' % avError(result))
-
-        filterCtx = ctypes.POINTER(av.lib.AVFilterContext)()
-
-        result = av.lib.avfilter_graph_create_filter(filterCtx, av.lib.avfilter_get_by_name(filterName), 
-                None, filterArgs, None, self.filterGraph)
- 
-        if result < 0:
-            av.lib.avfilter_graph_free(ctypes.byref(self.filterGraph))
-            self.filterGraph = None
-            raise RuntimeError('Could not create hflip filter %s' % avError(result))
-
-        result = av.lib.avfilter_link(self.inFilterCtx, 0, filterCtx, 0)
-        
-        if result < 0:
-            av.lib.avfilter_graph_free(ctypes.byref(self.filterGraph))
-            self.filterGraph = None
-            raise RuntimeError('Could not link filter (in) %s' % avError(result))
-        
-        result = av.lib.avfilter_link(filterCtx, 0, self.outFilterCtx, 0)
-        
-        if result < 0:
-            av.lib.avfilter_graph_free(ctypes.byref(self.filterGraph))
-            self.filterGraph = None
-            raise RuntimeError('Could not link filter (out) %s' % avError(result))
-
-        result = av.lib.avfilter_graph_config(self.filterGraph, None)
-
-        if result < 0:
-            av.lib.avfilter_graph_free(ctypes.byref(self.filterGraph))
-            self.filterGraph = None
-            raise RuntimeError('Could not config graph: %s' % avError(result))
 
     def addScaler(self, streamIndex, width=None, height=None):
 
@@ -735,10 +536,6 @@ class Packet(object):
         if self.swsFrame:
             av.lib.avpicture_free(ctypes.cast(self.swsFrame, ctypes.POINTER(av.lib.AVPicture)))
        
-        if self.filterGraph:
-            av.lib.avfilter_graph_free(ctypes.byref(self.filterGraph))
-            av.lib.av_free(self.filteredFrame)
-
         av.lib.av_free(self.frame)
         av.lib.av_free_packet(ctypes.byref(self.pkt))
 
@@ -774,37 +571,11 @@ class Packet(object):
                         self.decodedRef, self.pktRef)
 
                 if self.decoded:
-                    if self.filterGraph:
-                        
-                        result = av.lib.av_vsrc_buffer_add_frame(self.inFilterCtx, 
-                                self.frame, 
-                                0, 
-                                self.frame.contents.sample_aspect_ratio)
-                        
-                        if result < 0:
-                            raise RuntimeError('Error while sending frame to filter graph: %s' % avError(result))
-
-                        # TODO: check result
-                        frame_available = av.lib.avfilter_poll_frame(self.outFilterCtx.contents.inputs[0]);
-                        
-                        self.filteredFrame = av.lib.avcodec_alloc_frame()
-                        av.lib.avcodec_get_frame_defaults(self.filteredFrame)
-                        ist_pts_tb = av.lib.AVRational()
-
-                        while frame_available:
-                            self._filteredFrame(self.outFilterCtx, 
-                                    self.filteredFrame, 
-                                    self.picRef,
-                                    ctypes.byref(ist_pts_tb));
-                            
-                            # XXX: can get more than one frame?
-                            frame_available = av.lib.avfilter_poll_frame(self.outFilterCtx.contents.inputs[0]);
                         
                     swsCtx = self.swsCtx[self.pkt.stream_index]
-
                     if swsCtx:
                         
-                        srcFrame = self.filteredFrame if self.filterGraph else self.frame
+                        srcFrame = self.frame
                         
                         av.lib.sws_scale(swsCtx,
                                 srcFrame.contents.data,
@@ -838,27 +609,6 @@ class Packet(object):
             else:
                 # unsupported codec type...
                 pass
-
-    def _filteredFrame(self, ctx, frame, picRefPtr, tb):
-        
-        result = av.lib.avfilter_request_frame(ctx.contents.inputs[0])
-        if result < 0:
-            return result
-        
-        picRef = ctx.contents.inputs[0].contents.cur_buf;
-
-        # TODO: set tb
-        # TODO: Null cur_buf
-
-        # TODO: should copy more attributes: 
-        # interlaced_frame, top_field_first 
-        # key_frame, pict_type
-        # sample_aspect_ratio
-        # TODO: use memcpy?
-        ctypes.memmove(frame.contents.data, picRef.contents.data, ctypes.sizeof(frame.contents.data))
-        ctypes.memmove(frame.contents.linesize, picRef.contents.linesize, ctypes.sizeof(frame.contents.linesize))
-        
-        return 1
 
 def avError(res):
 

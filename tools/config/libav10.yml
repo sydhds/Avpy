@@ -9,7 +9,7 @@ type:
     - uint64_t
     - size_t
     - STRING
-    - CodecID
+    - AVCodecID
     - AVPacketSideDataType
     - AVDiscard
     - AVStreamParseType
@@ -18,11 +18,11 @@ type:
     - AVColorSpace
     - AVColorRange
     - AVChromaLocation
-    - AVLPCType
+    #- AVLPCType
     - AVAudioServiceType
     - AVSampleFormat
     - AVMediaType
-    - PixelFormat
+    - AVPixelFormat
     - AVPictureType
     - AVSubtitleType
     - AVFieldOrder
@@ -50,33 +50,37 @@ define:
     - SUBTITLE_TEXT
     - SUBTITLE_ASS
     # encode
-    - CODEC_ID_MPEG2VIDEO
-    - CODEC_ID_MPEG1VIDEO
     - CODEC_FLAG_GLOBAL_HEADER
-    - CODEC_ID_NONE
     - AVFMT_GLOBALHEADER
     # seek
     - AVSEEK_FLAG_FRAME 
     - AVSEEK_FLAG_BACKWARD 
     - AVSEEK_FLAG_ANY 
     - AVSEEK_FLAG_BYTE 
+    # filter
+    - AV_PERM_READ
 
 alias:
-    - ByteIOContext
-    - AVMetadata
+    #- ByteIOContext
+    #- AVMetadata
+    #- CodecID
+    - PixelFormat
+    # libav10
+    - AVPictureStructure
+    - AVFrameSideDataType
 
 class:
-    - N8AVPacket4DOT_29E
-    - N8AVStream4DOT_32E
+    - N8AVPacket3DOT_0E
+    - N8AVStream4DOT_28E
     - AVProfile
     - AVPanScan
     - AVCodec
     - RcOverride
     - AVFrame
-    - AVPaletteControl
+    #- AVPaletteControl
     - AVHWAccel
     - AVCodecParser
-    - AVFormatParameters
+    #- AVFormatParameters
     - AVCodecContext
     - AVCodecParserContext
     - AVIndexEntry
@@ -84,7 +88,7 @@ class:
     - AVIOContext
     - AVOption
     - AVCodecTag
-    - AVMetadataConv
+    #- AVMetadataConv
     - AVProbeData
     - AVRational
     - AVFrac
@@ -109,6 +113,11 @@ class:
     - AVDictionaryEntry
     - AVSubtitle
     - AVSubtitleRect
+    # libav10
+    - AVBufferRef
+    - AVFormatInternal
+    - AVBuffer
+    - AVFrameSideData
 
 import:
     - import os
@@ -144,16 +153,16 @@ cdll:
     - "CDLL(libavutil, RTLD_GLOBAL)"
     - "_libraries = {}"
     - "_libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)"
-    - "_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)"
     - "_libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)"
+    - "_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)"
     - "_libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)"
-
+    
 function:
     ## avformat
     - av_register_all
     - av_iformat_next
     - av_oformat_next
-    - av_find_stream_info
+    #- av_find_stream_info
     - avformat_alloc_context
     - avformat_new_stream
     - avformat_open_input
@@ -168,7 +177,7 @@ function:
     - avcodec_find_decoder
     - avcodec_find_decoder_by_name
     - avcodec_find_encoder_by_name
-    - avcodec_get_pix_fmt_name
+    #- avcodec_get_pix_fmt_name
     - av_log_set_level
     - av_strerror
     - avcodec_decode_audio4
@@ -198,4 +207,3 @@ function:
     - sws_getContext
     - sws_freeContext
     - sws_scale
-

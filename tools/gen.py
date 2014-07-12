@@ -45,16 +45,21 @@ def main(options):
     xmlCmd = 'h2xml -I {0}/include -c libavcodec/avcodec.h'\
             ' libavdevice/avdevice.h libavformat/avformat.h libavutil/avutil.h'\
             ' libavutil/mathematics.h libavutil/rational.h libswscale/swscale.h'\
-            ' libavfilter/avfilter.h libavfilter/avfiltergraph.h {2} -o {1}'\
+            ' {2} -o {1}'\
             ' -D__STDC_CONSTANT_MACROS'.format(buildDir, xmlFile, addInclude)
     run(xmlCmd)
+   
+    # libav >= 9 require to preload libavresample
+    preloads = ' --preload ' + os.path.join(buildDir, 'lib', 'libavutil.so')
+    libResample = os.path.join(buildDir, 'lib', 'libavresample.so')
+    if os.path.isfile(libResample):
+        preloads += (' --preload ' + libResample)
 
     print 'generating python module'
     xml2pyCmd = 'xml2py {0} -o {1} -l {2}/lib/libavcodec.so'\
             ' -l {2}/lib/libavformat.so -l {2}/lib/libavdevice.so'\
             ' -l {2}/lib/libavutil.so -l {2}/lib/libswscale.so'\
-            ' -l {2}/lib/libavfilter.so'\
-            ' --preload {2}/lib/libavutil.so'.format(xmlFile, pyFileTmp, buildDir) 
+            ' {3}'.format(xmlFile, pyFileTmp, buildDir, preloads) 
     run(xml2pyCmd)
 
     print buildDir + 'lib%s' % os.sep
