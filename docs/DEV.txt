@@ -1,6 +1,9 @@
 Generate bindings
 =================
 
+The following information are only here for Pyav developers. 
+See Readme.txt if you only intend to use the python lib. 
+
 Requirements
 ------------
 
@@ -21,16 +24,19 @@ Build libav from git
 cd tools
 mkdir build
 git clone git://github.com/libav/libav.git build/libav_git
-python build.py -l libav -v 0.8.3
+python build.py -l libav -v 0.8.1
+
+note: use option -j to compile faster
 
 Generate bindings
 -----------------
 
-python gen.py -l libav -v 0.8.3
+python gen.py -l libav -v 0.8.1
 python genClean.py -s av08.py -d av8.py -c config/libav08.yml  
 cp -v av8.py ../pyav/version/
 
-note: running genClean.py script is not mandatory. You can directly copy av08.py script: cp -v av08.py ../pyav/version/av8.py. See Generate binding config for detailed information.
+note: running genClean.py script is recommended although not mandatory. 
+You can directly copy av08.py script: cp -v av08.py ../pyav/version/av8.py. See Generate binding config for detailed information.
 
 Building
 --------

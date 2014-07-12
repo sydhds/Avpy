@@ -35,6 +35,8 @@ FeatureMatrix:
     - filter: todo
 - doc:
     - sphinx doc: wip
+- misc:
+    - python3: done
 
 Install
 =======
