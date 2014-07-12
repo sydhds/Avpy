@@ -29,6 +29,7 @@ if __name__ == '__main__':
         infoDict = m.info()
 
         print('%s info:' % options.media)
+        print(' format: %s' % infoDict['format'])
         print(' metadata: %s' % infoDict['metadata'])
         print(' duration: %f' % infoDict['duration'])
 
