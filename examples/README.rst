@@ -57,4 +57,10 @@
   
   * Require PIL or pillow (> 1.1.4)
 
+* outputSDL2
 
+  * outputBMP.py -> write bmp images (first video stream)
+
+  * outputSDL2.py -> dump video player
+
+  * audioSDL2.py -> audio player

@@ -43,7 +43,7 @@ FeatureMatrix:
     - alsaaudio: done
     - Pygame: wip
     - PIL, pillow: done
-    - PySDL2: todo
+    - PySDL2: wip
     - PyAL: todo
 - misc:
     - Python3: done
