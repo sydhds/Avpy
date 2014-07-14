@@ -54,8 +54,11 @@ if __name__ == '__main__':
     si = mediaInfo['stream'][astream]
     channels = si['channels']
     fe = si['sample_rate']
-    
-    aformat=getattr(alsaaudio, 'PCM_FORMAT_%s_%s' % (si['sample_fmt'].upper(), 'LE' if sys.byteorder == 'little' else 'BE'))
+  
+    # S16P -> S16
+    sampleFmt = si['sample_fmt'].upper()
+    sampleFmt = sampleFmt[:-1] if sampleFmt.endswith('P') else sampleFmt
+    aformat=getattr(alsaaudio, 'PCM_FORMAT_%s_%s' % (sampleFmt, 'LE' if sys.byteorder == 'little' else 'BE'))
 
     out = alsaaudio.PCM(type=alsaaudio.PCM_PLAYBACK, mode=alsaaudio.PCM_NORMAL, card='default')
     out.setchannels(channels)
@@ -88,3 +91,4 @@ if __name__ == '__main__':
                 # exact time will vary depending on dataSize
                 if decodedSize >= options.length*secondSize:
                     break
+
