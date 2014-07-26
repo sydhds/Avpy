@@ -30,6 +30,7 @@ def main(options):
     buildDir = os.path.abspath('build/%s_%s' % (options.lib, options.version))
 
     pyLibVersion = ''.join(options.version.split('.')[:2])
+    pyLibVersion = pyLibVersion.zfill(3)
     xmlFile = 'av%s.xml' % (pyLibVersion)
     pyFileTmp = 'av%s_tmp.py' % (pyLibVersion)
     pyFile = 'av%s.py' % (pyLibVersion)
@@ -41,7 +42,7 @@ def main(options):
     for i in _addInclude:
         if os.path.isfile(os.path.join(buildDir, 'include', i)):
             addInclude.append(i)
-    addInclude = ''.join(addInclude)
+    addInclude = ' '.join(addInclude)
 
     print 'generating xml...'
     xmlCmd = 'h2xml -I {0}/include -c libavcodec/avcodec.h'\
