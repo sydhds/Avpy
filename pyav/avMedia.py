@@ -111,6 +111,13 @@ class Media(object):
             streamInfo['fps'] = (cCodecCtx.contents.time_base.num, 
                     cCodecCtx.contents.time_base.den, 
                     cCodecCtx.contents.ticks_per_frame) 
+            
+            try:
+                pixFmtName = av.lib.avcodec_get_pix_fmt_name
+            except AttributeError:
+                pixFmtName = av.lib.av_get_pix_fmt_name
+            
+            streamInfo['pixelFormat'] = pixFmtName(cCodecCtx.contents.pix_fmt)
         elif codecType == av.lib.AVMEDIA_TYPE_AUDIO:
             streamInfo['type'] = 'audio'
             streamInfo['sample_rate'] = cCodecCtx.contents.sample_rate

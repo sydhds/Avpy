@@ -61,39 +61,39 @@ AVSubtitleType = c_int # enum
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
+CODEC_ID_MPEG2VIDEO = 2
+PIX_FMT_YUV420P = 0
 AVMEDIA_TYPE_VIDEO = 0
+AVMEDIA_TYPE_SUBTITLE = 3
+AVMEDIA_TYPE_AUDIO = 1
+SUBTITLE_ASS = 3
+SUBTITLE_TEXT = 2
+PIX_FMT_NONE = -1
 PIX_FMT_RGB24 = 2
 CODEC_ID_NONE = 0
-PIX_FMT_NONE = -1
-PIX_FMT_YUV420P = 0
-AVMEDIA_TYPE_AUDIO = 1
 CODEC_ID_MPEG1VIDEO = 1
-CODEC_ID_MPEG2VIDEO = 2
-AVMEDIA_TYPE_SUBTITLE = 3
-SUBTITLE_TEXT = 2
 SUBTITLE_BITMAP = 1
 SUBTITLE_NONE = 0
-SUBTITLE_ASS = 3
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
 AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
+AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
 CODEC_CAP_AUTO_THREADS = 32768 # Variable c_int '32768'
-CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
 CODEC_CAP_SLICE_THREADS = 8192 # Variable c_int '8192'
 CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
 AV_TIME_BASE = 1000000 # Variable c_int '1000000'
 AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
-AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
-AVSEEK_FLAG_BYTE = 2 # Variable c_int '2'
-AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
 AVSEEK_FLAG_FRAME = 8 # Variable c_int '8'
+CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
+AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
+AVSEEK_FLAG_BYTE = 2 # Variable c_int '2'
 
 AV_NOPTS_VALUE = 9223372036854775808 # Variable c_ulong '-9223372036854775808ul'
 
 class N8AVPacket3DOT_0E(Structure):
 	pass
 
-class N8AVStream4DOT_29E(Structure):
+class N8AVStream4DOT_30E(Structure):
 	pass
 
 class AVProfile(Structure):
@@ -674,7 +674,7 @@ AVStream._fields_ = [
     ('metadata', POINTER(AVDictionary)),
     ('avg_frame_rate', AVRational),
     ('attached_pic', AVPacket),
-    ('info', POINTER(N8AVStream4DOT_29E)),
+    ('info', POINTER(N8AVStream4DOT_30E)),
     ('pts_wrap_bits', c_int),
     ('reference_dts', int64_t),
     ('first_dts', int64_t),
@@ -692,7 +692,7 @@ AVStream._fields_ = [
     ('nb_index_entries', c_int),
     ('index_entries_allocated_size', c_uint),
 ]
-N8AVStream4DOT_29E._fields_ = [
+N8AVStream4DOT_30E._fields_ = [
     ('last_dts', int64_t),
     ('duration_gcd', int64_t),
     ('duration_count', c_int),
@@ -924,6 +924,9 @@ av_malloc.argtypes = [size_t]
 av_free = _libraries['libavcodec.so'].av_free
 av_free.restype = None
 av_free.argtypes = [c_void_p]
+av_get_pix_fmt_name = _libraries['libavcodec.so'].av_get_pix_fmt_name
+av_get_pix_fmt_name.restype = STRING
+av_get_pix_fmt_name.argtypes = [AVPixelFormat]
 av_get_sample_fmt_name = _libraries['libavcodec.so'].av_get_sample_fmt_name
 av_get_sample_fmt_name.restype = STRING
 av_get_sample_fmt_name.argtypes = [AVSampleFormat]

@@ -58,7 +58,7 @@ define:
     - AVSEEK_FLAG_ANY 
     - AVSEEK_FLAG_BYTE 
     # filter
-    - AV_PERM_READ
+    #- AV_PERM_READ
 
 alias:
     #- ByteIOContext
@@ -71,7 +71,7 @@ alias:
 
 class:
     - N8AVPacket3DOT_0E
-    - N8AVStream4DOT_28E
+    - N8AVStream4DOT_29E
     - AVProfile
     - AVPanScan
     - AVCodec
@@ -177,7 +177,7 @@ function:
     - avcodec_find_decoder
     - avcodec_find_decoder_by_name
     - avcodec_find_encoder_by_name
-    #- avcodec_get_pix_fmt_name
+    - av_get_pix_fmt_name
     - av_log_set_level
     - av_strerror
     - avcodec_decode_audio4

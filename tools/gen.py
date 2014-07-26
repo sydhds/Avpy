@@ -35,11 +35,13 @@ def main(options):
     pyFile = 'av%s.py' % (pyLibVersion)
     
     # file is not present in libav9 includes 
-    _addInclude = 'libavfilter/vsrc_buffer.h'
-    addInclude = ''
+    _addInclude = ['libavfilter/vsrc_buffer.h', 'libavutil/pixdesc.h']
+    addInclude = []
 
-    if os.path.isfile(os.path.join(buildDir, 'include', addInclude)):
-        addInclude = _addInclude
+    for i in _addInclude:
+        if os.path.isfile(os.path.join(buildDir, 'include', i)):
+            addInclude.append(i)
+    addInclude = ''.join(addInclude)
 
     print 'generating xml...'
     xmlCmd = 'h2xml -I {0}/include -c libavcodec/avcodec.h'\

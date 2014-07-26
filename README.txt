@@ -67,6 +67,8 @@ Install from source:
 - python setup.py sdist
 - pip install dist/Pyav-*.tar.gz
 
+Please read doc/DEV.txt (virtualenvs) or doc/Windows.txt for additional information.
+
 Contact
 =======
 

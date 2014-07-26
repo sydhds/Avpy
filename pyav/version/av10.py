@@ -35,8 +35,8 @@ _libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
 _libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)
 
 STRING = c_char_p
-AVPixelFormat = c_int # enum
 size_t = c_ulong
+AVPixelFormat = c_int # enum
 AVCodecID = c_int # enum
 AVMediaType = c_int # enum
 AVDiscard = c_int # enum
@@ -56,42 +56,41 @@ uint64_t = c_uint64
 uint16_t = c_uint16
 uint32_t = c_uint32
 AVSubtitleType = c_int # enum
-AVPictureType = c_int # enum
 AVStreamParseType = c_int # enum
+AVPictureType = c_int # enum
 int8_t = c_int8
 int32_t = c_int32
 
-AVMEDIA_TYPE_AUDIO = 1
-PIX_FMT_NONE = -1
-PIX_FMT_YUV420P = 0
 PIX_FMT_RGB24 = 2
-AVMEDIA_TYPE_VIDEO = 0
-SUBTITLE_TEXT = 2
-SUBTITLE_BITMAP = 1
-AVMEDIA_TYPE_SUBTITLE = 3
+PIX_FMT_YUV420P = 0
 SUBTITLE_NONE = 0
+PIX_FMT_NONE = -1
+AVMEDIA_TYPE_SUBTITLE = 3
+AVMEDIA_TYPE_VIDEO = 0
 SUBTITLE_ASS = 3
+SUBTITLE_TEXT = 2
+AVMEDIA_TYPE_AUDIO = 1
+SUBTITLE_BITMAP = 1
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
-AV_PERM_READ = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
 AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
+AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
 CODEC_CAP_AUTO_THREADS = 32768 # Variable c_int '32768'
 CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
 CODEC_CAP_SLICE_THREADS = 8192 # Variable c_int '8192'
 CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
 AV_TIME_BASE = 1000000 # Variable c_int '1000000'
 AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
-AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
-AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
 AVSEEK_FLAG_FRAME = 8 # Variable c_int '8'
 AVSEEK_FLAG_BYTE = 2 # Variable c_int '2'
+AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
 
 AV_NOPTS_VALUE = 9223372036854775808 # Variable c_ulong '-9223372036854775808ul'
 
 class N8AVPacket3DOT_0E(Structure):
 	pass
 
-class N8AVStream4DOT_28E(Structure):
+class N8AVStream4DOT_29E(Structure):
 	pass
 
 class AVProfile(Structure):
@@ -639,7 +638,7 @@ AVStream._fields_ = [
     ('metadata', POINTER(AVDictionary)),
     ('avg_frame_rate', AVRational),
     ('attached_pic', AVPacket),
-    ('info', POINTER(N8AVStream4DOT_28E)),
+    ('info', POINTER(N8AVStream4DOT_29E)),
     ('pts_wrap_bits', c_int),
     ('do_not_use', int64_t),
     ('first_dts', int64_t),
@@ -657,7 +656,7 @@ AVStream._fields_ = [
     ('nb_index_entries', c_int),
     ('index_entries_allocated_size', c_uint),
 ]
-N8AVStream4DOT_28E._fields_ = [
+N8AVStream4DOT_29E._fields_ = [
     ('nb_decoded_frames', c_int),
     ('found_decoder', c_int),
     ('fps_first_dts', int64_t),
@@ -954,6 +953,9 @@ av_malloc.argtypes = [size_t]
 av_free = _libraries['libavcodec.so'].av_free
 av_free.restype = None
 av_free.argtypes = [c_void_p]
+av_get_pix_fmt_name = _libraries['libavcodec.so'].av_get_pix_fmt_name
+av_get_pix_fmt_name.restype = STRING
+av_get_pix_fmt_name.argtypes = [AVPixelFormat]
 av_get_sample_fmt_name = _libraries['libavcodec.so'].av_get_sample_fmt_name
 av_get_sample_fmt_name.restype = STRING
 av_get_sample_fmt_name.argtypes = [AVSampleFormat]

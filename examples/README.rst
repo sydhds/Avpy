@@ -5,13 +5,14 @@
 
 * mediaInfo
 
-  Retrieve and print media infos 
+  * Retrieve and print media infos 
 
 
 * outputPgm
 
-  Decode first video stream of media
-  Write pgm images
+  * Decode first video stream of media
+  
+  * Write pgm images
 
 
 * outputWav
@@ -25,7 +26,7 @@
 
   * Decode first audio stream of media
 
-  * Play it with alsa (Linux only)
+  * Play it with Alsa (Linux only)
 
 
 * outputPygame
@@ -56,6 +57,7 @@
   * Decode first video stream of media and write greyscale png
   
   * Require PIL or pillow (> 1.1.4)
+
 
 * outputSDL2
 
