@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-dumb video player (pygame)
+demo video player (pygame)
 python outputPygame2.py -m file.avi
 '''
 
@@ -31,9 +31,6 @@ if __name__ == '__main__':
     parser.add_option('--scaleHeight',
         type='float', default=1.0,
         help='height scale (default: %default)')
-    parser.add_option('-o', '--overlay',
-        action='store_true', 
-        help='EXPERIMENTAL: use pygame overlay')
     parser.add_option('-f', '--fullscreen', 
             action='store_true',
             help='turn on full screen mode')
@@ -75,12 +72,20 @@ if __name__ == '__main__':
     else:
         screen = pygame.display.set_mode(size)
 
-    # TODO: should check for stream pixel format - overlay is ok only for PIX_FMT_YUV420P
-    if options.overlay:
-        # ok with format YUV420p
+    useYuv = False
+    if streamInfo['pixelFormat'] == 'yuv420p':
+
         overlay = pygame.Overlay(pygame.YV12_OVERLAY, size)
         overlay.set_location(0, 0, size[0], size[1]) 
+        
+        useYuv = True
+        if overlay.get_hardware():
+            print('render: Hardware accelerated yuv overlay (fast)')
+        else:
+            print('render: Software yuv overlay (slow)')
+
     else:
+        print('render: software rgb (very slow)')
         # add scaler to convert to rgb
         m.addScaler2(vstream, *size)
 
@@ -108,7 +113,7 @@ if __name__ == '__main__':
             if p2.decoded:
                 decodedCount += 1
 
-                if options.overlay:
+                if useYuv:
                     
                     size0 = p2.frame.contents.linesize[0] * p2.frame.contents.height
                     size1 = p2.frame.contents.linesize[1] * (p2.frame.contents.height/2)
