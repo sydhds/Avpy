@@ -44,7 +44,7 @@ if __name__ == '__main__':
     parser = OptionParser(usage=usage)
     parser.add_option('-m', '--media', 
             help='play media')
-    parser.add_option('--length', 
+    parser.add_option('-l', '--length', 
             help='decode at max seconds of audio',
             type='int',
             default=90)

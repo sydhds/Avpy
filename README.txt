@@ -46,6 +46,7 @@ FeatureMatrix:
     - PySDL2: wip
     - PyAL: todo
 - misc:
+    - Python2.6, 2.7: done
     - Python3: done
 
 Install

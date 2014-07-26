@@ -24,7 +24,7 @@ def saveFrame(frame, w, h, i):
 
     header = 'P6\n%d %d\n255\n' % (w, h)
 
-    if sys.version_info.major >= 3:
+    if sys.version_info >= (3, 0):
         header = bytes(header, 'ascii')
 
     with open('frame.%d.ppm' % i, 'wb') as f:
