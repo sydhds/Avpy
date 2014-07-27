@@ -29,6 +29,7 @@ else:
 
 CDLL(libavutil, RTLD_GLOBAL)
 _libraries = {}
+_libraries['libavutil.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)
 _libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)
 _libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)
 _libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
@@ -61,16 +62,16 @@ AVPictureType = c_int # enum
 int8_t = c_int8
 int32_t = c_int32
 
-PIX_FMT_RGB24 = 2
 PIX_FMT_YUV420P = 0
-SUBTITLE_NONE = 0
-PIX_FMT_NONE = -1
-AVMEDIA_TYPE_SUBTITLE = 3
-AVMEDIA_TYPE_VIDEO = 0
 SUBTITLE_ASS = 3
+SUBTITLE_NONE = 0
 SUBTITLE_TEXT = 2
-AVMEDIA_TYPE_AUDIO = 1
 SUBTITLE_BITMAP = 1
+PIX_FMT_NONE = -1
+PIX_FMT_RGB24 = 2
+AVMEDIA_TYPE_SUBTITLE = 3
+AVMEDIA_TYPE_AUDIO = 1
+AVMEDIA_TYPE_VIDEO = 0
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
 AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
@@ -938,31 +939,31 @@ avformat_close_input.argtypes = [POINTER(POINTER(AVFormatContext))]
 av_guess_format = _libraries['libavformat.so'].av_guess_format
 av_guess_format.restype = POINTER(AVOutputFormat)
 av_guess_format.argtypes = [STRING, STRING, STRING]
-av_dict_get = _libraries['libavcodec.so'].av_dict_get
+av_dict_get = _libraries['libavutil.so'].av_dict_get
 av_dict_get.restype = POINTER(AVDictionaryEntry)
 av_dict_get.argtypes = [POINTER(AVDictionary), STRING, POINTER(AVDictionaryEntry), c_int]
-av_strerror = _libraries['libavcodec.so'].av_strerror
+av_strerror = _libraries['libavutil.so'].av_strerror
 av_strerror.restype = c_int
 av_strerror.argtypes = [c_int, STRING, size_t]
-av_log_set_level = _libraries['libavcodec.so'].av_log_set_level
+av_log_set_level = _libraries['libavutil.so'].av_log_set_level
 av_log_set_level.restype = None
 av_log_set_level.argtypes = [c_int]
-av_malloc = _libraries['libavcodec.so'].av_malloc
+av_malloc = _libraries['libavutil.so'].av_malloc
 av_malloc.restype = c_void_p
 av_malloc.argtypes = [size_t]
-av_free = _libraries['libavcodec.so'].av_free
+av_free = _libraries['libavutil.so'].av_free
 av_free.restype = None
 av_free.argtypes = [c_void_p]
-av_get_pix_fmt_name = _libraries['libavcodec.so'].av_get_pix_fmt_name
+av_get_pix_fmt_name = _libraries['libavutil.so'].av_get_pix_fmt_name
 av_get_pix_fmt_name.restype = STRING
 av_get_pix_fmt_name.argtypes = [AVPixelFormat]
-av_get_sample_fmt_name = _libraries['libavcodec.so'].av_get_sample_fmt_name
+av_get_sample_fmt_name = _libraries['libavutil.so'].av_get_sample_fmt_name
 av_get_sample_fmt_name.restype = STRING
 av_get_sample_fmt_name.argtypes = [AVSampleFormat]
-av_get_bytes_per_sample = _libraries['libavcodec.so'].av_get_bytes_per_sample
+av_get_bytes_per_sample = _libraries['libavutil.so'].av_get_bytes_per_sample
 av_get_bytes_per_sample.restype = c_int
 av_get_bytes_per_sample.argtypes = [AVSampleFormat]
-av_samples_get_buffer_size = _libraries['libavcodec.so'].av_samples_get_buffer_size
+av_samples_get_buffer_size = _libraries['libavutil.so'].av_samples_get_buffer_size
 av_samples_get_buffer_size.restype = c_int
 av_samples_get_buffer_size.argtypes = [POINTER(c_int), c_int, c_int, AVSampleFormat, c_int]
 sws_freeContext = _libraries['libswscale.so'].sws_freeContext

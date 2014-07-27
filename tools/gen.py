@@ -53,16 +53,15 @@ def main(options):
     run(xmlCmd)
    
     # libav >= 9 require to preload libavresample
-    preloads = ' --preload ' + os.path.join(buildDir, 'lib', 'libavutil.so')
-    libResample = os.path.join(buildDir, 'lib', 'libavresample.so')
-    if os.path.isfile(libResample):
-        preloads += (' --preload ' + libResample)
+    #preloads = ' --preload ' + os.path.join(buildDir, 'lib', 'libavutil.so')
+    #libResample = os.path.join(buildDir, 'lib', 'libavresample.so')
+    #if os.path.isfile(libResample):
+        #preloads += (' --preload ' + libResample)
 
     print 'generating python module'
-    xml2pyCmd = 'xml2py {0} -o {1} -l {2}/lib/libavcodec.so'\
+    xml2pyCmd = 'xml2py {0} -o {1} -l {2}/lib/libavutil.so -l {2}/lib/libavcodec.so'\
             ' -l {2}/lib/libavformat.so -l {2}/lib/libavdevice.so'\
-            ' -l {2}/lib/libavutil.so -l {2}/lib/libswscale.so'\
-            ' {3}'.format(xmlFile, pyFileTmp, buildDir, preloads) 
+            ' -l {2}/lib/libavutil.so -l {2}/lib/libswscale.so'.format(xmlFile, pyFileTmp, buildDir) 
     run(xml2pyCmd)
 
     print buildDir + 'lib%s' % os.sep

@@ -29,6 +29,7 @@ else:
 
 CDLL(libavutil, RTLD_GLOBAL)
 _libraries = {}
+_libraries['libavutil.so'] = CDLL(libavutil, mode=RTLD_GLOBAL)
 _libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)
 _libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)
 _libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
@@ -62,39 +63,39 @@ AVSubtitleType = c_int # enum
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
-PIX_FMT_YUV420P = 0
-PIX_FMT_NONE = -1
-AVMEDIA_TYPE_VIDEO = 0
-AVMEDIA_TYPE_AUDIO = 1
-PIX_FMT_RGB24 = 2
-AVMEDIA_TYPE_SUBTITLE = 3
+CODEC_ID_MPEG2VIDEO = 2
 CODEC_ID_MPEG1VIDEO = 1
 CODEC_ID_NONE = 0
-SUBTITLE_ASS = 3
 AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
-CODEC_ID_MPEG2VIDEO = 2
-SUBTITLE_NONE = 0
+AVMEDIA_TYPE_VIDEO = 0
+AVMEDIA_TYPE_SUBTITLE = 3
+AVMEDIA_TYPE_AUDIO = 1
+SUBTITLE_ASS = 3
 SUBTITLE_TEXT = 2
 SUBTITLE_BITMAP = 1
+PIX_FMT_RGB24 = 2
+PIX_FMT_YUV420P = 0
+PIX_FMT_NONE = -1
+SUBTITLE_NONE = 0
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
 AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
-AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
 CODEC_CAP_AUTO_THREADS = 32768 # Variable c_int '32768'
-CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
 CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
-AVSEEK_FLAG_FRAME = 8 # Variable c_int '8'
-CODEC_CAP_SLICE_THREADS = 8192 # Variable c_int '8192'
-AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
 AV_TIME_BASE = 1000000 # Variable c_int '1000000'
+CODEC_CAP_SLICE_THREADS = 8192 # Variable c_int '8192'
+AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
+AVSEEK_FLAG_FRAME = 8 # Variable c_int '8'
+CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
+AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
 AVSEEK_FLAG_BYTE = 2 # Variable c_int '2'
 
 AV_NOPTS_VALUE = 9223372036854775808 # Variable c_ulong '-9223372036854775808ul'
 
-class N8AVPacket4DOT_29E(Structure):
+class N8AVPacket4DOT_30E(Structure):
 	pass
 
-class N8AVStream4DOT_32E(Structure):
+class N8AVStream4DOT_33E(Structure):
 	pass
 
 class AVProfile(Structure):
@@ -242,7 +243,7 @@ AVPacket._fields_ = [
     ('size', c_int),
     ('stream_index', c_int),
     ('flags', c_int),
-    ('side_data', POINTER(N8AVPacket4DOT_29E)),
+    ('side_data', POINTER(N8AVPacket4DOT_30E)),
     ('side_data_elems', c_int),
     ('duration', c_int),
     ('destruct', CFUNCTYPE(None, POINTER(AVPacket))),
@@ -250,7 +251,7 @@ AVPacket._fields_ = [
     ('pos', int64_t),
     ('convergence_duration', int64_t),
 ]
-N8AVPacket4DOT_29E._fields_ = [
+N8AVPacket4DOT_30E._fields_ = [
     ('data', POINTER(uint8_t)),
     ('size', c_int),
     ('type', AVPacketSideDataType),
@@ -757,9 +758,9 @@ AVStream._fields_ = [
     ('last_in_packet_buffer', POINTER(AVPacketList)),
     ('avg_frame_rate', AVRational),
     ('codec_info_nb_frames', c_int),
-    ('info', POINTER(N8AVStream4DOT_32E)),
+    ('info', POINTER(N8AVStream4DOT_33E)),
 ]
-N8AVStream4DOT_32E._fields_ = [
+N8AVStream4DOT_33E._fields_ = [
     ('last_dts', int64_t),
     ('duration_gcd', int64_t),
     ('duration_count', c_int),
@@ -979,28 +980,28 @@ avformat_close_input.argtypes = [POINTER(POINTER(AVFormatContext))]
 av_guess_format = _libraries['libavformat.so'].av_guess_format
 av_guess_format.restype = POINTER(AVOutputFormat)
 av_guess_format.argtypes = [STRING, STRING, STRING]
-av_dict_get = _libraries['libavcodec.so'].av_dict_get
+av_dict_get = _libraries['libavutil.so'].av_dict_get
 av_dict_get.restype = POINTER(AVDictionaryEntry)
 av_dict_get.argtypes = [POINTER(AVDictionary), STRING, POINTER(AVDictionaryEntry), c_int]
-av_strerror = _libraries['libavcodec.so'].av_strerror
+av_strerror = _libraries['libavutil.so'].av_strerror
 av_strerror.restype = c_int
 av_strerror.argtypes = [c_int, STRING, size_t]
-av_log_set_level = _libraries['libavcodec.so'].av_log_set_level
+av_log_set_level = _libraries['libavutil.so'].av_log_set_level
 av_log_set_level.restype = None
 av_log_set_level.argtypes = [c_int]
-av_malloc = _libraries['libavcodec.so'].av_malloc
+av_malloc = _libraries['libavutil.so'].av_malloc
 av_malloc.restype = c_void_p
 av_malloc.argtypes = [size_t]
-av_free = _libraries['libavcodec.so'].av_free
+av_free = _libraries['libavutil.so'].av_free
 av_free.restype = None
 av_free.argtypes = [c_void_p]
-av_get_sample_fmt_name = _libraries['libavcodec.so'].av_get_sample_fmt_name
+av_get_sample_fmt_name = _libraries['libavutil.so'].av_get_sample_fmt_name
 av_get_sample_fmt_name.restype = STRING
 av_get_sample_fmt_name.argtypes = [AVSampleFormat]
-av_get_bytes_per_sample = _libraries['libavcodec.so'].av_get_bytes_per_sample
+av_get_bytes_per_sample = _libraries['libavutil.so'].av_get_bytes_per_sample
 av_get_bytes_per_sample.restype = c_int
 av_get_bytes_per_sample.argtypes = [AVSampleFormat]
-av_samples_get_buffer_size = _libraries['libavcodec.so'].av_samples_get_buffer_size
+av_samples_get_buffer_size = _libraries['libavutil.so'].av_samples_get_buffer_size
 av_samples_get_buffer_size.restype = c_int
 av_samples_get_buffer_size.argtypes = [POINTER(c_int), c_int, c_int, AVSampleFormat, c_int]
 sws_freeContext = _libraries['libswscale.so'].sws_freeContext

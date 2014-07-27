@@ -152,12 +152,19 @@ cdll:
     - ""
     - "CDLL(libavutil, RTLD_GLOBAL)"
     - "_libraries = {}"
+    - "_libraries['libavutil.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)"
     - "_libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)"
     - "_libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)"
     - "_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)"
     - "_libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)"
     
 function:
+    ## avutil
+    - av_dict_get
+    - av_log_set_level
+    - av_strerror
+    - av_malloc
+    - av_free
     ## avformat
     - av_register_all
     - av_iformat_next
@@ -173,13 +180,10 @@ function:
     # seek
     - av_seek_frame
     ## avocodec
-    - av_dict_get
     - avcodec_find_decoder
     - avcodec_find_decoder_by_name
     - avcodec_find_encoder_by_name
     - av_get_pix_fmt_name
-    - av_log_set_level
-    - av_strerror
     - avcodec_decode_audio4
     - av_samples_get_buffer_size
     - avcodec_decode_video2
@@ -192,8 +196,6 @@ function:
     # test
     - avpicture_get_size
     - avpicture_fill
-    - av_malloc
-    - av_free
     #- av_dup_packet
     - av_free_packet
     # encoding
