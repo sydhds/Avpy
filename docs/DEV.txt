@@ -62,6 +62,13 @@ PYAV_AVCODEC=PATH_TO/libavcodec.so PYTHONPATH=./:$PYTHONPATH python examples/med
 
 Please note that LD_LIBRARY_PATH (Linux or DYLD_FALLBACK_LIBRARY_PATH - Mac OS X) is not supported for python < 3.4.
 
+The following env variables can also be used
+- PYAV_AVUTIL
+- PYAV_AVCODEC
+- PYAV_AVFORMAT
+- PYAV_AVDEVICE
+- PYAV_SWSCALE
+
 Testing in a virtualenvs
 ------------------------
 

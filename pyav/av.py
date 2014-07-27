@@ -11,7 +11,11 @@ def version():
     # find_library does not support LD_LIBRARY_PATH for python < 3.4
     if 'PYAV_AVCODEC' in os.environ:
         fold, base = os.path.split(os.environ['PYAV_AVCODEC'])
-        libavutil = os.path.join(fold, re.sub('avcodec', 'avutil', base))
+        
+        if 'PYAV_AVUTIL' in os.environ:
+            libavutil = os.environ['PYAV_AVUTIL']
+        else:
+            libavutil = os.path.join(fold, re.sub('avcodec', 'avutil', base))
         libavcodec = os.environ['PYAV_AVCODEC']
     else:
         libavutil = util.find_library('avutil')
@@ -21,6 +25,7 @@ def version():
     version = CDLL(libavcodec, mode=RTLD_GLOBAL).avcodec_version() 
     
     return version >> 16 & 0xFF, version >> 8 & 0xFF, version & 0xFF
+
 
 def findModuleName():
    

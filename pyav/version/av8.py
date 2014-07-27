@@ -15,10 +15,18 @@ from ctypes import util
 
 if 'PYAV_AVCODEC' in os.environ:
     fold, base = os.path.split(os.environ['PYAV_AVCODEC'])
-    libavutil = os.path.join(fold, re.sub('avcodec', 'avutil', base))
-    libavformat = os.path.join(fold, re.sub('avcodec', 'avformat', base))
-    libavdevice = os.path.join(fold, re.sub('avcodec', 'avdevice', base))
-    libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))
+    libavutil = os.environ.get('PYAV_AVUTIL')
+    if not libavutil:
+        libavutil = os.path.join(fold, re.sub('avcodec', 'avutil', base))
+    libavformat = os.environ.get('PYAV_AVFORMAT')
+    if not libavformat:
+        libavformat = os.path.join(fold, re.sub('avcodec', 'avformat', base))
+    libavdevice = os.environ.get('PYAV_AVDEVICE')
+    if not libavdevice:
+        libavdevice = os.path.join(fold, re.sub('avcodec', 'avdevice', base))
+    libswscale = os.environ.get('PYAV_SWSCALE')
+    if not libswscale:
+        libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))
     libavcodec = os.environ['PYAV_AVCODEC']
 else:
     libavutil = util.find_library('avutil')
