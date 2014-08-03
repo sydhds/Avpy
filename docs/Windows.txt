@@ -1,0 +1,36 @@
+Testing
+=======
+
+Requirements
+------------
+
+Install msysgit
+Install python (www.python.org, version 2.7 or 3.4)
+Download libav windows build (http://win32.libav.org/releases)
+--> versions 0.8 to 0.10 are supported 
+
+Note: check that python and libav build are compatible (ie. 32 vs 64 bits build)
+
+Setup
+-----
+
+Under msysgit:
+- cd /c/dev
+- git clone https://bitbucket.org/sydh/pyav.git Pyav
+
+Examples
+--------
+
+Create a script mediaInfo.sh with the following content
+
+export PYTHONPATH=./
+export PYAV_AVUTIL=c:/dev/libav_dll/libav-0.8.12-win32/bin/avutil-51.dll
+export PYAV_AVCODEC=c:/dev/libav_dll/libav-0.8.12-win32/bin/avcodec-53.dll
+export PYAV_SWSCALE=c:/dev/libav_dll/libav-0.8.12-win32/bin/swscale-2.dll
+
+/c/Python34/Python.exe examples/mediaInfo/mediaInfo.py -m PATH_TO/movie.avi
+
+Under msysgit:
+- cd /c/dev/Pyav
+- sh mediaInfo.sh
+
