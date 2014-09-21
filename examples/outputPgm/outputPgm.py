@@ -124,3 +124,4 @@ if __name__ == '__main__':
 
                 if decodedCount >= options.offset+options.frameCount:
                     break 
+

@@ -15,8 +15,8 @@ class Media(object):
 
 	:param mediaName: media to open for reading or writing
         :type label: str
-        :param mode: 'r' or 'w' (not yet supported)
-	:type icon: str
+        :param mode: 'r' or 'w' 
+	:type mode: str
 
 	'''
  
@@ -51,7 +51,32 @@ class Media(object):
                 raise IOError(avError(res))
        
         elif mode == 'w':
-            raise NotImplementedError('no write support') 
+            
+            # FIXME: code dup...
+
+            # XXX: ok for python3 and python2 with special characters
+            # not sure this is a right/elegant solution 
+            if sys.version_info >= (3, 0):
+                _mediaName = mediaName.encode('utf-8')
+            else:
+                _mediaName = mediaName
+
+            # Autodetect the output format from the name, default to MPEG
+            fmt = av.lib.av_guess_format(None, _mediaName, None)
+	    if not fmt:
+                print 'Could not deduce output format from file extension: using MPEG.'
+                fmt = av.lib.av_guess_format('mpeg', None, None)
+
+            if not fmt:
+                raise RuntimeError('Could not find a valid output format')
+
+            # Allocate the output media context.
+            self.pFormatCtx = av.lib.avformat_alloc_context()
+            if not self.pFormatCtx:
+                raise IOError(avError(res))
+
+            self.pFormatCtx.contents.oformat = fmt
+            self.pFormatCtx.contents.filename = _mediaName
 
         self.pkt = None
 
@@ -123,6 +148,7 @@ class Media(object):
             streamInfo['sample_rate'] = cCodecCtx.contents.sample_rate
             streamInfo['channels'] = cCodecCtx.contents.channels
             streamInfo['sample_fmt'] = av.lib.av_get_sample_fmt_name(cCodecCtx.contents.sample_fmt)
+            streamInfo['sample_fmt_id'] = cCodecCtx.contents.sample_fmt
             streamInfo['bytes_per_sample'] = av.lib.av_get_bytes_per_sample(cCodecCtx.contents.sample_fmt)
         elif codecType == av.lib.AVMEDIA_TYPE_SUBTITLE:
             streamInfo['type'] = 'subtitle'
@@ -291,6 +317,7 @@ class Media(object):
             ci['samplerates'] = [] 
             ci['pix_fmt'] = []
             ci['profiles'] = []
+            ci['sample_fmts'] = []
             
             # thread caps
             caps = c.contents.capabilities & (av.lib.CODEC_CAP_FRAME_THREADS|av.lib.CODEC_CAP_SLICE_THREADS)
@@ -321,6 +348,8 @@ class Media(object):
                 for r in srates:
                     if r==0:
                         break
+                    if r.num == 0 and r.den == 0:
+                        break
                     ci['samplerates'].append(r)
             
             # supported pixel formats
@@ -338,6 +367,14 @@ class Media(object):
                     if not p.name:
                         break
                     ci['profiles'].append(p.name)
+
+            # sample_fmts
+            sfmts = c.contents.sample_fmts
+            if sfmts:
+                for s in sfmts:
+                    if s == -1:
+                        break
+                    ci['sample_fmts'].append(av.lib.av_get_sample_fmt_name(s))
 
         else:
             raise ValueError('Unable to find codec %s' % name)
@@ -407,6 +444,207 @@ class Media(object):
         timestamp = int(round(time * av.lib.AV_TIME_BASE)) 
         
         return av.lib.av_seek_frame(self.pFormatCtx, -1, timestamp, flags)
+
+    def addStream(self, streamType, streamInfo):
+
+        ''' Add a stream
+        '''
+
+        if streamType == 'video':
+            
+            codecId = self.pFormatCtx.contents.oformat.contents.video_codec 
+
+            # find the video encoder
+            codec = av.lib.avcodec_find_encoder(codecId)
+            if not codec:
+                raise RuntimeError('Codec not found')
+            
+            stream = av.lib.avformat_new_stream(self.pFormatCtx, codec)
+            if not stream:
+                raise RuntimeError('Could not alloc stream')
+
+            c = stream.contents.codec
+
+            c.contents.bit_rate = streamInfo['bitRate']
+            c.contents.width = streamInfo['width']
+            c.contents.height = streamInfo['height']
+            c.contents.time_base.den = streamInfo['timeBase'][1]
+            c.contents.time_base.num = streamInfo['timeBase'][0]
+
+            # TODO: from info
+            c.contents.gop_size = 12
+
+            # TODO: from info
+            c.contents.pix_fmt = av.lib.PIX_FMT_YUV420P 
+
+            if c.contents.codec_id == av.lib.CODEC_ID_MPEG2VIDEO:
+                c.contents.max_b_frames = 2
+
+            if c.contents.codec_id == av.lib.CODEC_ID_MPEG1VIDEO:
+                c.contents.mb_decision = 2;
+
+            if self.pFormatCtx.contents.oformat.contents.flags & av.lib.AVFMT_GLOBALHEADER:
+                c.contents.flags |= av.lib.CODEC_FLAG_GLOBAL_HEADER 
+        
+            # open codec
+            res = av.lib.avcodec_open2(c, None, None) 
+            if res < 0:
+		raise RuntimeError(avError(res))
+
+            self.videoOutBufferSize = av.lib.avpicture_get_size(av.lib.PIX_FMT_YUV420P, streamInfo['width'], streamInfo['height'])
+	    self.videoOutBuffer = ctypes.cast(av.lib.av_malloc(self.videoOutBufferSize), 
+                    ctypes.POINTER(ctypes.c_ubyte))
+            self.outStream = stream
+
+        elif streamType == 'audio':
+
+            if 'codec' in streamInfo and streamInfo['codec'] == 'auto':
+                codecId = self.pFormatCtx.contents.oformat.contents.audio_codec
+                _codec = av.lib.avcodec_find_encoder(codecId)
+            else:
+                _codec = av.lib.avcodec_find_encoder_by_name(streamInfo['codec'])
+                codecId = _codec.contents.id
+
+            # find the audio encoder
+            if not _codec:
+                raise RuntimeError('Codec not found')
+            
+            # XXX: use COMPLIANCE_NORMAL or COMPLIANCE_STRICT?
+            res = av.lib.avformat_query_codec(self.pFormatCtx.contents.oformat, codecId, av.lib.FF_COMPLIANCE_STRICT)
+
+            # Note:
+            # 1 -> codec supported by output format
+            # 0 -> unsupported
+            # < 0 -> not available
+            # for safety reason, raise for <= 0 
+            # ex: codec mp2 in ogg report < 0 but can crash encoder
+            errorTpl = (_codec.contents.name, self.pFormatCtx.contents.oformat.contents.name)
+            if res == 0:
+                raise RuntimeError('Codec %s not supported in %s muxer' % errorTpl )
+            elif res < 0:
+                print('Warning: could not determine if codec %s is supported by %s muxer' % errorTpl)            
+
+            stream = av.lib.avformat_new_stream(self.pFormatCtx, _codec)
+            if not stream:
+                raise RuntimeError('Could not alloc stream')
+
+            c = stream.contents.codec
+
+            # sample parameters 
+            c.contents.sample_fmt = av.lib.AV_SAMPLE_FMT_S16;
+            c.contents.bit_rate = streamInfo['bitRate']
+            c.contents.sample_rate = streamInfo['sampleRate']
+            c.contents.channels = streamInfo['channels']
+
+            if self.pFormatCtx.contents.oformat.contents.flags & av.lib.AVFMT_GLOBALHEADER:
+                c.contents.flags |= av.lib.CODEC_FLAG_GLOBAL_HEADER 
+            
+            # open codec
+            res = av.lib.avcodec_open2(c, None, None) 
+            if res < 0:
+		raise RuntimeError(avError(res))
+           
+            # XXX: multiply by 2 to avoid buffer to small (flac encoding...) 
+            if c.contents.frame_size <= 1:
+                # FIXME: hardcoded value
+                self.audioOutBufferSize = 4608
+            else:
+                self.audioOutBufferSize = c.contents.frame_size * 2 * c.contents.channels
+
+            self.audioOutBuffer = ctypes.cast(av.lib.av_malloc(self.audioOutBufferSize), 
+                    ctypes.POINTER(ctypes.c_ubyte))
+
+            # FIXME: multiple stream
+            self.outStream = stream
+            
+        else:
+            raise RuntimeError('Unknown stream type (not video or audio)')
+    
+    def writeHeader(self):
+        
+        ''' Start writing process (header) 
+        '''
+        
+        ret = av.lib.av_set_parameters(self.pFormatCtx, None)
+
+        if ret < 0:
+            raise RuntimeError(avError(res))
+
+        fmt = self.pFormatCtx.contents.oformat
+        fn = self.pFormatCtx.contents.filename
+        if not (fmt.contents.flags & av.lib.AVFMT_NOFILE):
+            res = av.lib.avio_open(ctypes.byref(self.pFormatCtx.contents.pb), 
+                    fn, av.lib.AVIO_FLAG_WRITE)
+            if res < 0:
+                raise IOError(avError(res))
+
+        # write the stream header, if any
+        av.lib.av_write_header(self.pFormatCtx)
+
+    def writeTrailer(self):
+
+        ''' End writing process (trailer)
+        '''
+        
+        av.lib.av_write_trailer(self.pFormatCtx)
+   
+    def videoPacket(self, width, height):
+
+        ''' Get a packet ready for encoding purpose  
+        '''
+
+        self.pkt = Packet(self.pFormatCtx)
+        
+        pix_fmt = av.lib.PIX_FMT_YUV420P
+        
+        av.lib.avpicture_alloc(
+                ctypes.cast(self.pkt.frame, ctypes.POINTER(av.lib.AVPicture)), 
+                pix_fmt,
+                width, 
+                height)
+
+        return self.pkt
+
+    def write(self, packet, pts, mediaType='video'):
+        
+        c = self.outStream.contents.codec
+        st = self.outStream
+
+        if mediaType == 'video':
+
+	    encSize = av.lib.avcodec_encode_video(c, 
+                    self.videoOutBuffer, self.videoOutBufferSize, packet.frame)
+        elif mediaType == 'audio':
+
+            encSize = av.lib.avcodec_encode_audio(c, self.audioOutBuffer, self.audioOutBufferSize, packet.audioBuf)
+
+        if encSize > 0:
+
+            pkt = av.lib.AVPacket()
+            pktRef = ctypes.byref(pkt)
+
+            av.lib.av_init_packet(pktRef)
+
+	    if c.contents.coded_frame.contents.pts != av.lib.AV_NOPTS_VALUE:
+                
+                pkt.pts = pts
+
+                if c.contents.coded_frame.contents.key_frame:
+                    pkt.flags |= av.lib.AV_PKT_FLAG_KEY
+
+		pkt.stream_index = st.contents.index
+
+                if mediaType == 'video':
+		    pkt.data = self.videoOutBuffer
+                    # FIXME: should be encSize?
+		    pkt.size = self.videoOutBufferSize
+                elif mediaType == 'audio':
+                    pkt.data = self.audioOutBuffer
+                    pkt.size = encSize
+
+            # write compressed frame
+	    ret = av.lib.av_interleaved_write_frame(self.pFormatCtx, pktRef)
+
 
 class Packet(object):
 
@@ -638,5 +876,4 @@ def avError(res):
         return msg
     else:
         return buf.value
-
 

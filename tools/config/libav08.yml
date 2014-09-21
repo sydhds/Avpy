@@ -55,6 +55,11 @@ define:
     - CODEC_FLAG_GLOBAL_HEADER
     - CODEC_ID_NONE
     - AVFMT_GLOBALHEADER
+    - AVFMT_NOFILE
+    - AV_PKT_FLAG_KEY
+    - AVIO_FLAG_WRITE
+    - FF_COMPLIANCE_NORMAL
+    - FF_COMPLIANCE_STRICT
     # seek
     - AVSEEK_FLAG_FRAME 
     - AVSEEK_FLAG_BACKWARD 
@@ -195,12 +200,20 @@ function:
     # test
     - avpicture_get_size
     - avpicture_fill
-    #- av_dup_packet
     - av_free_packet
     # encoding
     - avcodec_find_encoder
     - av_get_sample_fmt_name
     - av_get_bytes_per_sample
+    - av_write_trailer
+    - avcodec_encode_video
+    - av_codec_get_id
+    - av_init_packet
+    - av_interleaved_write_frame
+    - av_set_parameters
+    - av_write_header
+    - avio_open
+    - avformat_query_codec
     # subtitle
     - avcodec_decode_subtitle2
     - avsubtitle_free
