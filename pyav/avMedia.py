@@ -7,6 +7,8 @@ import sys
 import ctypes
 from . import av
 
+__version__ = '0.0.1'
+
 class Media(object):
 
     def __init__(self, mediaName, mode='r'):
@@ -616,6 +618,32 @@ class Packet(object):
             else:
                 # unsupported codec type...
                 pass
+
+def versions():
+
+    ''' Return version & config & license (C libs)
+    '''
+
+    versions = {}
+    for lib, cdll in av.lib._libraries.iteritems():
+            
+            prefix = lib[3:-3]
+            fversion = getattr(av.lib, prefix+'_version')
+            fconfig = getattr(av.lib, prefix+'_configuration')
+            flicense = getattr(av.lib, prefix+'_license')
+            
+            e = versions[lib[:-3]] = {}
+            _version = fversion()
+            # FIXME dup code in av.version
+            e['version'] = (_version >> 16 & 0xFF, _version >> 8 & 0xFF, _version & 0xFF)
+            e['configuration'] = fconfig()
+            e['license'] = flicense()
+            e['path'] = cdll._name 
+
+            #print lib, av.lib._libraries[lib]
+            #print dir(av.lib._libraries[lib])
+
+    return versions
 
 def avError(res):
 

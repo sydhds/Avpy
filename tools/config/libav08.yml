@@ -164,6 +164,9 @@ function:
     - av_log_set_level
     - av_malloc
     - av_free
+    - avutil_version
+    - avutil_configuration
+    - avutil_license
     ## avformat
     - av_register_all
     - av_iformat_next
@@ -176,6 +179,9 @@ function:
     - avformat_find_stream_info
     - av_guess_format
     - av_read_frame
+    - avformat_version
+    - avformat_configuration
+    - avformat_license
     # seek
     - av_seek_frame
     ## avocodec
@@ -192,6 +198,13 @@ function:
     - avpicture_alloc
     - avpicture_free
     - avcodec_alloc_frame
+    - avcodec_version
+    - avcodec_configuration
+    - avcodec_license
+    ## avdevice
+    - avdevice_version
+    - avdevice_configuration
+    - avdevice_license
     # test
     - avpicture_get_size
     - avpicture_fill
@@ -208,4 +221,7 @@ function:
     - sws_getContext
     - sws_freeContext
     - sws_scale
+    - swscale_version
+    - swscale_configuration
+    - swscale_license
 

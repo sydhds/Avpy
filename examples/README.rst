@@ -66,3 +66,8 @@
   * outputSDL2.py -> dump video player
 
   * audioSDL2.py -> audio player
+
+* misc
+
+  * libInfo.py -> print pyav and libav C libs info
+
