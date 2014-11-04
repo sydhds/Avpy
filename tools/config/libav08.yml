@@ -83,6 +83,7 @@ class:
     - AVDictionary
     - AVIOContext
     - AVOption
+    - AVOptionType
     - AVCodecTag
     - AVMetadataConv
     - AVProbeData

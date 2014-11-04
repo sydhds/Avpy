@@ -640,9 +640,6 @@ def versions():
             e['license'] = flicense()
             e['path'] = cdll._name 
 
-            #print lib, av.lib._libraries[lib]
-            #print dir(av.lib._libraries[lib])
-
     return versions
 
 def avError(res):
