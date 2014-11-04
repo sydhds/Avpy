@@ -625,8 +625,8 @@ def versions():
     '''
 
     versions = {}
-    for lib, cdll in av.lib._libraries.iteritems():
-            
+    for lib in av.lib._libraries:
+
             prefix = lib[3:-3]
             fversion = getattr(av.lib, prefix+'_version')
             fconfig = getattr(av.lib, prefix+'_configuration')
@@ -638,7 +638,7 @@ def versions():
             e['version'] = (_version >> 16 & 0xFF, _version >> 8 & 0xFF, _version & 0xFF)
             e['configuration'] = fconfig()
             e['license'] = flicense()
-            e['path'] = cdll._name 
+            e['path'] = av.lib._libraries[lib]._name
 
     return versions
 
