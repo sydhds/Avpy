@@ -6,6 +6,19 @@ import ctypes
 
 from pyav import Media
 
+# Python3 compat stuff...
+def progress(msg):
+
+    if sys.version_info >= (3, 0):
+        #print('\r%s' % msg, end='')
+        print('\r%s' % msg)
+    else:
+        print('\r%s' % msg),
+
+if sys.version_info >= (3, 0):
+    xrange = range
+
+
 class signalGen(object):
 
     ''' Single tone sound generator
@@ -36,15 +49,16 @@ def fillYuvImage(picture, frameIndex, width, height):
     i = frameIndex;
 
     # Y
-    for y in range(0, height):
-        for x in range(0, width):
+    for y in xrange(0, height):
+        for x in xrange(0, width):
             picture.contents.data[0][y*picture.contents.linesize[0] + x] = x + y + i*3
 
     # Cb and Cr
-    for y in range(0, height/2):
-        for x in range(0, width/2):
+    for y in xrange(0, int(height/2)):
+        for x in xrange(0, int(width/2)):
             picture.contents.data[1][y * picture.contents.linesize[1] + x] = 128 + y + i * 2
             picture.contents.data[2][y * picture.contents.linesize[2] + x] = 64 + x + i * 5
+
 
 if __name__ == '__main__':
 
@@ -114,14 +128,14 @@ if __name__ == '__main__':
 
             if options.mediaType == 'video':
 
-                print('\rgenerating video frame %d (/%d)...    ' % (i, maxFrame)),
+                progress('\rgenerating video frame %d/%d...    ' % (i, maxFrame))
                 fillYuvImage(pkt.frame, i, *resolution) 
                 m.write(pkt, i+1, options.mediaType)
 
             elif options.mediaType == 'audio':
 
                 # FIXME frame size
-                print('\rgenerating audio frame %d (/%d)...    ' % (i, maxFrame)),
+                progress('\rgenerating audio frame %d/%d...    ' % (i, maxFrame))
                 sg.audioFrame(pkt, frameSize, streamInfoAudio['channels'])
 
                 m.write(pkt, i+1, options.mediaType) 

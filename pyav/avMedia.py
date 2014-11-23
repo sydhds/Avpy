@@ -63,8 +63,8 @@ class Media(object):
 
             # Autodetect the output format from the name, default to MPEG
             fmt = av.lib.av_guess_format(None, _mediaName, None)
-	    if not fmt:
-                print 'Could not deduce output format from file extension: using MPEG.'
+            if not fmt:
+                print('Could not deduce output format from file extension: using MPEG.')
                 fmt = av.lib.av_guess_format('mpeg', None, None)
 
             if not fmt:
@@ -508,10 +508,10 @@ class Media(object):
             # open codec
             res = av.lib.avcodec_open2(c, None, None) 
             if res < 0:
-		raise RuntimeError(avError(res))
+                raise RuntimeError(avError(res))
 
             self.videoOutBufferSize = av.lib.avpicture_get_size(av.lib.PIX_FMT_YUV420P, streamInfo['width'], streamInfo['height'])
-	    self.videoOutBuffer = ctypes.cast(av.lib.av_malloc(self.videoOutBufferSize), 
+            self.videoOutBuffer = ctypes.cast(av.lib.av_malloc(self.videoOutBufferSize), 
                     ctypes.POINTER(ctypes.c_ubyte))
             self.outStream = stream
 
@@ -562,8 +562,8 @@ class Media(object):
             # open codec
             res = av.lib.avcodec_open2(c, None, None) 
             if res < 0:
-		raise RuntimeError(avError(res))
-           
+                raise RuntimeError(avError(res))
+
             # FIXME: multiple stream
             self.outStream = stream
             
@@ -628,7 +628,7 @@ class Media(object):
 
         av.lib.avcodec_get_frame_defaults(self.pkt.frame) 
 
-        self.pkt.frame.contents.nb_samples = bufSize / (channels * av.lib.av_get_bytes_per_sample(av.lib.AV_SAMPLE_FMT_S16))
+        self.pkt.frame.contents.nb_samples = int(bufSize / (channels * av.lib.av_get_bytes_per_sample(av.lib.AV_SAMPLE_FMT_S16)))
         
         res = av.lib.avcodec_fill_audio_frame(self.pkt.frame, 
                 c.contents.channels, c.contents.sample_fmt,
