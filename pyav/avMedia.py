@@ -58,14 +58,16 @@ class Media(object):
             # not sure this is a right/elegant solution 
             if sys.version_info >= (3, 0):
                 _mediaName = mediaName.encode('utf-8')
+                defaultCodec = ctypes.c_char_p(b'mpeg')
             else:
                 _mediaName = mediaName
+                defaultCodec = ctypes.c_char_p('mpeg')
 
             # Autodetect the output format from the name, default to MPEG
             fmt = av.lib.av_guess_format(None, _mediaName, None)
             if not fmt:
-                print('Could not deduce output format from file extension: using MPEG.')
-                fmt = av.lib.av_guess_format('mpeg', None, None)
+                #print('Could not deduce output format from file extension: using MPEG.')
+                fmt = av.lib.av_guess_format(defaultCodec, None ,None)
 
             if not fmt:
                 raise RuntimeError('Could not find a valid output format')
