@@ -211,7 +211,6 @@ function:
     - av_codec_get_id
     - av_init_packet
     - av_interleaved_write_frame
-    - av_set_parameters
     - av_write_header
     - avio_open
     - avformat_query_codec

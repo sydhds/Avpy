@@ -50,8 +50,17 @@ define:
     - SUBTITLE_TEXT
     - SUBTITLE_ASS
     # encode
+    - AV_CODEC_ID_MPEG2VIDEO
+    - AV_CODEC_ID_MPEG1VIDEO
     - CODEC_FLAG_GLOBAL_HEADER
+    - AV_CODEC_ID_NONE
     - AVFMT_GLOBALHEADER
+    - AVFMT_NOFILE
+    - AV_PKT_FLAG_KEY
+    - AVIO_FLAG_WRITE
+    - FF_COMPLIANCE_NORMAL
+    - FF_COMPLIANCE_STRICT
+    - AV_SAMPLE_FMT_S16
     # seek
     - AVSEEK_FLAG_FRAME 
     - AVSEEK_FLAG_BACKWARD 
@@ -68,6 +77,7 @@ alias:
     # libav10
     - AVPictureStructure
     - AVFrameSideDataType
+    - AVOptionType
 
 class:
     - N8AVPacket3DOT_0E
@@ -118,6 +128,7 @@ class:
     - AVFormatInternal
     - AVBuffer
     - AVFrameSideData
+    - N8AVOption4DOT_30E
 
 import:
     - import os
@@ -210,6 +221,17 @@ function:
     - avcodec_find_encoder
     - av_get_sample_fmt_name
     - av_get_bytes_per_sample
+    - av_write_trailer
+    - avcodec_encode_video2
+    - av_codec_get_id
+    - av_init_packet
+    - av_interleaved_write_frame
+    - avformat_write_header
+    - avio_open
+    - avformat_query_codec
+    - avcodec_encode_audio2
+    - avcodec_get_frame_defaults
+    - avcodec_fill_audio_frame
     # subtitle
     - avcodec_decode_subtitle2
     - avsubtitle_free

@@ -486,10 +486,20 @@ class Media(object):
             # TODO: from info
             c.contents.pix_fmt = av.lib.PIX_FMT_YUV420P 
 
-            if c.contents.codec_id == av.lib.CODEC_ID_MPEG2VIDEO:
+            if hasattr(av.lib, 'CODEC_ID_MPEG2VIDEO'):
+                mpg2CodecId = av.lib.CODEC_ID_MPEG2VIDEO
+            else:
+                mpg2CodecId = av.lib.AV_CODEC_ID_MPEG2VIDEO
+
+            if c.contents.codec_id == mpg2CodecId:
                 c.contents.max_b_frames = 2
 
-            if c.contents.codec_id == av.lib.CODEC_ID_MPEG1VIDEO:
+            if hasattr(av.lib, 'CODEC_ID_MPEG1VIDEO'):
+                mpg1CodecId = av.lib.CODEC_ID_MPEG1VIDEO
+            else:
+                mpg1CodecId = av.lib.AV_CODEC_ID_MPEG1VIDEO
+            
+            if c.contents.codec_id == mpg1CodecId:
                 c.contents.mb_decision = 2;
 
             if self.pFormatCtx.contents.oformat.contents.flags & av.lib.AVFMT_GLOBALHEADER:
@@ -565,11 +575,6 @@ class Media(object):
         ''' Start writing process (header) 
         '''
         
-        ret = av.lib.av_set_parameters(self.pFormatCtx, None)
-
-        if ret < 0:
-            raise RuntimeError(avError(res))
-
         fmt = self.pFormatCtx.contents.oformat
         fn = self.pFormatCtx.contents.filename
         if not (fmt.contents.flags & av.lib.AVFMT_NOFILE):
@@ -579,7 +584,11 @@ class Media(object):
                 raise IOError(avError(res))
 
         # write the stream header, if any
-        av.lib.av_write_header(self.pFormatCtx)
+        # libav8 -> av_write_header, libav9 -> avformat...
+        if hasattr(av.lib, 'av_write_header'):
+            av.lib.av_write_header(self.pFormatCtx)
+        else:
+            av.lib.avformat_write_header(self.pFormatCtx, None)
 
     def writeTrailer(self):
 
@@ -637,28 +646,46 @@ class Media(object):
 
         if mediaType == 'video':
 
-	    encSize = av.lib.avcodec_encode_video(c, 
-                    self.videoOutBuffer, self.videoOutBufferSize, packet.frame)
- 
-            if encSize > 0:
+            if hasattr(av.lib, 'avcodec_encode_video'):
+               
+                encSize = av.lib.avcodec_encode_video(c, 
+                        self.videoOutBuffer, self.videoOutBufferSize, packet.frame)
+     
+                if encSize > 0:
 
-                pkt = av.lib.AVPacket()
-                pktRef = ctypes.byref(pkt)
+                    pkt = av.lib.AVPacket()
+                    pktRef = ctypes.byref(pkt)
 
-                av.lib.av_init_packet(pktRef)
+                    av.lib.av_init_packet(pktRef)
 
-	        if c.contents.coded_frame.contents.pts != av.lib.AV_NOPTS_VALUE:
+                    if c.contents.coded_frame.contents.pts != av.lib.AV_NOPTS_VALUE:
+                    
+                        pkt.pts = pts
+
+                        if c.contents.coded_frame.contents.key_frame:
+                            pkt.flags |= av.lib.AV_PKT_FLAG_KEY
+
+                        pkt.stream_index = st.contents.index
+
+                        pkt.data = self.videoOutBuffer
+                        pkt.size = encSize
+
+                        ret = av.lib.av_interleaved_write_frame(self.pFormatCtx, pktRef)
+            else:
+                     
+                outPkt = av.lib.AVPacket()
+                outPktRef = ctypes.byref(outPkt)
+                outPkt.data = None
+
+                self.decoded = ctypes.c_int(-1)
+                self.decodedRef = ctypes.byref(self.decoded)
+
+                av.lib.av_init_packet(outPktRef)
                 
-                    pkt.pts = pts
-
-                    if c.contents.coded_frame.contents.key_frame:
-                        pkt.flags |= av.lib.AV_PKT_FLAG_KEY
-
-		    pkt.stream_index = st.contents.index
-
-		    pkt.data = self.videoOutBuffer
-                    pkt.size = encSize
-
+                encSize = av.lib.avcodec_encode_video2(c, outPktRef, packet.frame, self.decodedRef) 
+                
+                if outPkt.size > 0:
+                    pktRef = ctypes.byref(outPkt)
                     ret = av.lib.av_interleaved_write_frame(self.pFormatCtx, pktRef)
 
         elif mediaType == 'audio':
