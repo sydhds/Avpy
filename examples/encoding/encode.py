@@ -1,30 +1,37 @@
 #!/usr/bin/env python
 
+import sys
 import math
+import ctypes
 
 from pyav import Media
 
 class signalGen(object):
 
+    ''' Single tone sound generator
+    '''
+
     def __init__(self, sampleRate):
+        self.t = 0
+        self.tincr = 2 * math.pi * 440.0 / sampleRate
 
-        self.t = 0.0
-        self.tincr = (2 * math.pi * 110.0) / sampleRate
-        self.tincr2 = ((2 * math.pi * 110.0) / sampleRate)/ sampleRate
+    def audioFrame(self, pkt, frameSize, nbChannels):
 
-    def audioFrame(self, samples, frameSize, nbChannels):
+        samples = ctypes.cast(pkt.frame.contents.data[0],
+                ctypes.POINTER(ctypes.c_uint16))
 
-        i = 0
         for j in xrange(frameSize):
-            v = int(math.sin(self.t)*10000)
-            for c in xrange(nbChannels):
-                samples[i] = v 
-                i += 1
+            samples[2*j] = int(math.sin(self.t)*10000)
+            
+            for k in xrange(1, nbChannels):
+                samples[2*j+k] = samples[2*j]
 
             self.t += self.tincr
-            self.tincr += self.tincr2
 
 def fillYuvImage(picture, frameIndex, width, height):
+
+    ''' quad image generator
+    '''
 
     i = frameIndex;
 
@@ -72,6 +79,9 @@ if __name__ == '__main__':
 
             streamIndex = m.addStream('video', streamInfoVideo)
         
+            #resolution = (320, 240)
+            pkt = m.videoPacket(*resolution)
+
         elif options.mediaType == 'audio':
 
             streamInfoAudio = {
@@ -84,6 +94,7 @@ if __name__ == '__main__':
                     streamInfo=streamInfoAudio)
 
             sg = signalGen(streamInfoAudio['sampleRate'])
+            pkt = m.audioPacket(streamInfoAudio['channels'])
 
         elif options.mediaType == 'both':
 
@@ -93,18 +104,31 @@ if __name__ == '__main__':
             raise RuntimeError()
 
         m.writeHeader()
-        pkt = m.videoPacket(*resolution)
 
         i = 0
         while True:
 
             if options.mediaType == 'video':
 
-                print 'generating video frame %d...' % i
+                sys.stdout.write('generating video frame %d...    ' % i),
                 fillYuvImage(pkt.frame, i, *resolution) 
-                print 'done.' 
                 m.write(pkt, i+1, options.mediaType)
-            
+
+            elif options.mediaType == 'audio':
+
+                # FIXME frame size
+                sys.stdout.write('generating audio frame %d...    ' % i),
+                sg.audioFrame(pkt, 1152, streamInfoAudio['channels'])
+
+                m.write(pkt, i+1, options.mediaType) 
+
+            elif options.mediaType == 'both':
+
+                raise NotImplementedError()
+
+            else:
+                raise RuntimeError()
+           
             i+= 1
             if i > 125:
                 break

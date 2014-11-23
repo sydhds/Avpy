@@ -60,6 +60,7 @@ define:
     - AVIO_FLAG_WRITE
     - FF_COMPLIANCE_NORMAL
     - FF_COMPLIANCE_STRICT
+    - AV_SAMPLE_FMT_S16
     # seek
     - AVSEEK_FLAG_FRAME 
     - AVSEEK_FLAG_BACKWARD 
@@ -214,6 +215,9 @@ function:
     - av_write_header
     - avio_open
     - avformat_query_codec
+    - avcodec_encode_audio2
+    - avcodec_get_frame_defaults
+    - avcodec_fill_audio_frame
     # subtitle
     - avcodec_decode_subtitle2
     - avsubtitle_free

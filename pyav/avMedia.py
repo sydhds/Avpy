@@ -502,6 +502,7 @@ class Media(object):
                 codecId = self.pFormatCtx.contents.oformat.contents.audio_codec
                 _codec = av.lib.avcodec_find_encoder(codecId)
             else:
+                # TODO: result
                 _codec = av.lib.avcodec_find_encoder_by_name(streamInfo['codec'])
                 codecId = _codec.contents.id
 
@@ -544,16 +545,6 @@ class Media(object):
             if res < 0:
 		raise RuntimeError(avError(res))
            
-            # XXX: multiply by 2 to avoid buffer to small (flac encoding...) 
-            if c.contents.frame_size <= 1:
-                # FIXME: hardcoded value
-                self.audioOutBufferSize = 4608
-            else:
-                self.audioOutBufferSize = c.contents.frame_size * 2 * c.contents.channels
-
-            self.audioOutBuffer = ctypes.cast(av.lib.av_malloc(self.audioOutBufferSize), 
-                    ctypes.POINTER(ctypes.c_ubyte))
-
             # FIXME: multiple stream
             self.outStream = stream
             
@@ -595,6 +586,7 @@ class Media(object):
 
         self.pkt = Packet(self.pFormatCtx)
         
+        # TODO: from codec
         pix_fmt = av.lib.PIX_FMT_YUV420P
         
         av.lib.avpicture_alloc(
@@ -605,6 +597,30 @@ class Media(object):
 
         return self.pkt
 
+    def audioPacket(self, channels):
+
+        c = self.outStream.contents.codec
+        bufSize = av.lib.av_samples_get_buffer_size(None, c.contents.channels, c.contents.frame_size,
+                c.contents.sample_fmt, 0)
+
+        buf = ctypes.cast(av.lib.av_malloc(bufSize), ctypes.POINTER(ctypes.c_uint16))
+        #ctypes.memset(buf, 0, bufSize) 
+        
+        self.pkt = Packet(self.pFormatCtx)
+
+        av.lib.avcodec_get_frame_defaults(self.pkt.frame) 
+
+        self.pkt.frame.contents.nb_samples = bufSize / (channels * av.lib.av_get_bytes_per_sample(av.lib.AV_SAMPLE_FMT_S16))
+        
+        res = av.lib.avcodec_fill_audio_frame(self.pkt.frame, 
+                c.contents.channels, c.contents.sample_fmt,
+                ctypes.cast(buf, ctypes.POINTER(ctypes.c_ubyte)), bufSize, 0)
+
+        if res < 0:
+            raise RuntimeError('fill audio frame failed')
+
+        return self.pkt
+    
     def write(self, packet, pts, mediaType='video'):
         
         c = self.outStream.contents.codec
@@ -614,37 +630,44 @@ class Media(object):
 
 	    encSize = av.lib.avcodec_encode_video(c, 
                     self.videoOutBuffer, self.videoOutBufferSize, packet.frame)
-        elif mediaType == 'audio':
+ 
+            if encSize > 0:
 
-            encSize = av.lib.avcodec_encode_audio(c, self.audioOutBuffer, self.audioOutBufferSize, packet.audioBuf)
+                pkt = av.lib.AVPacket()
+                pktRef = ctypes.byref(pkt)
 
-        if encSize > 0:
+                av.lib.av_init_packet(pktRef)
 
-            pkt = av.lib.AVPacket()
-            pktRef = ctypes.byref(pkt)
-
-            av.lib.av_init_packet(pktRef)
-
-	    if c.contents.coded_frame.contents.pts != av.lib.AV_NOPTS_VALUE:
+	        if c.contents.coded_frame.contents.pts != av.lib.AV_NOPTS_VALUE:
                 
-                pkt.pts = pts
+                    pkt.pts = pts
 
-                if c.contents.coded_frame.contents.key_frame:
-                    pkt.flags |= av.lib.AV_PKT_FLAG_KEY
+                    if c.contents.coded_frame.contents.key_frame:
+                        pkt.flags |= av.lib.AV_PKT_FLAG_KEY
 
-		pkt.stream_index = st.contents.index
+		    pkt.stream_index = st.contents.index
 
-                if mediaType == 'video':
 		    pkt.data = self.videoOutBuffer
-                    # FIXME: should be encSize?
-		    pkt.size = self.videoOutBufferSize
-                elif mediaType == 'audio':
-                    pkt.data = self.audioOutBuffer
                     pkt.size = encSize
 
-            # write compressed frame
-	    ret = av.lib.av_interleaved_write_frame(self.pFormatCtx, pktRef)
+                    ret = av.lib.av_interleaved_write_frame(self.pFormatCtx, pktRef)
 
+        elif mediaType == 'audio':
+
+            outPkt = av.lib.AVPacket()
+            outPktRef = ctypes.byref(outPkt)
+            outPkt.data = None
+
+            self.decoded = ctypes.c_int(-1)
+            self.decodedRef = ctypes.byref(self.decoded)
+
+            av.lib.av_init_packet(outPktRef)
+            
+            encSize = av.lib.avcodec_encode_audio2(c, outPktRef, packet.frame, self.decodedRef) 
+            
+            if outPkt.size > 0:
+                pktRef = ctypes.byref(outPkt)
+                ret = av.lib.av_interleaved_write_frame(self.pFormatCtx, pktRef)
 
 class Packet(object):
 
@@ -783,7 +806,7 @@ class Packet(object):
        
         av.lib.av_free(self.frame)
         av.lib.av_free_packet(ctypes.byref(self.pkt))
-
+        
     def streamIndex(self):
         return self.pkt.stream_index
 
@@ -855,6 +878,7 @@ class Packet(object):
                 # unsupported codec type...
                 pass
 
+
 def avError(res):
 
     '''
@@ -876,4 +900,5 @@ def avError(res):
         return msg
     else:
         return buf.value
+
 
