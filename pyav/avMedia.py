@@ -7,6 +7,8 @@ import sys
 import ctypes
 from . import av
 
+FRAME_SIZE_DEFAULT = 1152
+
 class Media(object):
 
     def __init__(self, mediaName, mode='r'):
@@ -160,6 +162,10 @@ class Media(object):
             streamInfo['sample_fmt'] = av.lib.av_get_sample_fmt_name(cCodecCtx.contents.sample_fmt)
             streamInfo['sample_fmt_id'] = cCodecCtx.contents.sample_fmt
             streamInfo['frame_size'] = cCodecCtx.contents.frame_size
+
+            if streamInfo['frame_size'] == 0:
+                streamInfo['frame_size'] = FRAME_SIZE_DEFAULT
+
             streamInfo['bytes_per_sample'] = av.lib.av_get_bytes_per_sample(cCodecCtx.contents.sample_fmt)
         elif codecType == av.lib.AVMEDIA_TYPE_SUBTITLE:
             streamInfo['type'] = 'subtitle'
@@ -626,8 +632,13 @@ class Media(object):
     def audioPacket(self, channels):
 
         c = self.outStream.contents.codec
-        bufSize = av.lib.av_samples_get_buffer_size(None, c.contents.channels, c.contents.frame_size,
-                c.contents.sample_fmt, 0)
+        
+        if c.contents.frame_size == 0:
+            # frame size is set to 0 for pcm codec
+            bufSize = FRAME_SIZE_DEFAULT * c.contents.channels * av.lib.av_get_bytes_per_sample(c.contents.sample_fmt) 
+        else:
+            bufSize = av.lib.av_samples_get_buffer_size(None, c.contents.channels, c.contents.frame_size,
+                    c.contents.sample_fmt, 0)
 
         buf = ctypes.cast(av.lib.av_malloc(bufSize), ctypes.POINTER(ctypes.c_uint16))
         #ctypes.memset(buf, 0, bufSize) 
