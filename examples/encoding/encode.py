@@ -79,7 +79,6 @@ if __name__ == '__main__':
 
             streamIndex = m.addStream('video', streamInfoVideo)
         
-            #resolution = (320, 240)
             pkt = m.videoPacket(*resolution)
 
         elif options.mediaType == 'audio':
@@ -92,6 +91,9 @@ if __name__ == '__main__':
                     }
             streamIndex = m.addStream('audio',
                     streamInfo=streamInfoAudio)
+
+            info = m.info()
+            frameSize = info['stream'][0]['frame_size']
 
             sg = signalGen(streamInfoAudio['sampleRate'])
             pkt = m.audioPacket(streamInfoAudio['channels'])
@@ -106,19 +108,21 @@ if __name__ == '__main__':
         m.writeHeader()
 
         i = 0
+        maxFrame = 125
+
         while True:
 
             if options.mediaType == 'video':
 
-                sys.stdout.write('generating video frame %d...    ' % i),
+                print('\rgenerating video frame %d (/%d)...    ' % (i, maxFrame)),
                 fillYuvImage(pkt.frame, i, *resolution) 
                 m.write(pkt, i+1, options.mediaType)
 
             elif options.mediaType == 'audio':
 
                 # FIXME frame size
-                sys.stdout.write('generating audio frame %d...    ' % i),
-                sg.audioFrame(pkt, 1152, streamInfoAudio['channels'])
+                print('\rgenerating audio frame %d (/%d)...    ' % (i, maxFrame)),
+                sg.audioFrame(pkt, frameSize, streamInfoAudio['channels'])
 
                 m.write(pkt, i+1, options.mediaType) 
 
@@ -130,7 +134,7 @@ if __name__ == '__main__':
                 raise RuntimeError()
            
             i+= 1
-            if i > 125:
+            if i > maxFrame:
                 break
 
         m.writeTrailer()

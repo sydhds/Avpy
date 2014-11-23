@@ -79,6 +79,7 @@ class Media(object):
             self.pFormatCtx.contents.filename = _mediaName
 
         self.pkt = None
+        self.mode = mode
 
     def __del__(self):
 
@@ -87,7 +88,8 @@ class Media(object):
                 cStream = self.pFormatCtx.contents.streams[i]
                 av.lib.avcodec_close(cStream.contents.codec)
 
-            av.lib.avformat_close_input(self.pFormatCtx)
+            if self.mode == 'r':
+                av.lib.avformat_close_input(self.pFormatCtx)
 
     def info(self):
 
@@ -103,9 +105,15 @@ class Media(object):
         
         infoDict = {}
         infoDict['name'] = self.pFormatCtx.contents.filename
-        infoDict['format'] = self.pFormatCtx.contents.iformat.contents.name
+
+        if self.mode == 'r':
+            avFormat = self.pFormatCtx.contents.iformat
+        else:
+            avFormat = self.pFormatCtx.contents.oformat
+
+        infoDict['format'] = avFormat.contents.name
         infoDict['metadata'] = self.metadata()
-        infoDict['stream'] = [] 
+        infoDict['stream'] = []
         infoDict['duration'] = float(self.pFormatCtx.contents.duration)/av.lib.AV_TIME_BASE
 
         for i in range(self.pFormatCtx.contents.nb_streams):
@@ -149,6 +157,7 @@ class Media(object):
             streamInfo['channels'] = cCodecCtx.contents.channels
             streamInfo['sample_fmt'] = av.lib.av_get_sample_fmt_name(cCodecCtx.contents.sample_fmt)
             streamInfo['sample_fmt_id'] = cCodecCtx.contents.sample_fmt
+            streamInfo['frame_size'] = cCodecCtx.contents.frame_size
             streamInfo['bytes_per_sample'] = av.lib.av_get_bytes_per_sample(cCodecCtx.contents.sample_fmt)
         elif codecType == av.lib.AVMEDIA_TYPE_SUBTITLE:
             streamInfo['type'] = 'subtitle'
