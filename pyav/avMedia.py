@@ -527,7 +527,13 @@ class Media(object):
 
             # find the audio encoder
             if not _codec:
-                raise RuntimeError('Codec not found')
+
+                if 'codec' in streamInfo and streamInfo['codec'] == 'auto':
+                    exceptMsg = 'Codec for format %s not found' % self.pFormatCtx.contents.oformat.contents.name
+                else:
+                    exceptMsg = 'Codec %s not found' % _codec.contents.name
+
+                raise RuntimeError(exceptMsg)
             
             # XXX: use COMPLIANCE_NORMAL or COMPLIANCE_STRICT?
             res = av.lib.avformat_query_codec(self.pFormatCtx.contents.oformat, codecId, av.lib.FF_COMPLIANCE_STRICT)
