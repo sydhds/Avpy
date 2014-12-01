@@ -589,6 +589,10 @@ class Media(object):
     def writeHeader(self, metaData=None):
         
         ''' Start writing process (header) 
+
+        .. note:: 
+            see http://multimedia.cx/eggs/supplying-ffmpeg-with-metadata/
+            for available metadata per container
         '''
         
         fmt = self.pFormatCtx.contents.oformat
