@@ -70,38 +70,38 @@ AVSubtitleType = c_int # enum
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
-CODEC_ID_MPEG2VIDEO = 2
-PIX_FMT_YUV420P = 0
-AVMEDIA_TYPE_VIDEO = 0
+PIX_FMT_RGB24 = 2
 AVMEDIA_TYPE_SUBTITLE = 3
 AVMEDIA_TYPE_AUDIO = 1
+AVMEDIA_TYPE_VIDEO = 0
+PIX_FMT_YUV420P = 0
+PIX_FMT_NONE = -1
 SUBTITLE_ASS = 3
 SUBTITLE_TEXT = 2
-PIX_FMT_NONE = -1
-PIX_FMT_RGB24 = 2
-CODEC_ID_NONE = 0
-CODEC_ID_MPEG1VIDEO = 1
-SUBTITLE_BITMAP = 1
 SUBTITLE_NONE = 0
+SUBTITLE_BITMAP = 1
 AV_SAMPLE_FMT_S16 = 1
+CODEC_ID_MPEG2VIDEO = 2
+CODEC_ID_MPEG1VIDEO = 1
+CODEC_ID_NONE = 0
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
 AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
-AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
 CODEC_CAP_AUTO_THREADS = 32768 # Variable c_int '32768'
 AV_PKT_FLAG_KEY = 1 # Variable c_int '1'
+CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
 CODEC_CAP_SLICE_THREADS = 8192 # Variable c_int '8192'
-CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
 AV_TIME_BASE = 1000000 # Variable c_int '1000000'
+AVIO_FLAG_WRITE = 2 # Variable c_int '2'
 FF_COMPLIANCE_STRICT = 1 # Variable c_int '1'
 AVFMT_NOFILE = 1 # Variable c_int '1'
-AVIO_FLAG_WRITE = 2 # Variable c_int '2'
-AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
 AVSEEK_FLAG_FRAME = 8 # Variable c_int '8'
-FF_COMPLIANCE_NORMAL = 0 # Variable c_int '0'
-CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
+CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
+AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
+AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
 AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
 AVSEEK_FLAG_BYTE = 2 # Variable c_int '2'
+FF_COMPLIANCE_NORMAL = 0 # Variable c_int '0'
 
 AV_NOPTS_VALUE = 9223372036854775808 # Variable c_ulong '-9223372036854775808ul'
 
@@ -207,6 +207,9 @@ class AVSubtitle(Structure):
 class AVSubtitleRect(Structure):
 	pass
 
+class N8AVOption4DOT_31E(Structure):
+	pass
+
 class N8AVPacket3DOT_0E(Structure):
 	pass
 
@@ -227,6 +230,7 @@ class SwsVector(Structure):
 
 PixelFormat = AVPixelFormat # alias
 CodecID = AVCodecID # alias
+AVOptionType = c_int # enum
 
 RcOverride._fields_ = [
     ('start_frame', c_int),
@@ -815,7 +819,22 @@ AVDictionaryEntry._fields_ = [
 ]
 AVDictionary._fields_ = [
 ]
+N8AVOption4DOT_31E._fields_ = [
+    ('i64', int64_t),
+    ('dbl', c_double),
+    ('str', STRING),
+    ('q', AVRational),
+]
 AVOption._fields_ = [
+    ('name', STRING),
+    ('help', STRING),
+    ('offset', c_int),
+    ('type', AVOptionType),
+    ('default_val', N8AVOption4DOT_31E),
+    ('min', c_double),
+    ('max', c_double),
+    ('flags', c_int),
+    ('unit', STRING),
 ]
 AVClass._fields_ = [
     ('class_name', STRING),
@@ -957,31 +976,34 @@ avformat_query_codec.argtypes = [POINTER(AVOutputFormat), AVCodecID, c_int]
 avio_open = _libraries['libavformat.so'].avio_open
 avio_open.restype = c_int
 avio_open.argtypes = [POINTER(POINTER(AVIOContext)), STRING, c_int]
-av_dict_get = _libraries['libavcodec.so'].av_dict_get
+av_dict_get = _libraries['libavutil.so'].av_dict_get
 av_dict_get.restype = POINTER(AVDictionaryEntry)
 av_dict_get.argtypes = [POINTER(AVDictionary), STRING, POINTER(AVDictionaryEntry), c_int]
-av_strerror = _libraries['libavcodec.so'].av_strerror
+av_dict_set = _libraries['libavutil.so'].av_dict_set
+av_dict_set.restype = c_int
+av_dict_set.argtypes = [POINTER(POINTER(AVDictionary)), STRING, STRING, c_int]
+av_strerror = _libraries['libavutil.so'].av_strerror
 av_strerror.restype = c_int
 av_strerror.argtypes = [c_int, STRING, size_t]
-av_log_set_level = _libraries['libavcodec.so'].av_log_set_level
+av_log_set_level = _libraries['libavutil.so'].av_log_set_level
 av_log_set_level.restype = None
 av_log_set_level.argtypes = [c_int]
-av_malloc = _libraries['libavcodec.so'].av_malloc
+av_malloc = _libraries['libavutil.so'].av_malloc
 av_malloc.restype = c_void_p
 av_malloc.argtypes = [size_t]
-av_free = _libraries['libavcodec.so'].av_free
+av_free = _libraries['libavutil.so'].av_free
 av_free.restype = None
 av_free.argtypes = [c_void_p]
-av_get_pix_fmt_name = _libraries['libavcodec.so'].av_get_pix_fmt_name
+av_get_pix_fmt_name = _libraries['libavutil.so'].av_get_pix_fmt_name
 av_get_pix_fmt_name.restype = STRING
 av_get_pix_fmt_name.argtypes = [AVPixelFormat]
-av_get_sample_fmt_name = _libraries['libavcodec.so'].av_get_sample_fmt_name
+av_get_sample_fmt_name = _libraries['libavutil.so'].av_get_sample_fmt_name
 av_get_sample_fmt_name.restype = STRING
 av_get_sample_fmt_name.argtypes = [AVSampleFormat]
-av_get_bytes_per_sample = _libraries['libavcodec.so'].av_get_bytes_per_sample
+av_get_bytes_per_sample = _libraries['libavutil.so'].av_get_bytes_per_sample
 av_get_bytes_per_sample.restype = c_int
 av_get_bytes_per_sample.argtypes = [AVSampleFormat]
-av_samples_get_buffer_size = _libraries['libavcodec.so'].av_samples_get_buffer_size
+av_samples_get_buffer_size = _libraries['libavutil.so'].av_samples_get_buffer_size
 av_samples_get_buffer_size.restype = c_int
 av_samples_get_buffer_size.argtypes = [POINTER(c_int), c_int, c_int, AVSampleFormat, c_int]
 sws_freeContext = _libraries['libswscale.so'].sws_freeContext

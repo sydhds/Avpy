@@ -72,6 +72,7 @@ alias:
     #- AVMetadata
     - CodecID
     - PixelFormat
+    - AVOptionType
 
 class:
     - N8AVPacket3DOT_0E
@@ -117,6 +118,7 @@ class:
     - AVDictionaryEntry
     - AVSubtitle
     - AVSubtitleRect
+    - N8AVOption4DOT_31E
 
 import:
     - import os
@@ -168,6 +170,7 @@ cdll:
 function:
     ## avutil
     - av_dict_get
+    - av_dict_set
     - av_strerror
     - av_log_set_level
     - av_malloc

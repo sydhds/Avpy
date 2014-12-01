@@ -41,9 +41,10 @@ class signalGen(object):
 
             self.t += self.tincr
 
+
 def fillYuvImage(picture, frameIndex, width, height):
 
-    ''' quad image generator
+    ''' yuv image generator
     '''
 
     i = frameIndex;
@@ -72,6 +73,11 @@ if __name__ == '__main__':
     parser.add_option('-t', '--mediaType',
             help='media type: video, audio, both')
 
+    parser.add_option('-c', '--frameCount',
+            help='number of frame to encode',
+            type='int',
+            default=125)
+    
     (options, args) = parser.parse_args() 
 
     # open
@@ -103,6 +109,7 @@ if __name__ == '__main__':
                     'channels': 2,
                     'codec': 'auto',
                     }
+            
             streamIndex = m.addStream('audio',
                     streamInfo=streamInfoAudio)
 
@@ -119,10 +126,11 @@ if __name__ == '__main__':
         else:
             raise RuntimeError()
 
-        m.writeHeader()
+        metadata = {'artist': 'me'}
+        m.writeHeader(metadata)
 
         i = 0
-        maxFrame = 125
+        maxFrame = options.frameCount
 
         while True:
 

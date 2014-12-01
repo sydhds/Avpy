@@ -481,6 +481,8 @@ class Media(object):
                 raise RuntimeError('Could not alloc stream')
 
             c = stream.contents.codec
+        
+
 
             c.contents.bit_rate = streamInfo['bitRate']
             c.contents.width = streamInfo['width']
@@ -491,7 +493,7 @@ class Media(object):
             # TODO: from info
             c.contents.gop_size = 12
 
-            # TODO: from info
+            ## TODO: from info
             c.contents.pix_fmt = av.lib.PIX_FMT_YUV420P 
 
             if hasattr(av.lib, 'CODEC_ID_MPEG2VIDEO'):
@@ -584,7 +586,7 @@ class Media(object):
         else:
             raise RuntimeError('Unknown stream type (not video or audio)')
     
-    def writeHeader(self):
+    def writeHeader(self, metaData=None):
         
         ''' Start writing process (header) 
         '''
@@ -597,6 +599,15 @@ class Media(object):
             if res < 0:
                 raise IOError(avError(res))
 
+        if metaData:
+            for k, v in metaData.iteritems():
+                metaDict = ctypes.POINTER(ctypes.POINTER(av.lib.AVDictionary))()
+                metaDict.contents = self.pFormatCtx.contents.metadata
+
+                av.lib.av_dict_set(metaDict,
+                        k, v, 
+                        av.lib.AV_DICT_IGNORE_SUFFIX)
+    
         # write the stream header, if any
         # libav8 -> av_write_header, libav9 -> avformat...
         if hasattr(av.lib, 'av_write_header'):

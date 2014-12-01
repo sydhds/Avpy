@@ -166,6 +166,7 @@ cdll:
 function:
     ## avutil
     - av_dict_get
+    - av_dict_set
     - av_strerror
     - av_log_set_level
     - av_malloc

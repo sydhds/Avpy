@@ -106,106 +106,124 @@ FF_COMPLIANCE_NORMAL = 0 # Variable c_int '0'
 
 AV_NOPTS_VALUE = 9223372036854775808 # Variable c_ulong '-9223372036854775808ul'
 
+class AVChapter(Structure):
+	pass
+
+class AVClass(Structure):
+	pass
+
+class AVCodec(Structure):
+	pass
+
+class AVCodecContext(Structure):
+	pass
+
+class AVCodecDefault(Structure):
+	pass
+
+class AVCodecInternal(Structure):
+	pass
+
+class AVCodecParser(Structure):
+	pass
+
+class AVCodecParserContext(Structure):
+	pass
+
+class AVCodecTag(Structure):
+	pass
+
+class AVDictionary(Structure):
+	pass
+
+class AVDictionaryEntry(Structure):
+	pass
+
+class AVFormatContext(Structure):
+	pass
+
+class AVFormatParameters(Structure):
+	pass
+
+class AVFrac(Structure):
+	pass
+
+class AVFrame(Structure):
+	pass
+
+class AVHWAccel(Structure):
+	pass
+
+class AVIOContext(Structure):
+	pass
+
+class AVIOInterruptCB(Structure):
+	pass
+
+class AVIndexEntry(Structure):
+	pass
+
+class AVInputFormat(Structure):
+	pass
+
+class AVMetadataConv(Structure):
+	pass
+
+class AVOption(Structure):
+	pass
+
+class AVOutputFormat(Structure):
+	pass
+
+class AVPacket(Structure):
+	pass
+
+class AVPacketList(Structure):
+	pass
+
+class AVPacketList(Structure):
+	pass
+
+class AVPaletteControl(Structure):
+	pass
+
+class AVPanScan(Structure):
+	pass
+
+class AVPicture(Structure):
+	pass
+
+class AVProbeData(Structure):
+	pass
+
+class AVProfile(Structure):
+	pass
+
+class AVProgram(Structure):
+	pass
+
+class AVRational(Structure):
+	pass
+
+class AVStream(Structure):
+	pass
+
+class AVStream(Structure):
+	pass
+
+class AVSubtitle(Structure):
+	pass
+
+class AVSubtitleRect(Structure):
+	pass
+
 class N8AVPacket4DOT_30E(Structure):
 	pass
 
 class N8AVStream4DOT_33E(Structure):
 	pass
 
-class AVProfile(Structure):
-	pass
-
-class AVPanScan(Structure):
-	pass
-
-class AVCodec(Structure):
-	pass
-
 class RcOverride(Structure):
-	pass
-
-class AVFrame(Structure):
-	pass
-
-class AVPaletteControl(Structure):
-	pass
-
-class AVHWAccel(Structure):
-	pass
-
-class AVCodecParser(Structure):
-	pass
-
-class AVFormatParameters(Structure):
-	pass
-
-class AVCodecContext(Structure):
-	pass
-
-class AVCodecParserContext(Structure):
-	pass
-
-class AVIndexEntry(Structure):
-	pass
-
-class AVDictionary(Structure):
-	pass
-
-class AVIOContext(Structure):
-	pass
-
-class AVOption(Structure):
-	pass
-
-class AVCodecTag(Structure):
-	pass
-
-class AVMetadataConv(Structure):
-	pass
-
-class AVProbeData(Structure):
-	pass
-
-class AVRational(Structure):
-	pass
-
-class AVFrac(Structure):
-	pass
-
-class AVClass(Structure):
-	pass
-
-class AVInputFormat(Structure):
-	pass
-
-class AVOutputFormat(Structure):
-	pass
-
-class AVStream(Structure):
-	pass
-
-class AVPacketList(Structure):
-	pass
-
-class AVStream(Structure):
-	pass
-
-class AVPacket(Structure):
-	pass
-
-class AVProgram(Structure):
-	pass
-
-class AVChapter(Structure):
-	pass
-
-class AVPacketList(Structure):
-	pass
-
-class AVFormatContext(Structure):
-	pass
-
-class AVPicture(Structure):
 	pass
 
 class SwsContext(Structure):
@@ -215,24 +233,6 @@ class SwsFilter(Structure):
 	pass
 
 class SwsVector(Structure):
-	pass
-
-class AVCodecInternal(Structure):
-	pass
-
-class AVCodecDefault(Structure):
-	pass
-
-class AVIOInterruptCB(Structure):
-	pass
-
-class AVDictionaryEntry(Structure):
-	pass
-
-class AVSubtitle(Structure):
-	pass
-
-class AVSubtitleRect(Structure):
 	pass
 
 AVMetadata = AVDictionary
@@ -1006,9 +1006,6 @@ av_seek_frame.argtypes = [POINTER(AVFormatContext), c_int, int64_t, c_int]
 avformat_close_input = _libraries['libavformat.so'].avformat_close_input
 avformat_close_input.restype = None
 avformat_close_input.argtypes = [POINTER(POINTER(AVFormatContext))]
-av_set_parameters = _libraries['libavformat.so'].av_set_parameters
-av_set_parameters.restype = c_int
-av_set_parameters.argtypes = [POINTER(AVFormatContext), POINTER(AVFormatParameters)]
 av_write_header = _libraries['libavformat.so'].av_write_header
 av_write_header.restype = c_int
 av_write_header.argtypes = [POINTER(AVFormatContext)]
@@ -1033,6 +1030,9 @@ avio_open.argtypes = [POINTER(POINTER(AVIOContext)), STRING, c_int]
 av_dict_get = _libraries['libavutil.so'].av_dict_get
 av_dict_get.restype = POINTER(AVDictionaryEntry)
 av_dict_get.argtypes = [POINTER(AVDictionary), STRING, POINTER(AVDictionaryEntry), c_int]
+av_dict_set = _libraries['libavutil.so'].av_dict_set
+av_dict_set.restype = c_int
+av_dict_set.argtypes = [POINTER(POINTER(AVDictionary)), STRING, STRING, c_int]
 av_strerror = _libraries['libavutil.so'].av_strerror
 av_strerror.restype = c_int
 av_strerror.argtypes = [c_int, STRING, size_t]
