@@ -10,8 +10,10 @@ from pyav import Media
 def progress(msg):
 
     if sys.version_info >= (3, 0):
+
+        # python3 only - break python2 compat
         #print('\r%s' % msg, end='')
-        print('\r%s' % msg)
+        print('\r%s' % msg),
     else:
         print('\r%s' % msg),
 
@@ -19,7 +21,7 @@ if sys.version_info >= (3, 0):
     xrange = range
 
 
-class signalGen(object):
+class SignalGen(object):
 
     ''' Single tone sound generator
     '''
@@ -89,12 +91,22 @@ if __name__ == '__main__':
         
             resolution = (320, 240)
 
+            # spec 
+            # mpeg4 ok
+            # ffv1 ok
+            # h263 ko
+
             streamInfoVideo = {
                 'bitRate': 400000,
                 'width': resolution[0],
                 'height': resolution[1],
                 'timeBase': (1, 25),
                 'pixelFormat': 'yuv420p',
+                
+                # 'codec': 'h263',
+                #'codec': 'ffv1',
+                #'codec': 'mpeg4',
+                #'codec': 'mpeg2video',
                 }
 
             streamIndex = m.addStream('video', streamInfoVideo)
@@ -109,14 +121,14 @@ if __name__ == '__main__':
                     'channels': 2,
                     'codec': 'auto',
                     }
-            
+
             streamIndex = m.addStream('audio',
                     streamInfo=streamInfoAudio)
 
             info = m.info()
             frameSize = info['stream'][0]['frame_size']
 
-            sg = signalGen(streamInfoAudio['sampleRate'])
+            sg = SignalGen(streamInfoAudio['sampleRate'])
             pkt = m.audioPacket(streamInfoAudio['channels'])
 
         elif options.mediaType == 'both':
@@ -136,14 +148,14 @@ if __name__ == '__main__':
 
             if options.mediaType == 'video':
 
-                progress('\rgenerating video frame %d/%d...    ' % (i, maxFrame))
+                progress('Generating video frame %d/%d...    ' % (i, maxFrame))
                 fillYuvImage(pkt.frame, i, *resolution) 
                 m.write(pkt, i+1, options.mediaType)
 
             elif options.mediaType == 'audio':
 
                 # FIXME frame size
-                progress('\rgenerating audio frame %d/%d...    ' % (i, maxFrame))
+                progress('Generating audio frame %d/%d...    ' % (i, maxFrame))
                 sg.audioFrame(pkt, frameSize, streamInfoAudio['channels'])
 
                 m.write(pkt, i+1, options.mediaType) 

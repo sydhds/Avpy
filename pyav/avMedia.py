@@ -468,22 +468,53 @@ class Media(object):
         '''
 
         if streamType == 'video':
-            
-            codecId = self.pFormatCtx.contents.oformat.contents.video_codec 
+           
+            _codecRequested = streamInfo.get('codec', 'auto')
 
-            # find the video encoder
-            codec = av.lib.avcodec_find_encoder(codecId)
-            if not codec:
-                raise RuntimeError('Codec not found')
+            if sys.version_info >= (3, 0):
+                codecRequested = ctypes.c_char_p(_codecRequested.encode('utf-8'))
+            else:
+                codecRequested = _codecRequested
+
+            if codecRequested == 'auto':
+                codecId = self.pFormatCtx.contents.oformat.contents.video_codec
+                _codec = av.lib.avcodec_find_encoder(codecId)
+            else:
+                _codec = av.lib.avcodec_find_encoder_by_name(codecRequested)
+                if _codec:
+                    codecId = _codec.contents.id
+
+            # find the audio encoder
+            if not _codec:
+
+                if 'codec' in streamInfo and streamInfo['codec'] == 'auto':
+                    exceptMsg = 'Codec for format %s not found' % self.pFormatCtx.contents.oformat.contents.name
+                else:
+                    exceptMsg = 'Codec %s not found' % codecRequested
+
+                raise RuntimeError(exceptMsg)
+
+            # XXX: use COMPLIANCE_NORMAL or COMPLIANCE_STRICT?
+            res = av.lib.avformat_query_codec(self.pFormatCtx.contents.oformat, codecId, av.lib.FF_COMPLIANCE_STRICT)
+
+            # Note:
+            # 1 -> codec supported by output format
+            # 0 -> unsupported
+            # < 0 -> not available
+            # for safety reason, raise for <= 0 
+            # ex: codec mp2 in ogg report < 0 but can crash encoder
+            errorTpl = (_codec.contents.name, self.pFormatCtx.contents.oformat.contents.name)
+            if res == 0:
+                raise RuntimeError('Codec %s not supported in %s muxer' % errorTpl )
+            elif res < 0:
+                print('Warning: could not determine if codec %s is supported by %s muxer' % errorTpl)            
             
-            stream = av.lib.avformat_new_stream(self.pFormatCtx, codec)
+            stream = av.lib.avformat_new_stream(self.pFormatCtx, _codec)
             if not stream:
                 raise RuntimeError('Could not alloc stream')
 
             c = stream.contents.codec
         
-
-
             c.contents.bit_rate = streamInfo['bitRate']
             c.contents.width = streamInfo['width']
             c.contents.height = streamInfo['height']
@@ -493,7 +524,7 @@ class Media(object):
             # TODO: from info
             c.contents.gop_size = 12
 
-            ## TODO: from info
+            # TODO: from info
             c.contents.pix_fmt = av.lib.PIX_FMT_YUV420P 
 
             if hasattr(av.lib, 'CODEC_ID_MPEG2VIDEO'):
@@ -527,14 +558,21 @@ class Media(object):
 
         elif streamType == 'audio':
 
-            if 'codec' in streamInfo and streamInfo['codec'] == 'auto':
-                codecId = self.pFormatCtx.contents.oformat.contents.audio_codec
+            _codecRequested = streamInfo.get('codec', 'auto')
+
+            if sys.version_info >= (3, 0):
+                codecRequested = ctypes.c_char_p(_codecRequested.encode('utf-8'))
+            else:
+                codecRequested = _codecRequested
+
+            if codecRequested == 'auto':
+                codecId = self.pFormatCtx.contents.oformat.contents.video_codec
                 _codec = av.lib.avcodec_find_encoder(codecId)
             else:
-                # TODO: result
-                _codec = av.lib.avcodec_find_encoder_by_name(streamInfo['codec'])
-                codecId = _codec.contents.id
-
+                _codec = av.lib.avcodec_find_encoder_by_name(codecRequested)
+                if _codec:
+                    codecId = _codec.contents.id
+            
             # find the audio encoder
             if not _codec:
 
