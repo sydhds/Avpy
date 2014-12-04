@@ -476,7 +476,7 @@ class Media(object):
             else:
                 codecRequested = _codecRequested
 
-            if codecRequested == 'auto':
+            if _codecRequested == 'auto':
                 codecId = self.pFormatCtx.contents.oformat.contents.video_codec
                 _codec = av.lib.avcodec_find_encoder(codecId)
             else:
@@ -565,8 +565,8 @@ class Media(object):
             else:
                 codecRequested = _codecRequested
 
-            if codecRequested == 'auto':
-                codecId = self.pFormatCtx.contents.oformat.contents.video_codec
+            if _codecRequested == 'auto':
+                codecId = self.pFormatCtx.contents.oformat.contents.audio_codec
                 _codec = av.lib.avcodec_find_encoder(codecId)
             else:
                 _codec = av.lib.avcodec_find_encoder_by_name(codecRequested)
@@ -642,7 +642,13 @@ class Media(object):
                 raise IOError(avError(res))
 
         if metaData:
-            for k, v in metaData.iteritems():
+            for k in metaData:
+                
+                v = metaData[k] 
+                if sys.version_info >= (3, 0):
+                    k = ctypes.c_char_p(k.encode('utf-8'))
+                    v = ctypes.c_char_p(v.encode('utf-8')) 
+
                 metaDict = ctypes.POINTER(ctypes.POINTER(av.lib.AVDictionary))()
                 metaDict.contents = self.pFormatCtx.contents.metadata
 
