@@ -38,6 +38,7 @@ define:
     - AV_TIME_BASE
     - PIX_FMT_NONE
     - PIX_FMT_RGB24
+    - PIX_FMT_RGB8
     - PIX_FMT_YUV420P
     - SWS_BILINEAR
     - AV_LOG_QUIET
@@ -171,6 +172,7 @@ function:
     - av_log_set_level
     - av_malloc
     - av_free
+    - av_get_pix_fmt
     ## avformat
     - av_register_all
     - av_iformat_next
@@ -199,6 +201,7 @@ function:
     - avpicture_alloc
     - avpicture_free
     - avcodec_alloc_frame
+    - avcodec_get_context_defaults3
     # test
     - avpicture_get_size
     - avpicture_fill

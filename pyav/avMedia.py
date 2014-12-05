@@ -8,6 +8,7 @@ import ctypes
 from . import av
 
 FRAME_SIZE_DEFAULT = 1152
+FPS_DEFAULT = (1, 24)
 
 class Media(object):
 
@@ -485,9 +486,9 @@ class Media(object):
                     codecId = _codec.contents.id
 
             # find the audio encoder
-            if not _codec:
+            if not _codec:                
 
-                if 'codec' in streamInfo and streamInfo['codec'] == 'auto':
+                if 'codec' not in streamInfo or streamInfo['codec'] == 'auto':
                     exceptMsg = 'Codec for format %s not found' % self.pFormatCtx.contents.oformat.contents.name
                 else:
                     exceptMsg = 'Codec %s not found' % codecRequested
@@ -514,34 +515,32 @@ class Media(object):
                 raise RuntimeError('Could not alloc stream')
 
             c = stream.contents.codec
-        
-            c.contents.bit_rate = streamInfo['bitRate']
+
+            av.lib.avcodec_get_context_defaults3(c, _codec)
+
+            if 'bitRate' in streamInfo:
+                c.contents.bit_rate = streamInfo['bitRate']
+            
             c.contents.width = streamInfo['width']
             c.contents.height = streamInfo['height']
-            c.contents.time_base.den = streamInfo['timeBase'][1]
-            c.contents.time_base.num = streamInfo['timeBase'][0]
-
-            # TODO: from info
-            c.contents.gop_size = 12
-
-            # TODO: from info
-            c.contents.pix_fmt = av.lib.PIX_FMT_YUV420P 
-
-            if hasattr(av.lib, 'CODEC_ID_MPEG2VIDEO'):
-                mpg2CodecId = av.lib.CODEC_ID_MPEG2VIDEO
-            else:
-                mpg2CodecId = av.lib.AV_CODEC_ID_MPEG2VIDEO
-
-            if c.contents.codec_id == mpg2CodecId:
-                c.contents.max_b_frames = 2
-
-            if hasattr(av.lib, 'CODEC_ID_MPEG1VIDEO'):
-                mpg1CodecId = av.lib.CODEC_ID_MPEG1VIDEO
-            else:
-                mpg1CodecId = av.lib.AV_CODEC_ID_MPEG1VIDEO
             
-            if c.contents.codec_id == mpg1CodecId:
-                c.contents.mb_decision = 2;
+            if 'timeBase' in streamInfo:
+                c.contents.time_base.den = streamInfo['timeBase'][1]
+                c.contents.time_base.num = streamInfo['timeBase'][0]
+            else:
+                # note: even for writing an image, a time base is required
+                c.contents.time_base.den = FPS_DEFAULT[1]
+                c.contents.time_base.num = FPS_DEFAULT[0] 
+
+            # TODO: from info
+            #c.contents.gop_size = 12
+
+            if sys.version_info >= (3, 0):
+                pixFmt = ctypes.c_char_p(streamInfo['pixelFormat'].encode('utf8'))
+            else:
+                pixFmt = streamInfo['pixelFormat']
+            
+            c.contents.pix_fmt = av.lib.av_get_pix_fmt(pixFmt)
 
             if self.pFormatCtx.contents.oformat.contents.flags & av.lib.AVFMT_GLOBALHEADER:
                 c.contents.flags |= av.lib.CODEC_FLAG_GLOBAL_HEADER 
@@ -551,7 +550,8 @@ class Media(object):
             if res < 0:
                 raise RuntimeError(avError(res))
 
-            self.videoOutBufferSize = av.lib.avpicture_get_size(av.lib.PIX_FMT_YUV420P, streamInfo['width'], streamInfo['height'])
+            self.videoOutBufferSize = av.lib.avpicture_get_size(c.contents.pix_fmt, 
+                    streamInfo['width'], streamInfo['height'])
             self.videoOutBuffer = ctypes.cast(av.lib.av_malloc(self.videoOutBufferSize), 
                     ctypes.POINTER(ctypes.c_ubyte))
             self.outStream = stream
@@ -576,7 +576,7 @@ class Media(object):
             # find the audio encoder
             if not _codec:
 
-                if 'codec' in streamInfo and streamInfo['codec'] == 'auto':
+                if 'codec' not in streamInfo or streamInfo['codec'] == 'auto':
                     exceptMsg = 'Codec for format %s not found' % self.pFormatCtx.contents.oformat.contents.name
                 else:
                     exceptMsg = 'Codec %s not found' % _codec.contents.name
@@ -677,12 +677,12 @@ class Media(object):
 
         self.pkt = Packet(self.pFormatCtx)
         
-        # TODO: from codec
-        pix_fmt = av.lib.PIX_FMT_YUV420P
+        c = self.outStream.contents.codec
+        pixFmt = c.contents.pix_fmt
         
         av.lib.avpicture_alloc(
                 ctypes.cast(self.pkt.frame, ctypes.POINTER(av.lib.AVPicture)), 
-                pix_fmt,
+                pixFmt,
                 width, 
                 height)
 
@@ -782,6 +782,9 @@ class Media(object):
             if outPkt.size > 0:
                 pktRef = ctypes.byref(outPkt)
                 ret = av.lib.av_interleaved_write_frame(self.pFormatCtx, pktRef)
+
+        else:
+            raise RuntimeError('Unknown media type %s' % mediaType)
 
 class Packet(object):
 

@@ -185,6 +185,7 @@ function:
     - av_strerror
     - av_malloc
     - av_free
+    - av_get_pix_fmt
     ## avformat
     - av_register_all
     - av_iformat_next
@@ -213,6 +214,7 @@ function:
     - avpicture_alloc
     - avpicture_free
     - avcodec_alloc_frame
+    - avcodec_get_context_defaults3
     # test
     - avpicture_get_size
     - avpicture_fill

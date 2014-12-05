@@ -49,7 +49,7 @@ def fillYuvImage(picture, frameIndex, width, height):
     ''' yuv image generator
     '''
 
-    i = frameIndex;
+    i = frameIndex
 
     # Y
     for y in xrange(0, height):
@@ -87,26 +87,35 @@ if __name__ == '__main__':
         
         m = Media(options.media, 'w')
         
-        if options.mediaType == 'video':
-        
+        if options.mediaType == 'image':
+
             resolution = (320, 240)
 
-            # spec 
-            # mpeg4 ok
-            # ffv1 ok
-            # h263 ko
+            streamInfoVideo = {
+                'width': resolution[0],
+                'height': resolution[1],
+                'pixelFormat': 'rgb24',
+                'codec': 'tiff'
+                }
+
+            streamIndex = m.addStream('video', streamInfoVideo)
+        
+            pkt = m.videoPacket(*resolution)
+
+            # restrict to 1 image only
+            options.frameCount = 1
+
+        elif options.mediaType == 'video':
+        
+            resolution = (320, 240)
 
             streamInfoVideo = {
                 'bitRate': 400000,
                 'width': resolution[0],
                 'height': resolution[1],
+                # 25 fps
                 'timeBase': (1, 25),
                 'pixelFormat': 'yuv420p',
-                
-                # 'codec': 'h263',
-                #'codec': 'ffv1',
-                #'codec': 'mpeg4',
-                #'codec': 'mpeg2video',
                 }
 
             streamIndex = m.addStream('video', streamInfoVideo)
@@ -146,7 +155,14 @@ if __name__ == '__main__':
 
         while True:
 
-            if options.mediaType == 'video':
+            if options.mediaType == 'image':
+
+                progress('Generating image frame...    ')
+                # TODO: need a fillRgbImage
+                #fillYuvImage(pkt.frame, i, *resolution) 
+                m.write(pkt, i+1, 'video')
+            
+            elif options.mediaType == 'video':
 
                 progress('Generating video frame %d/%d...    ' % (i, maxFrame))
                 fillYuvImage(pkt.frame, i, *resolution) 
@@ -167,8 +183,8 @@ if __name__ == '__main__':
             else:
                 raise RuntimeError()
            
-            i+= 1
-            if i > maxFrame:
+            i+=1
+            if i >= maxFrame:
                 break
 
         m.writeTrailer()
