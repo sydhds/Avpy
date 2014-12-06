@@ -231,6 +231,7 @@ function:
     - av_interleaved_write_frame
     - avformat_write_header
     - avio_open
+    - avio_close
     - avformat_query_codec
     - avcodec_encode_audio2
     - avcodec_get_frame_defaults

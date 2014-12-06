@@ -222,7 +222,7 @@ class AVSubtitleRect(Structure):
 class N8AVOption4DOT_30E(Structure):
 	pass
 
-class N8AVPacket3DOT_0E(Structure):
+class N8AVPacket4DOT_30E(Structure):
 	pass
 
 class N8AVStream4DOT_29E(Structure):
@@ -265,7 +265,7 @@ AVPacket._fields_ = [
     ('size', c_int),
     ('stream_index', c_int),
     ('flags', c_int),
-    ('side_data', POINTER(N8AVPacket3DOT_0E)),
+    ('side_data', POINTER(N8AVPacket4DOT_30E)),
     ('side_data_elems', c_int),
     ('duration', c_int),
     ('destruct', CFUNCTYPE(None, POINTER(AVPacket))),
@@ -273,7 +273,7 @@ AVPacket._fields_ = [
     ('pos', int64_t),
     ('convergence_duration', int64_t),
 ]
-N8AVPacket3DOT_0E._fields_ = [
+N8AVPacket4DOT_30E._fields_ = [
     ('data', POINTER(uint8_t)),
     ('size', c_int),
     ('type', AVPacketSideDataType),
@@ -1011,6 +1011,9 @@ avformat_query_codec.argtypes = [POINTER(AVOutputFormat), AVCodecID, c_int]
 avio_open = _libraries['libavformat.so'].avio_open
 avio_open.restype = c_int
 avio_open.argtypes = [POINTER(POINTER(AVIOContext)), STRING, c_int]
+avio_close = _libraries['libavformat.so'].avio_close
+avio_close.restype = c_int
+avio_close.argtypes = [POINTER(AVIOContext)]
 av_dict_get = _libraries['libavutil.so'].av_dict_get
 av_dict_get.restype = POINTER(AVDictionaryEntry)
 av_dict_get.argtypes = [POINTER(AVDictionary), STRING, POINTER(AVDictionaryEntry), c_int]

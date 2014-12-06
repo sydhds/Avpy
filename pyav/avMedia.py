@@ -61,7 +61,7 @@ class Media(object):
             # not sure this is a right/elegant solution 
             if sys.version_info >= (3, 0):
                 _mediaName = mediaName.encode('utf-8')
-                defaultCodec = ctypes.c_char_p(b'mpeg')
+                defaultCodec = ctypes.c_char_p('mpeg'.encode('utf8'))
             else:
                 _mediaName = mediaName
                 defaultCodec = ctypes.c_char_p('mpeg')
@@ -89,12 +89,23 @@ class Media(object):
     def __del__(self):
 
         if self.pFormatCtx:
+            
             for i in range(self.pFormatCtx.contents.nb_streams):
                 cStream = self.pFormatCtx.contents.streams[i]
                 av.lib.avcodec_close(cStream.contents.codec)
 
             if self.mode == 'r':
                 av.lib.avformat_close_input(self.pFormatCtx)
+            elif self.mode == 'w':
+                
+                # FIXME: segfault
+                pass
+                #res = av.lib.avio_close(self.pFormatCtx.contents.pb) 
+                #if res < 0:
+                    #raise IOError(avError(res))
+
+            # FIXME: segfault
+            #av.lib.avformat_free_context(self.pFormatCtx)
 
     def info(self):
 
@@ -724,10 +735,18 @@ class Media(object):
 
         if mediaType == 'video':
 
+            # guess if we should use packet.frame or packet.swsFrame
+
+            pktFrame = packet.frame
+
+            swsCtx = packet.swsCtx[packet.streamIndex()]
+            if swsCtx:
+                pktFrame = packet.swsFrame
+
             if hasattr(av.lib, 'avcodec_encode_video'):
                
                 encSize = av.lib.avcodec_encode_video(c, 
-                        self.videoOutBuffer, self.videoOutBufferSize, packet.frame)
+                        self.videoOutBuffer, self.videoOutBufferSize, pktFrame)
      
                 if encSize > 0:
 
@@ -760,7 +779,7 @@ class Media(object):
 
                 av.lib.av_init_packet(outPktRef)
                 
-                encSize = av.lib.avcodec_encode_video2(c, outPktRef, packet.frame, self.decodedRef) 
+                encSize = av.lib.avcodec_encode_video2(c, outPktRef, pktFrame, self.decodedRef) 
                 
                 if outPkt.size > 0:
                     pktRef = ctypes.byref(outPkt)
@@ -899,7 +918,9 @@ class Packet(object):
                 
         # side data copy
         side_data_size = pkt.side_data_elems * ctypes.sizeof(av.lib.N8AVPacket4DOT_30E)
-        p.side_data = ctypes.cast(av.lib.av_malloc(side_data_size), ctypes.POINTER(av.lib.N8AVPacket4DOT_30E))
+        p.side_data = ctypes.cast(av.lib.av_malloc(side_data_size), 
+                ctypes.POINTER(av.lib.N8AVPacket4DOT_30E))
+
         # XXX: use memcpy from libavcodec?
         ctypes.memmove(pkt.side_data, srcPkt.side_data, side_data_size)
         

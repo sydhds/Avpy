@@ -185,6 +185,7 @@ function:
     - avformat_find_stream_info
     - av_guess_format
     - av_read_frame
+    - avformat_free_context
     # seek
     - av_seek_frame
     ## avocodec
@@ -217,6 +218,7 @@ function:
     - av_interleaved_write_frame
     - av_write_header
     - avio_open
+    - avio_close
     - avformat_query_codec
     - avcodec_encode_audio2
     - avcodec_get_frame_defaults
