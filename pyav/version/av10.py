@@ -222,7 +222,7 @@ class AVSubtitleRect(Structure):
 class N8AVOption4DOT_30E(Structure):
 	pass
 
-class N8AVPacket4DOT_30E(Structure):
+class N8AVPacket3DOT_0E(Structure):
 	pass
 
 class N8AVStream4DOT_29E(Structure):
@@ -265,7 +265,7 @@ AVPacket._fields_ = [
     ('size', c_int),
     ('stream_index', c_int),
     ('flags', c_int),
-    ('side_data', POINTER(N8AVPacket4DOT_30E)),
+    ('side_data', POINTER(N8AVPacket3DOT_0E)),
     ('side_data_elems', c_int),
     ('duration', c_int),
     ('destruct', CFUNCTYPE(None, POINTER(AVPacket))),
@@ -273,7 +273,7 @@ AVPacket._fields_ = [
     ('pos', int64_t),
     ('convergence_duration', int64_t),
 ]
-N8AVPacket4DOT_30E._fields_ = [
+N8AVPacket3DOT_0E._fields_ = [
     ('data', POINTER(uint8_t)),
     ('size', c_int),
     ('type', AVPacketSideDataType),
@@ -918,6 +918,9 @@ av_init_packet.argtypes = [POINTER(AVPacket)]
 av_free_packet = _libraries['libavcodec.so'].av_free_packet
 av_free_packet.restype = None
 av_free_packet.argtypes = [POINTER(AVPacket)]
+av_packet_move_ref = _libraries['libavcodec.so'].av_packet_move_ref
+av_packet_move_ref.restype = None
+av_packet_move_ref.argtypes = [POINTER(AVPacket), POINTER(AVPacket)]
 avcodec_find_decoder = _libraries['libavcodec.so'].avcodec_find_decoder
 avcodec_find_decoder.restype = POINTER(AVCodec)
 avcodec_find_decoder.argtypes = [AVCodecID]

@@ -899,30 +899,33 @@ class Packet(object):
         pkt = p.pkt
         srcPkt = self.pkt
 
-        pkt.pts = srcPkt.pts
-        pkt.dts = srcPkt.dts
-        pkt.size = srcPkt.size
-        pkt.stream_index = srcPkt.stream_index
-        pkt.flags = srcPkt.flags
-        pkt.side_data_elems = srcPkt.side_data_elems
-        pkt.duration = srcPkt.duration
-        pkt.destruct = srcPkt.destruct
-        pkt.pos = srcPkt.pos
-        pkt.convergence_duration = srcPkt.convergence_duration
+        if hasattr(av.lib, 'av_packet_move_ref'):
+            av.lib.av_packet_move_ref(pkt, srcPkt)
+        else:
+            pkt.pts = srcPkt.pts
+            pkt.dts = srcPkt.dts
+            pkt.size = srcPkt.size
+            pkt.stream_index = srcPkt.stream_index
+            pkt.flags = srcPkt.flags
+            pkt.side_data_elems = srcPkt.side_data_elems
+            pkt.duration = srcPkt.duration
+            pkt.destruct = srcPkt.destruct
+            pkt.pos = srcPkt.pos
+            pkt.convergence_duration = srcPkt.convergence_duration
 
-        # data copy
-        data_size = pkt.size * ctypes.sizeof(av.lib.uint8_t)
-        pkt.data = ctypes.cast( av.lib.av_malloc(data_size), ctypes.POINTER(av.lib.uint8_t))
-        # XXX: use memcpy from libavcodec?
-        ctypes.memmove(pkt.data, srcPkt.data, data_size)
-                
-        # side data copy
-        side_data_size = pkt.side_data_elems * ctypes.sizeof(av.lib.N8AVPacket4DOT_30E)
-        p.side_data = ctypes.cast(av.lib.av_malloc(side_data_size), 
-                ctypes.POINTER(av.lib.N8AVPacket4DOT_30E))
+            # data copy
+            data_size = pkt.size * ctypes.sizeof(av.lib.uint8_t)
+            pkt.data = ctypes.cast( av.lib.av_malloc(data_size), ctypes.POINTER(av.lib.uint8_t))
+            # XXX: use memcpy from libavcodec?
+            ctypes.memmove(pkt.data, srcPkt.data, data_size)
+                    
+            # side data copy
+            side_data_size = pkt.side_data_elems * ctypes.sizeof(av.lib.N8AVPacket4DOT_30E)
+            p.side_data = ctypes.cast(av.lib.av_malloc(side_data_size), 
+                    ctypes.POINTER(av.lib.N8AVPacket4DOT_30E))
 
-        # XXX: use memcpy from libavcodec?
-        ctypes.memmove(pkt.side_data, srcPkt.side_data, side_data_size)
+            # XXX: use memcpy from libavcodec?
+            ctypes.memmove(pkt.side_data, srcPkt.side_data, side_data_size)
         
         # scaler copy
         for streamIndex, scaler in enumerate(self.scaler):
