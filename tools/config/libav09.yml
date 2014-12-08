@@ -215,7 +215,8 @@ function:
     - av_get_sample_fmt_name
     - av_get_bytes_per_sample
     - av_write_trailer
-    - avcodec_encode_video
+    #- avcodec_encode_video
+    - avcodec_encode_video2
     - av_codec_get_id
     - av_init_packet
     - av_interleaved_write_frame
