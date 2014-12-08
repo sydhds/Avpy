@@ -17,8 +17,9 @@ More examples can be found in the examples folder.
 FeatureMatrix:
 - libav: 
     - version 0.8: done
-    - version 0.9: done
-    - version 0.10: done
+    - version 9: done
+    - version 10: done
+    - version 11: done
 - ffmpeg:
     - version 1.2: todo
     - version 2.1: todo
