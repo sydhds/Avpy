@@ -198,6 +198,7 @@ function:
     - avformat_find_stream_info
     - av_guess_format
     - av_read_frame
+    - av_guess_codec
     # seek
     - av_seek_frame
     ## avocodec

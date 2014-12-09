@@ -80,6 +80,10 @@ if __name__ == '__main__':
             type='int',
             default=125)
     
+    # test only
+    parser.add_option('--forceFmt',
+            help='force to use pixel format, image only')
+
     (options, args) = parser.parse_args() 
 
     # open
@@ -94,9 +98,15 @@ if __name__ == '__main__':
             streamInfoVideo = {
                 'width': resolution[0],
                 'height': resolution[1],
-                'pixelFormat': 'rgb24',
-                'codec': 'tiff'
                 }
+
+            # codec auto. guess
+            streamInfoVideo['codec'] = 'auto'
+
+            if options.forceFmt:
+                streamInfoVideo['pixelFormat'] = options.forceFmt
+            else:
+                streamInfoVideo['pixelFormat'] = 'rgb24'
 
             streamIndex = m.addStream('video', streamInfoVideo)
         

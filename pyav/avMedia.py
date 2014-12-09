@@ -23,7 +23,7 @@ class Media(object):
 
 	'''
  
-        av.lib.av_log_set_level(av.lib.AV_LOG_QUIET)
+        #av.lib.av_log_set_level(av.lib.AV_LOG_QUIET)
 
         av.lib.av_register_all()
         self.pFormatCtx = ctypes.POINTER(av.lib.AVFormatContext)()
@@ -489,8 +489,12 @@ class Media(object):
                 codecRequested = _codecRequested
 
             if _codecRequested == 'auto':
-                codecId = self.pFormatCtx.contents.oformat.contents.video_codec
+                oformat = self.pFormatCtx.contents.oformat
+                codecId = av.lib.av_guess_codec(oformat,
+                        None, self.pFormatCtx.contents.filename,
+                        None, av.lib.AVMEDIA_TYPE_VIDEO)
                 _codec = av.lib.avcodec_find_encoder(codecId)
+
             else:
                 _codec = av.lib.avcodec_find_encoder_by_name(codecRequested)
                 if _codec:
@@ -577,8 +581,13 @@ class Media(object):
                 codecRequested = _codecRequested
 
             if _codecRequested == 'auto':
-                codecId = self.pFormatCtx.contents.oformat.contents.audio_codec
+
+                oformat = self.pFormatCtx.contents.oformat
+                codecId = av.lib.av_guess_codec(oformat,
+                        None, self.pFormatCtx.contents.filename,
+                        None, av.lib.AVMEDIA_TYPE_AUDIO)
                 _codec = av.lib.avcodec_find_encoder(codecId)
+                
             else:
                 _codec = av.lib.avcodec_find_encoder_by_name(codecRequested)
                 if _codec:

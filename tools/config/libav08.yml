@@ -184,6 +184,7 @@ function:
     - avformat_close_input
     - avformat_find_stream_info
     - av_guess_format
+    - av_guess_codec
     - av_read_frame
     - avformat_free_context
     # seek
