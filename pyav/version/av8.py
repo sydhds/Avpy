@@ -44,8 +44,8 @@ _libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
 _libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)
 
 STRING = c_char_p
-size_t = c_ulong
 AVSampleFormat = c_int # enum
+size_t = c_ulong
 CodecID = c_int # enum
 AVDiscard = c_int # enum
 AVColorPrimaries = c_int # enum
@@ -73,36 +73,36 @@ int32_t = c_int32
 
 AV_SAMPLE_FMT_S16 = 1
 CODEC_ID_MPEG2VIDEO = 2
-CODEC_ID_MPEG1VIDEO = 1
-CODEC_ID_NONE = 0
-AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
-AVMEDIA_TYPE_VIDEO = 0
-AVMEDIA_TYPE_SUBTITLE = 3
-AVMEDIA_TYPE_AUDIO = 1
+PIX_FMT_RGB8 = 22
 SUBTITLE_ASS = 3
 SUBTITLE_TEXT = 2
-SUBTITLE_BITMAP = 1
-PIX_FMT_RGB24 = 2
 PIX_FMT_YUV420P = 0
 PIX_FMT_NONE = -1
-PIX_FMT_RGB8 = 22
+SUBTITLE_BITMAP = 1
+CODEC_ID_MPEG1VIDEO = 1
+AVMEDIA_TYPE_SUBTITLE = 3
+AVMEDIA_TYPE_AUDIO = 1
+AVMEDIA_TYPE_VIDEO = 0
+AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
 SUBTITLE_NONE = 0
+CODEC_ID_NONE = 0
+PIX_FMT_RGB24 = 2
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
 AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
 CODEC_CAP_AUTO_THREADS = 32768 # Variable c_int '32768'
 AVFMT_NOFILE = 1 # Variable c_int '1'
 AV_PKT_FLAG_KEY = 1 # Variable c_int '1'
+CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
 CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
 AV_TIME_BASE = 1000000 # Variable c_int '1000000'
 FF_COMPLIANCE_STRICT = 1 # Variable c_int '1'
 AVIO_FLAG_WRITE = 2 # Variable c_int '2'
-CODEC_CAP_SLICE_THREADS = 8192 # Variable c_int '8192'
-AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
 AVSEEK_FLAG_FRAME = 8 # Variable c_int '8'
-CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
-AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
+AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
+CODEC_CAP_SLICE_THREADS = 8192 # Variable c_int '8192'
 AVSEEK_FLAG_BYTE = 2 # Variable c_int '2'
+AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
 FF_COMPLIANCE_NORMAL = 0 # Variable c_int '0'
 
 AV_NOPTS_VALUE = 9223372036854775808 # Variable c_ulong '-9223372036854775808ul'
@@ -218,6 +218,9 @@ class AVSubtitle(Structure):
 class AVSubtitleRect(Structure):
 	pass
 
+class N8AVOption4DOT_37E(Structure):
+	pass
+
 class N8AVPacket4DOT_30E(Structure):
 	pass
 
@@ -236,8 +239,16 @@ class SwsFilter(Structure):
 class SwsVector(Structure):
 	pass
 
+AV_CH_LAYOUT_5POINT1 = 1551 # Variable c_int '1551'
+AV_CH_LAYOUT_QUAD = 51 # Variable c_int '51'
+AV_CH_LAYOUT_MONO = 4 # Variable c_int '4'
+AV_CH_LAYOUT_5POINT0 = 1543 # Variable c_int '1543'
+AV_CH_LAYOUT_STEREO = 3 # Variable c_int '3'
+AV_CH_LAYOUT_SURROUND = 7 # Variable c_int '7'
+AV_CH_LAYOUT_7POINT1 = 1599 # Variable c_int '1599'
 AVMetadata = AVDictionary
 ByteIOContext = AVIOContext
+AVOptionType = c_int # enum
 
 RcOverride._fields_ = [
     ('start_frame', c_int),
@@ -880,7 +891,22 @@ AVIOContext._fields_ = [
 ]
 AVDictionary._fields_ = [
 ]
+N8AVOption4DOT_37E._fields_ = [
+    ('dbl', c_double),
+    ('str', STRING),
+    ('i64', int64_t),
+    ('q', AVRational),
+]
 AVOption._fields_ = [
+    ('name', STRING),
+    ('help', STRING),
+    ('offset', c_int),
+    ('type', AVOptionType),
+    ('default_val', N8AVOption4DOT_37E),
+    ('min', c_double),
+    ('max', c_double),
+    ('flags', c_int),
+    ('unit', STRING),
 ]
 AVClass._fields_ = [
     ('class_name', STRING),
@@ -1040,6 +1066,9 @@ avio_open.argtypes = [POINTER(POINTER(AVIOContext)), STRING, c_int]
 avio_close = _libraries['libavformat.so'].avio_close
 avio_close.restype = c_int
 avio_close.argtypes = [POINTER(AVIOContext)]
+av_get_channel_layout = _libraries['libavutil.so'].av_get_channel_layout
+av_get_channel_layout.restype = uint64_t
+av_get_channel_layout.argtypes = [STRING]
 av_dict_get = _libraries['libavutil.so'].av_dict_get
 av_dict_get.restype = POINTER(AVDictionaryEntry)
 av_dict_get.argtypes = [POINTER(AVDictionary), STRING, POINTER(AVDictionaryEntry), c_int]

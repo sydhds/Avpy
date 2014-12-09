@@ -176,6 +176,7 @@ function:
     - av_malloc
     - av_free
     - av_get_pix_fmt
+    - av_get_default_channel_layout
     ## avformat
     - av_register_all
     - av_iformat_next

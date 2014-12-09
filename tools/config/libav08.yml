@@ -71,10 +71,20 @@ define:
 alias:
     - ByteIOContext
     - AVMetadata
+    - AVOptionType
+    # channel layout
+    - AV_CH_LAYOUT_MONO
+    - AV_CH_LAYOUT_STEREO
+    - AV_CH_LAYOUT_SURROUND
+    - AV_CH_LAYOUT_QUAD
+    - AV_CH_LAYOUT_5POINT0
+    - AV_CH_LAYOUT_5POINT1
+    - AV_CH_LAYOUT_7POINT1
 
 class:
     - N8AVPacket4DOT_30E
     - N8AVStream4DOT_33E
+    - N8AVOption4DOT_37E
     - AVProfile
     - AVPanScan
     - AVCodec
@@ -173,6 +183,7 @@ function:
     - av_malloc
     - av_free
     - av_get_pix_fmt
+    - av_get_channel_layout
     ## avformat
     - av_register_all
     - av_iformat_next

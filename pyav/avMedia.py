@@ -23,7 +23,7 @@ class Media(object):
 
 	'''
  
-        av.lib.av_log_set_level(av.lib.AV_LOG_QUIET)
+        #av.lib.av_log_set_level(av.lib.AV_LOG_QUIET)
 
         av.lib.av_register_all()
         self.pFormatCtx = ctypes.POINTER(av.lib.AVFormatContext)()
@@ -634,7 +634,16 @@ class Media(object):
             c.contents.sample_fmt = av.lib.AV_SAMPLE_FMT_S16;
             c.contents.bit_rate = streamInfo['bitRate']
             c.contents.sample_rate = streamInfo['sampleRate']
-            c.contents.channels = streamInfo['channels']
+
+            nbChannels = streamInfo['channels']
+            c.contents.channels = nbChannels
+
+            if hasattr(av.lib, 'av_get_default_channel_layout'):
+                f = av.lib.av_get_default_channel_layout
+            else:
+                f = guessChannelLayout
+
+            c.contents.channel_layout = f(nbChannels)
 
             if self.pFormatCtx.contents.oformat.contents.flags & av.lib.AVFMT_GLOBALHEADER:
                 c.contents.flags |= av.lib.CODEC_FLAG_GLOBAL_HEADER 
@@ -1060,4 +1069,24 @@ def avError(res):
     else:
         return buf.value
 
+
+def guessChannelLayout(nbChannels):
+
+    # reimplement avcodec_guess_channel_layout (libav8)
+
+    channelMap = {
+            1: av.lib.AV_CH_LAYOUT_MONO,
+            2: av.lib.AV_CH_LAYOUT_STEREO,
+            3: av.lib.AV_CH_LAYOUT_SURROUND,
+            4: av.lib.AV_CH_LAYOUT_QUAD,
+            5: av.lib.AV_CH_LAYOUT_5POINT0,
+            6: av.lib.AV_CH_LAYOUT_5POINT1,
+            8: av.lib.AV_CH_LAYOUT_7POINT1,
+            }
+
+    res = 0
+    if nbChannels in channelMap:
+        res = channelMap[nbChannels]
+
+    return res
 
