@@ -23,7 +23,7 @@ class Media(object):
 
 	'''
  
-        #av.lib.av_log_set_level(av.lib.AV_LOG_QUIET)
+        av.lib.av_log_set_level(av.lib.AV_LOG_QUIET)
 
         av.lib.av_register_all()
         self.pFormatCtx = ctypes.POINTER(av.lib.AVFormatContext)()
@@ -69,7 +69,6 @@ class Media(object):
             # Autodetect the output format from the name, default to MPEG
             fmt = av.lib.av_guess_format(None, _mediaName, None)
             if not fmt:
-                #print('Could not deduce output format from file extension: using MPEG.')
                 fmt = av.lib.av_guess_format(defaultCodec, None ,None)
 
             if not fmt:
@@ -84,6 +83,7 @@ class Media(object):
             self.pFormatCtx.contents.filename = _mediaName
 
         self.pkt = None
+        self.videoOutBuffer = None
         self.mode = mode
 
     def __del__(self):
@@ -99,7 +99,10 @@ class Media(object):
                 av.lib.avformat_close_input(self.pFormatCtx)
             
             elif self.mode == 'w':
-                
+               
+                if self.videoOutBuffer:
+                    av.lib.av_free(self.videoOutBuffer)
+
                 pAvioCtx = self.pFormatCtx.contents.pb
                 
                 if pAvioCtx:
@@ -566,7 +569,8 @@ class Media(object):
             res = av.lib.avcodec_open2(c, None, None) 
             if res < 0:
                 raise RuntimeError(avError(res))
-
+            
+            # FIXME: only alloc for libav8?
             self.videoOutBufferSize = av.lib.avpicture_get_size(c.contents.pix_fmt, 
                     streamInfo['width'], streamInfo['height'])
             self.videoOutBuffer = ctypes.cast(av.lib.av_malloc(self.videoOutBufferSize), 
@@ -723,7 +727,7 @@ class Media(object):
         else:
             bufSize = av.lib.av_samples_get_buffer_size(None, c.contents.channels, c.contents.frame_size,
                     c.contents.sample_fmt, 0)
-
+        
         buf = ctypes.cast(av.lib.av_malloc(bufSize), ctypes.POINTER(ctypes.c_uint16))
         #ctypes.memset(buf, 0, bufSize) 
         
