@@ -95,17 +95,19 @@ class Media(object):
                 av.lib.avcodec_close(cStream.contents.codec)
 
             if self.mode == 'r':
+
                 av.lib.avformat_close_input(self.pFormatCtx)
+            
             elif self.mode == 'w':
                 
-                # FIXME: segfault
-                pass
-                #res = av.lib.avio_close(self.pFormatCtx.contents.pb) 
-                #if res < 0:
-                    #raise IOError(avError(res))
+                pAvioCtx = self.pFormatCtx.contents.pb
+                
+                if pAvioCtx:
+                    res = av.lib.avio_close(pAvioCtx) 
+                    if res < 0:
+                        raise IOError(avError(res))
 
-            # FIXME: segfault
-            #av.lib.avformat_free_context(self.pFormatCtx)
+            av.lib.avformat_free_context(self.pFormatCtx)
 
     def info(self):
 
@@ -655,11 +657,14 @@ class Media(object):
         
         fmt = self.pFormatCtx.contents.oformat
         fn = self.pFormatCtx.contents.filename
-        if not (fmt.contents.flags & av.lib.AVFMT_NOFILE):
-            res = av.lib.avio_open(ctypes.byref(self.pFormatCtx.contents.pb), 
-                    fn, av.lib.AVIO_FLAG_WRITE)
-            if res < 0:
-                raise IOError(avError(res))
+        #if not (fmt.contents.flags & av.lib.AVFMT_NOFILE):
+            
+            #print 'opening avio_open...'
+            
+        res = av.lib.avio_open(ctypes.byref(self.pFormatCtx.contents.pb), 
+                fn, av.lib.AVIO_FLAG_WRITE)
+        if res < 0:
+            raise IOError(avError(res))
 
         if metaData:
             for k in metaData:

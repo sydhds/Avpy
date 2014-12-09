@@ -199,6 +199,7 @@ function:
     - av_guess_format
     - av_read_frame
     - av_guess_codec
+    - avformat_free_context
     # seek
     - av_seek_frame
     ## avocodec
