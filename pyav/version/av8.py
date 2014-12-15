@@ -71,6 +71,7 @@ AVSubtitleType = c_int # enum
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
+AV_SAMPLE_FMT_NONE = -1
 AV_SAMPLE_FMT_S16 = 1
 CODEC_ID_MPEG2VIDEO = 2
 PIX_FMT_RGB8 = 22
@@ -1093,6 +1094,9 @@ av_get_pix_fmt.argtypes = [STRING]
 av_get_sample_fmt_name = _libraries['libavutil.so'].av_get_sample_fmt_name
 av_get_sample_fmt_name.restype = STRING
 av_get_sample_fmt_name.argtypes = [AVSampleFormat]
+av_get_sample_fmt = _libraries['libavutil.so'].av_get_sample_fmt
+av_get_sample_fmt.restype = AVSampleFormat
+av_get_sample_fmt.argtypes = [STRING]
 av_get_bytes_per_sample = _libraries['libavutil.so'].av_get_bytes_per_sample
 av_get_bytes_per_sample.restype = c_int
 av_get_bytes_per_sample.argtypes = [AVSampleFormat]

@@ -60,6 +60,7 @@ define:
     - AVIO_FLAG_WRITE
     - FF_COMPLIANCE_NORMAL
     - FF_COMPLIANCE_STRICT
+    - AV_SAMPLE_FMT_NONE
     - AV_SAMPLE_FMT_S16
     # seek
     - AVSEEK_FLAG_FRAME 
@@ -215,6 +216,7 @@ function:
     - av_free_packet
     # encoding
     - avcodec_find_encoder
+    - av_get_sample_fmt
     - av_get_sample_fmt_name
     - av_get_bytes_per_sample
     - av_write_trailer

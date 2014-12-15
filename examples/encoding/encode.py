@@ -81,6 +81,10 @@ if __name__ == '__main__':
             default=125)
     
     # test only
+    parser.add_option('--forceCodec',
+            help='force to use codec, audio only')
+    parser.add_option('--forceSampleFormat',
+            help='force to use sample format, audio only')
     parser.add_option('--forceFmt',
             help='force to use pixel format, image only')
 
@@ -141,6 +145,14 @@ if __name__ == '__main__':
                     'codec': 'auto',
                     }
 
+            if options.forceSampleFormat:
+                streamInfoAudio['sampleFmt'] = options.forceSampleFormat
+            if options.forceCodec:
+                streamInfoAudio['codec'] = options.forceCodec
+
+            if options.forceSampleFormat and options.forceSampleFormat != 's16':
+                print('Warning: will generate a silent sound!') 
+
             streamIndex = m.addStream('audio',
                     streamInfo=streamInfoAudio)
 
@@ -182,7 +194,9 @@ if __name__ == '__main__':
 
                 # FIXME frame size
                 progress('Generating audio frame %d/%d...    ' % (i, maxFrame))
-                sg.audioFrame(pkt, frameSize, streamInfoAudio['channels'])
+                
+                if 'sampleFmt' not in streamInfoAudio or streamInfoAudio['sampleFmt'] == 's16': 
+                    sg.audioFrame(pkt, frameSize, streamInfoAudio['channels'])
 
                 m.write(pkt, i+1, options.mediaType) 
 

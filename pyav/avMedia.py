@@ -12,7 +12,7 @@ FPS_DEFAULT = (1, 24)
 
 class Media(object):
 
-    def __init__(self, mediaName, mode='r'):
+    def __init__(self, mediaName, mode='r', quiet=True):
         
         '''Command constructor
 
@@ -23,7 +23,8 @@ class Media(object):
 
 	'''
  
-        #av.lib.av_log_set_level(av.lib.AV_LOG_QUIET)
+        if quiet:
+            av.lib.av_log_set_level(av.lib.AV_LOG_QUIET)
 
         av.lib.av_register_all()
         self.pFormatCtx = ctypes.POINTER(av.lib.AVFormatContext)()
@@ -406,7 +407,7 @@ class Media(object):
             sfmts = c.contents.sample_fmts
             if sfmts:
                 for s in sfmts:
-                    if s == -1:
+                    if s == av.lib.AV_SAMPLE_FMT_NONE:
                         break
                     ci['sample_fmts'].append(av.lib.av_get_sample_fmt_name(s))
 
@@ -630,8 +631,35 @@ class Media(object):
 
             c = stream.contents.codec
 
+            av.lib.avcodec_get_context_defaults3(c, _codec)
+            
             # sample parameters 
-            c.contents.sample_fmt = av.lib.AV_SAMPLE_FMT_S16;
+            if 'sampleFmt' in streamInfo:
+
+                _sfmt = streamInfo.get('sampleFmt', '')
+                if sys.version_info >= (3, 0):
+                    _sfmt = _sfmt.encode('utf-8')
+                
+                sampleFmt = av.lib.av_get_sample_fmt(_sfmt)
+            else:
+                # default to signed 16 bits sample format
+                sampleFmt = av.lib.AV_SAMPLE_FMT_S16
+
+            # check if sample format is supported by codec
+            # TODO: facto. codec - see codecInfo 
+            sfmtOk = False
+            for sfmt in _codec.contents.sample_fmts:
+                if sfmt == av.lib.AV_SAMPLE_FMT_NONE:
+                    break
+                else:
+                    if sampleFmt == sfmt:
+                        sfmtOk = True
+                        break
+
+            if not sfmtOk:
+                raise RuntimeError('Sample format %s not supported' % av.lib.av_get_sample_fmt_name(sampleFmt))
+
+            c.contents.sample_fmt = sampleFmt
             c.contents.bit_rate = streamInfo['bitRate']
             c.contents.sample_rate = streamInfo['sampleRate']
 
@@ -670,10 +698,7 @@ class Media(object):
         
         fmt = self.pFormatCtx.contents.oformat
         fn = self.pFormatCtx.contents.filename
-        #if not (fmt.contents.flags & av.lib.AVFMT_NOFILE):
-            
-            #print 'opening avio_open...'
-            
+         
         res = av.lib.avio_open(ctypes.byref(self.pFormatCtx.contents.pb), 
                 fn, av.lib.AVIO_FLAG_WRITE)
         if res < 0:
@@ -737,14 +762,14 @@ class Media(object):
             bufSize = av.lib.av_samples_get_buffer_size(None, c.contents.channels, c.contents.frame_size,
                     c.contents.sample_fmt, 0)
         
-        buf = ctypes.cast(av.lib.av_malloc(bufSize), ctypes.POINTER(ctypes.c_uint16))
-        #ctypes.memset(buf, 0, bufSize) 
+        buf = av.lib.av_malloc(bufSize)
         
         self.pkt = Packet(self.pFormatCtx)
 
         av.lib.avcodec_get_frame_defaults(self.pkt.frame) 
 
-        self.pkt.frame.contents.nb_samples = int(bufSize / (channels * av.lib.av_get_bytes_per_sample(av.lib.AV_SAMPLE_FMT_S16)))
+        self.pkt.frame.contents.nb_samples = int(bufSize / 
+                (channels * av.lib.av_get_bytes_per_sample(c.contents.sample_fmt)))
         
         res = av.lib.avcodec_fill_audio_frame(self.pkt.frame, 
                 c.contents.channels, c.contents.sample_fmt,
