@@ -47,11 +47,6 @@
   * Dump to a text file
 
 
-* videoPlayer
-
-  * Simple video player (WIP, linux/alsa only) 
-
-
 * outputPil
 
   * Decode first video stream of media and write greyscale png
@@ -65,7 +60,6 @@
 
   * outputSDL2.py -> dump video player
 
-  * audioSDL2.py -> audio player
 
 * misc
 

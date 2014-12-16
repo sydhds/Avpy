@@ -20,10 +20,6 @@ FeatureMatrix:
     - version 9: done
     - version 10: done
     - version 11: done
-- ffmpeg:
-    - version 1.2: todo
-    - version 2.1: todo
-    - version 2.2: todo
 - OS: 
     - Linux - BSD: done
     - MacOS: please report!
@@ -32,11 +28,8 @@ FeatureMatrix:
     - media info: done
     - basic video decoding: done
     - basic audio decoding: done
-    - sync video player: wip 
-    - subtitle support: wip
     - basic encoding: done
-    - filter: todo
-    - accurate seeking: todo
+    - subtitle support: done
 - doc:
     - sphinx doc: done
 - examples:
@@ -44,12 +37,24 @@ FeatureMatrix:
     - alsaaudio: done
     - Pygame: done
     - PIL, pillow: done
-    - PySDL2: wip
+    - PySDL2 video: done
     - encoding: done
 - misc:
     - Python2.6, 2.7: done
     - Python3: done
     - PyPy: done
+
+Missing features:
+
+- ffmpeg:
+    - version ?: todo
+- pyav:
+    - filter: todo (see old filter branch)
+    - audio resampling: todo
+    - seeking: todo
+- examples:
+    - PySDL2 audio: todo
+    - PySDL2 video player: todo
 
 Install
 =======
