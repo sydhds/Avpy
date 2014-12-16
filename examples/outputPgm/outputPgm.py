@@ -51,19 +51,8 @@ if __name__ == '__main__':
             type='int',
             default=5,
             help='number of image to save (default: %default)')
-    parser.add_option('-s', '--seek', 
-            action='store_true',
-            default=False,
-            help='(EXPERIMENTAL) use seek if an offset is given (default: %default)')
-    parser.add_option('--seek_index', 
-            action='store_true',
-            default=False,
-            help='(EXPERIMENTAL) pass video stream index to seek function - DEBUG only (default: %default)')
 
     (options, args) = parser.parse_args()
-
-    if options.seek_index:
-        options.seek = True
 
     if not options.media:
         print('Please provide a media to play with -m or --media option')
@@ -93,21 +82,6 @@ if __name__ == '__main__':
 
     m.addScaler2(vstream, w, h)
 
-    seekOffset = 0
-    if options.offset and options.seek:
-        
-        fpsTuple = streamInfo['fps']
-        fps = fpsTuple[1]/float(fpsTuple[0] * fpsTuple[2])
-        seekTime = options.offset / fps
-        seekStreamIndex = vstream if options.seek_index else -1
-        seekResult = m.seek(seekTime, streamIndex=seekStreamIndex)
-        if seekResult < 0:
-            raise RuntimeError('Could not seek to given offset')
-        
-        seekOffset = options.offset - 1
-        # reset offset
-        options.offset = 0
-   
     decodedCount = 0
     for p in m:
         
@@ -116,11 +90,11 @@ if __name__ == '__main__':
             if p.decoded:
 
                 decodedCount += 1
-                print('decoded frame %d' % (decodedCount+seekOffset))
+                print('decoded frame %d' % decodedCount)
 
                 if decodedCount >= options.offset:
                     print('saving frame...')
-                    saveFrame(p.swsFrame, w, h, decodedCount+seekOffset)
+                    saveFrame(p.swsFrame, w, h, decodedCount)
 
                 if decodedCount >= options.offset+options.frameCount:
                     break 

@@ -464,24 +464,6 @@ class Media(object):
         self.pkt.scaler[streamIndex] = scaler         
         self.pkt.addScaler(*scaler)
 
-    def seek(self, time, direction='forward', streamIndex=-1):
-
-        # seek to given time in direction
-        # :time (float): in seconds
-
-        flags = 0
-        if direction == 'backward':
-            flags = av.lib.AVSEEK_FLAG_BACKWARD
-        
-        if streamIndex >= 0:
-            # FIXME: should be stream time base... 
-            timestamp = time * av.lib.AV_TIME_BASE
-        else:
-            timestamp = time * av.lib.AV_TIME_BASE
-        timestamp = int(round(time * av.lib.AV_TIME_BASE)) 
-        
-        return av.lib.av_seek_frame(self.pFormatCtx, -1, timestamp, flags)
-
     def addStream(self, streamType, streamInfo):
 
         ''' Add a stream

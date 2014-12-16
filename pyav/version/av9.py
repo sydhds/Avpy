@@ -208,7 +208,7 @@ class AVSubtitle(Structure):
 class AVSubtitleRect(Structure):
 	pass
 
-class N8AVOption4DOT_30E(Structure):
+class N8AVOption4DOT_31E(Structure):
 	pass
 
 class N8AVPacket4DOT_30E(Structure):
