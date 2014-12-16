@@ -87,7 +87,7 @@ if __name__ == '__main__':
     else:
         print('render: software rgb (very slow)')
         # add scaler to convert to rgb
-        m.addScaler2(vstream, *size)
+        m.addScaler(vstream, *size)
 
     decodedCount = 0
     mainLoop = True

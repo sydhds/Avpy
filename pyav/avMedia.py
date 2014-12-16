@@ -443,8 +443,7 @@ class Media(object):
         # end of generator
         raise StopIteration
 
-    # TODO: rename to addScaler
-    def addScaler2(self, streamIndex, width, height):
+    def addScaler(self, streamIndex, width, height):
 
         ''' add a scaler for given stream
 

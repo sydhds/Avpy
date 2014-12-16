@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
     print('video stream resolution: %dx%d' % (w, h))
 
-    m.addScaler2(vstream, w, h)
+    m.addScaler(vstream, w, h)
 
     decodedCount = 0
     for p in m:

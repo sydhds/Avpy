@@ -171,14 +171,14 @@ if __name__ == '__main__':
             print('mode 2: basic rgb rendering (slow)...')
 
             # mode 2
-            m.addScaler2(vstream, *size)
+            m.addScaler(vstream, *size)
         
     else:
         
         print('mode 3: software rendering (very slow)...')
         
         # mode 3
-        m.addScaler2(vstream, *size)
+        m.addScaler(vstream, *size)
         
         sdl2.SDL_DestroyRenderer(renderer)
         windowSurface = sdl2.SDL_GetWindowSurface(window)

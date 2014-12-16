@@ -63,8 +63,7 @@ if __name__ == '__main__':
     print('video stream index: %d' % vstream)
     print('video stream resolution: %dx%d' % (size[0], size[1]))
 
-    #m.addScaler(vstream)
-    m.addScaler2(vstream, *size)
+    m.addScaler(vstream, *size)
 
     # sdl2
     sdl2Version = sdl2.version_info

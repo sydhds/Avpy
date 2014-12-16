@@ -73,7 +73,7 @@ if __name__ == '__main__':
     else:
         print('Using PIL frombuffer method...')
         
-    m.addScaler2(vstream, *size)
+    m.addScaler(vstream, *size)
 
     decodedCount = 0
     for p in m:
