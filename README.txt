@@ -5,12 +5,11 @@ Pyav
 Pyav is a ctypes binding for libav (and ffmpeg). Typical usage often 
 looks like this:
 
-#!/usr/bin/env python
-from pyav import Media
-print Media.formats()
-print Media.codecInfo('mp3')
-m = Media('test.avi')
-print m.info()
+>>> from pyav import Media
+>>> print Media.formats()
+>>> print Media.codecInfo('mp3')
+>>> m = Media('test.avi')
+>>> print m.info()
 
 More examples can be found in the examples folder.
 
@@ -35,7 +34,7 @@ FeatureMatrix:
     - basic audio decoding: done
     - sync video player: wip 
     - subtitle support: wip
-    - encoding: todo
+    - basic encoding: done
     - filter: todo
     - accurate seeking: todo
 - doc:
@@ -43,13 +42,14 @@ FeatureMatrix:
 - examples:
     - dump image/wav/subtitle: done
     - alsaaudio: done
-    - Pygame: wip
+    - Pygame: done
     - PIL, pillow: done
     - PySDL2: wip
-    - PyAL: todo
+    - encoding: done
 - misc:
     - Python2.6, 2.7: done
     - Python3: done
+    - PyPy: done
 
 Install
 =======
