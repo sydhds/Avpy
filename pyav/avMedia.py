@@ -794,7 +794,8 @@ class Media(object):
             swsCtx = packet.swsCtx[packet.streamIndex()]
             if swsCtx:
                 pktFrame = packet.swsFrame
-
+            
+            # libav8: encode_video, libav 9 or > encode_video2
             if hasattr(av.lib, 'avcodec_encode_video'):
                
                 encSize = av.lib.avcodec_encode_video(c, 
