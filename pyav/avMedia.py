@@ -111,7 +111,7 @@ class Media(object):
                     if res < 0:
                         raise IOError(avError(res))
 
-            av.lib.avformat_free_context(self.pFormatCtx)
+                av.lib.avformat_free_context(self.pFormatCtx)
 
     def info(self):
 

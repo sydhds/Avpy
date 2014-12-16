@@ -93,7 +93,7 @@ if __name__ == '__main__':
     # open
     if options.media:
         
-        m = Media(options.media, 'w')
+        m = Media(options.media, 'w', quiet=False)
         
         if options.mediaType == 'image':
 

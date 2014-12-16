@@ -75,7 +75,7 @@ if __name__ == '__main__':
                 if decodedCount >= options.offset:
                     print('saving frame...')
                     fn = 'frame.%d.tiff' % decodedCount
-                    m2 = Media(fn, 'w')
+                    m2 = Media(fn, 'w', quiet=False)
                     streamInfoImage = {
                             'width': w,
                             'height': h,
