@@ -5,20 +5,22 @@ Pyav
 Pyav is a ctypes binding for libav (and ffmpeg). Typical usage often 
 looks like this:
 
-    #!/usr/bin/env python
-    from pyav import Media
-    print Media.formats()
-    print Media.codecInfo('mp3')
-    m = Media('test.avi')
-    print m.info()
+#!/usr/bin/env python
+from pyav import Media
+print Media.formats()
+print Media.codecInfo('mp3')
+m = Media('test.avi')
+print m.info()
 
 More examples can be found in the examples folder.
 
 FeatureMatrix:
+
 - libav: 
     - version 0.8: done
-    - version 0.9: done
-    - version 0.10: done
+    - version 9: done
+    - version 10: done
+    - version 11: done
 - ffmpeg:
     - version 1.2: todo
     - version 2.1: todo

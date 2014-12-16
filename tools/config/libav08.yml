@@ -185,6 +185,9 @@ function:
     - av_free
     - av_get_pix_fmt
     - av_get_channel_layout
+    - avutil_version
+    - avutil_configuration
+    - avutil_license
     ## avformat
     - av_register_all
     - av_iformat_next
@@ -199,6 +202,9 @@ function:
     - av_guess_codec
     - av_read_frame
     - avformat_free_context
+    - avformat_version
+    - avformat_configuration
+    - avformat_license
     # seek
     - av_seek_frame
     ## avocodec
@@ -216,6 +222,13 @@ function:
     - avpicture_free
     - avcodec_alloc_frame
     - avcodec_get_context_defaults3
+    - avcodec_version
+    - avcodec_configuration
+    - avcodec_license
+    ## avdevice
+    - avdevice_version
+    - avdevice_configuration
+    - avdevice_license
     # test
     - avpicture_get_size
     - avpicture_fill
@@ -244,4 +257,7 @@ function:
     - sws_getContext
     - sws_freeContext
     - sws_scale
+    - swscale_version
+    - swscale_configuration
+    - swscale_license
 

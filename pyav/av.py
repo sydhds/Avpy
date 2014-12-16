@@ -16,12 +16,22 @@ def version():
             libavutil = os.environ['PYAV_AVUTIL']
         else:
             libavutil = os.path.join(fold, re.sub('avcodec', 'avutil', base))
+
+        if 'PYAV_AVRESAMPLE' in os.environ:
+            libavresample = os.environ['PYAV_AVRESAMPLE']
+        else:
+            libavresample = os.path.join(fold, re.sub('avcodec', 'avresample', base))
+
         libavcodec = os.environ['PYAV_AVCODEC']
     else:
         libavutil = util.find_library('avutil')
+        libavresample = util.find_library('avresample')
         libavcodec = util.find_library('avcodec')
         
     CDLL(libavutil, RTLD_GLOBAL)
+    # libav11
+    if os.path.exists(libavresample):
+        CDLL(libavresample, RTLD_GLOBAL)
     version = CDLL(libavcodec, mode=RTLD_GLOBAL).avcodec_version() 
     
     return version >> 16 & 0xFF, version >> 8 & 0xFF, version & 0xFF
@@ -36,14 +46,6 @@ def findModuleName():
     '''
 
     versionDict = { 
-            #52: { 
-                ## libav 0.5.9
-                ## ffmpeg 0.5.10 ~ libav 0.5.9
-                #(20, 40): 'av5', 
-                ## libav 0.6.6
-                ## ffmpeg 0.6.6 ~ libav 0.6.6
-                #(70, 75): 'av6',
-                #},
             53: {
                 #(0, 10): 'av7',
                 (30, 40): 'av8',
@@ -54,6 +56,9 @@ def findModuleName():
             55: {
                 (30, 40): 'av10',
                 },
+            56: {
+                (1, 40): 'av11',
+                }
             }
 
     major, minor, micro = version()	

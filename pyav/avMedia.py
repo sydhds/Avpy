@@ -7,6 +7,8 @@ import sys
 import ctypes
 from . import av
 
+__version__ = '0.0.1'
+
 FRAME_SIZE_DEFAULT = 1152
 FPS_DEFAULT = (1, 24)
 
@@ -1072,6 +1074,28 @@ class Packet(object):
                 # unsupported codec type...
                 pass
 
+def versions():
+
+    ''' Return version & config & license (C libs)
+    '''
+
+    versions = {}
+    for lib in av.lib._libraries:
+
+            prefix = lib[3:-3]
+            fversion = getattr(av.lib, prefix+'_version')
+            fconfig = getattr(av.lib, prefix+'_configuration')
+            flicense = getattr(av.lib, prefix+'_license')
+            
+            e = versions[lib[:-3]] = {}
+            _version = fversion()
+            # FIXME dup code in av.version
+            e['version'] = (_version >> 16 & 0xFF, _version >> 8 & 0xFF, _version & 0xFF)
+            e['configuration'] = fconfig()
+            e['license'] = flicense()
+            e['path'] = av.lib._libraries[lib]._name
+
+    return versions
 
 def avError(res):
 
