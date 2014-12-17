@@ -21,10 +21,10 @@ if __name__ == '__main__':
     pprint(avMedia.versions())
     
     if options.formats:
-        pprint(avMedia.Media.formats())
+        pprint(avMedia.formats())
 
     if options.codecs:
-        codecs = avMedia.Media.codecs()
+        codecs = avMedia.codecs()
 
         if options.codecs in ['audio', 'video', 'subtitle']:
             pprint(codecs[options.codecs])

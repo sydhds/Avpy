@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pyav import Media
+from pyav import Media, formats, codecs, codecInfo
 
 def printSep(ch='='):
     print(ch*25)
@@ -19,8 +19,8 @@ if __name__ == '__main__':
             help='print codec info')
     (options, args) = parser.parse_args() 
 
-    formats = Media.formats()
-    codecs = Media.codecs() 
+    formats = formats()
+    codecs = codecs() 
 
     # open
     if options.media:
@@ -39,9 +39,10 @@ if __name__ == '__main__':
             print('- %s' % stream)
 
             if options.info:
-                print('  %s info: %s' % stream['codec'])
-                for k, v in Media.codecInfo(stream['codec']).iteritems():
-                    print('    %s: %s' % (k, v))
+                print('  %s info:' % stream['codec'])
+                info = codecInfo(stream['codec'])
+                for k in info:
+                    print('    %s: %s' % (k, info[k]))
                 printSep()
     else:
         print('please provide a movie or sound file')
