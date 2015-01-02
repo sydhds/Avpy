@@ -6,6 +6,7 @@ pyav tools/build.py
 Generate clean binding
 '''
 
+import os
 import re
 
 import yaml
@@ -13,7 +14,8 @@ import yaml
 def longCb(line):
 
     # handle long value and remove L at the end of line
-    # for python3 support
+    # only python2 support this: superInteger = 123456789L
+    # remove L to support python3
     return re.sub('(\d+)L', '\g<1>', line)
 
 def wHeader(fp, yamlDict):
@@ -41,7 +43,7 @@ def wAssignement(fp, yamlDict, src, key, cb=None):
         line = f.readline()
         while line:
             for t in yamlDict[key]:
-                if line.startswith( '%s =' % t ):
+                if line.startswith('%s =' % t):
                     
                     if cb:
                         fp.write(cb(line))
@@ -122,7 +124,8 @@ def wFunctions(fp, yamlDict, src):
 def main(options):
 
     y = {}
-    with open(options.cfg, 'r') as f:
+    cfgPath = os.path.abspath(options.cfg)
+    with open(cfgPath, 'r') as f:
         y = yaml.load(f.read())
 
     fd = open(options.dst, 'w')	
@@ -159,3 +162,4 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     main(options)
+

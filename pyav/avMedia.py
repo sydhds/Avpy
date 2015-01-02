@@ -855,6 +855,7 @@ class Packet(object):
                 # unsupported codec type...
                 pass
 
+
 def versions():
 
     ''' Return version & config & license (C libs)
@@ -877,6 +878,7 @@ def versions():
             e['path'] = av.lib._libraries[lib]._name
 
     return versions
+
 
 def avError(res):
 

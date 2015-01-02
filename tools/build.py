@@ -1,9 +1,15 @@
 #!/usr/bin/env python
 
 '''
-pyav tools/build.py
-
 Easily build libav/ffmpeg from git
+
+howto:
+
+- clone ffmpeg or libav in BUILD_FOLDER
+- cd tools
+- run: 
+    - ./build.py -l ffmpeg -v 2.5 -r BUILD_FOLDER
+    - ./build.py -l libav -v 0.8.1 -r BUILD_FOLDER
 '''
 
 import os
@@ -12,7 +18,11 @@ import sys
 import subprocess
 import shutil
 
+
 def run(cmd):
+        
+    ''' print and run shell command
+    '''
 
     print(cmd)
 
@@ -20,48 +30,56 @@ def run(cmd):
     if retCode != 0:
         raise RuntimeError('cmd %s failed!' % cmd)
 
+
 def buildGit(options):
+        
+    ''' build libav or ffmpeg git
+    '''
 
-    buildDir = os.path.abspath(os.path.join('build', '%s_%s' % (options.lib, options.version)))
+    pathToGit = os.path.abspath(os.path.join(options.repo, '%s_git' % options.lib))
+    installFolder = os.path.abspath(os.path.join(options.repo, '%s_%s' % (options.lib, options.version)))
 
-    if options.suffix:
-        buildDir += '_%s' % options.suffix
-
-    try:
-        os.makedirs(buildDir)
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            pass
-        else:
-            raise
-
-    try:
-        os.chdir('build/%s_git' % options.lib)
-    except OSError:
-        print('Could not find libav repo: ./build/%s_git' % options.lib)
+    if os.path.isdir(installFolder):
+        print('A build already exists @ %s' % installFolder)
         sys.exit(1)
+    else:
+        os.makedirs(installFolder)
+
+    if not os.path.isdir(pathToGit):
+        # TODO: auto clone repo
+        print('Could not find folder %s, please clone %s before running build' % (pathToGit, options.lib)) 
+        sys.exit(1)
+
+    print('Building in %s' % pathToGit)
+    print('Install in %s' % installFolder)
+    
+    os.chdir(pathToGit)
 
     if options.lib == 'ffmpeg':
         tagChar = 'n'
     else:
         tagChar = 'v'
 
+    # compile is a std: ./configure && make && make install process
+
     run('git checkout %s%s' % (tagChar, options.version))
     run('git describe --tags')
+    run('./configure --prefix={0} {1} --logfile={0}/config.log'.format(installFolder, ' '.join(c for c in options.configure_options)))
 
-    run('./configure --prefix={0} {1} --logfile={0}/config.log'.format(buildDir, ' '.join(c for c in options.configure_options)))
-
-    # in case we rebuild
+    # clean up before building
     run('make clean')
     print('now building...')
-    run('make -j {1} -k > {0}/make.log 2>&1'.format(buildDir, options.jobs))
-    run('make install > {0}/make_install.log 2>&1'.format(buildDir))
+    run('make -j {1} -k > {0}/make.log 2>&1'.format(installFolder, options.jobs))
+    run('make install > {0}/make_install.log 2>&1'.format(installFolder))
 
     print('build done!')
-    print('configure log: %s' % os.path.join(buildDir, 'config.log'))
-    print('make log: %s' % os.path.join(buildDir, 'make.log'))
-
+    print('configure log: %s' % os.path.join(installFolder, 'config.log'))
+    print('make log: %s' % os.path.join(installFolder, 'make.log'))
+    
     if options.doc:
+        
+        # libav has Doxyfile in git root folder
+        # ffmpeg has Doxyfile in GIT_ROOT/doc
         basedir = ''
         basefile = 'Doxyfile'
         if not os.path.isfile(os.path.join(basedir, basefile)): 
@@ -84,21 +102,15 @@ def buildGit(options):
                 raise
 
         # gen
-        run('doxygen %s > %s 2>&1' % (doxyf, os.path.join(buildDir, 'doxygen.log')))
+        run('doxygen %s > %s 2>&1' % (doxyf, os.path.join(installFolder, 'doxygen.log')))
         # pseudo install
-        run('cp -r {0} {1}'.format(doxyDst, buildDir))
+        run('cp -r {0} {1}'.format(doxyDst, installFolder))
 
 
 def main(options):
 
-    try:
-        os.mkdir('build')
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            buildGit(options)
-        else:
-            print('Could not create folder: build')
-            sys.exit(1)
+    buildGit(options)
+
 
 if __name__ == '__main__':
 
@@ -128,7 +140,10 @@ if __name__ == '__main__':
             default=2,
             type='int',
             help='allow N jobs at once (default: %default)'
-            )
+            ) 
+    parser.add_option('-r', '--repo',
+            default='./build',
+            help='where to find libav_git or ffmpeg_git folder')
 
     (options, args) = parser.parse_args()
 

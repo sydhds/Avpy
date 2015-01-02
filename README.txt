@@ -1,13 +1,14 @@
-===========
+====
 Pyav
-===========
+====
 
-Pyav is a ctypes binding for libav (and ffmpeg). Typical usage often 
-looks like this:
+Pyav is a ctypes binding for libav and ffmpeg (see www.libav.org or www.ffmpeg.org). 
 
->>> from pyav import Media
->>> print Media.formats()
->>> print Media.codecInfo('mp3')
+Typical usage often looks like this:
+
+>>> from pyav import formats, codecInfo, Media
+>>> print formats()
+>>> print codecInfo('mp3', decode=True)
 >>> m = Media('test.avi')
 >>> print m.info()
 

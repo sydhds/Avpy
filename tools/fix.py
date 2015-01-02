@@ -46,6 +46,7 @@ if __name__ == '__main__':
             dcMap[rgx.group(2)] = cls
 
     fixCount = 0
+    print('writing %s...' % options.dst)
     with open(options.src, 'r') as sfp:
         with open(options.dst, 'w') as dfp:
             for line in sfp:
@@ -63,5 +64,5 @@ if __name__ == '__main__':
 
                 dfp.write(nline)
 
-    print('fix %d line(s)' % fixCount)
+    print('%d line(s) fixed!' % fixCount)
 

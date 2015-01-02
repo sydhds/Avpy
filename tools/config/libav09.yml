@@ -76,8 +76,9 @@ alias:
     - AVOptionType
 
 class:
-    - N8AVPacket3DOT_0E
+    - N8AVPacket4DOT_30E
     - N8AVStream4DOT_30E
+    - N8AVOption4DOT_30E
     - AVProfile
     - AVPanScan
     - AVCodec
@@ -119,7 +120,6 @@ class:
     - AVDictionaryEntry
     - AVSubtitle
     - AVSubtitleRect
-    - N8AVOption4DOT_31E
 
 import:
     - import os

@@ -84,8 +84,8 @@ alias:
 
 class:
     - N8AVPacket4DOT_30E
-    - N8AVStream4DOT_33E
-    - N8AVOption4DOT_37E
+    - N8AVStream4DOT_30E
+    - N8AVOption4DOT_30E
     - AVProfile
     - AVPanScan
     - AVCodec

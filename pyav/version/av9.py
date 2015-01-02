@@ -44,9 +44,9 @@ _libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
 _libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)
 
 STRING = c_char_p
+AVCodecID = c_int # enum
 size_t = c_ulong
 AVPixelFormat = c_int # enum
-AVCodecID = c_int # enum
 AVMediaType = c_int # enum
 AVDiscard = c_int # enum
 AVColorPrimaries = c_int # enum
@@ -70,21 +70,21 @@ AVSubtitleType = c_int # enum
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
-PIX_FMT_RGB24 = 2
-AVMEDIA_TYPE_SUBTITLE = 3
 AVMEDIA_TYPE_AUDIO = 1
-AVMEDIA_TYPE_VIDEO = 0
+CODEC_ID_NONE = 0
+CODEC_ID_MPEG1VIDEO = 1
+CODEC_ID_MPEG2VIDEO = 2
 PIX_FMT_YUV420P = 0
-PIX_FMT_NONE = -1
+AV_SAMPLE_FMT_NONE = -1
+AV_SAMPLE_FMT_S16 = 1
 SUBTITLE_ASS = 3
 SUBTITLE_TEXT = 2
-SUBTITLE_NONE = 0
 SUBTITLE_BITMAP = 1
-AV_SAMPLE_FMT_S16 = 1
-AV_SAMPLE_FMT_NONE = -1
-CODEC_ID_MPEG2VIDEO = 2
-CODEC_ID_MPEG1VIDEO = 1
-CODEC_ID_NONE = 0
+SUBTITLE_NONE = 0
+AVMEDIA_TYPE_SUBTITLE = 3
+PIX_FMT_RGB24 = 2
+AVMEDIA_TYPE_VIDEO = 0
+PIX_FMT_NONE = -1
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
 AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
@@ -92,57 +92,39 @@ CODEC_CAP_AUTO_THREADS = 32768 # Variable c_int '32768'
 AV_PKT_FLAG_KEY = 1 # Variable c_int '1'
 CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
 CODEC_CAP_SLICE_THREADS = 8192 # Variable c_int '8192'
-AV_TIME_BASE = 1000000 # Variable c_int '1000000'
+AVFMT_NOFILE = 1 # Variable c_int '1'
 AVIO_FLAG_WRITE = 2 # Variable c_int '2'
 FF_COMPLIANCE_STRICT = 1 # Variable c_int '1'
-AVFMT_NOFILE = 1 # Variable c_int '1'
-AVSEEK_FLAG_FRAME = 8 # Variable c_int '8'
-CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
 AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
-AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
-AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
-AVSEEK_FLAG_BYTE = 2 # Variable c_int '2'
 FF_COMPLIANCE_NORMAL = 0 # Variable c_int '0'
+AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
+AVSEEK_FLAG_FRAME = 8 # Variable c_int '8'
+AVSEEK_FLAG_BYTE = 2 # Variable c_int '2'
+AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
+AV_TIME_BASE = 1000000 # Variable c_int '1000000'
+CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
 
 AV_NOPTS_VALUE = 9223372036854775808 # Variable c_ulong '-9223372036854775808ul'
 
-class AVChapter(Structure):
+class N8AVPacket4DOT_30E(Structure):
 	pass
 
-class AVClass(Structure):
+class N8AVStream4DOT_30E(Structure):
+	pass
+
+class N8AVOption4DOT_30E(Structure):
+	pass
+
+class AVProfile(Structure):
+	pass
+
+class AVPanScan(Structure):
 	pass
 
 class AVCodec(Structure):
 	pass
 
-class AVCodecContext(Structure):
-	pass
-
-class AVCodecDefault(Structure):
-	pass
-
-class AVCodecInternal(Structure):
-	pass
-
-class AVCodecParser(Structure):
-	pass
-
-class AVCodecParserContext(Structure):
-	pass
-
-class AVCodecTag(Structure):
-	pass
-
-class AVDictionary(Structure):
-	pass
-
-class AVDictionaryEntry(Structure):
-	pass
-
-class AVFormatContext(Structure):
-	pass
-
-class AVFrac(Structure):
+class RcOverride(Structure):
 	pass
 
 class AVFrame(Structure):
@@ -151,73 +133,73 @@ class AVFrame(Structure):
 class AVHWAccel(Structure):
 	pass
 
-class AVIOContext(Structure):
+class AVCodecParser(Structure):
 	pass
 
-class AVIOInterruptCB(Structure):
+class AVCodecContext(Structure):
+	pass
+
+class AVCodecParserContext(Structure):
 	pass
 
 class AVIndexEntry(Structure):
 	pass
 
-class AVInputFormat(Structure):
+class AVDictionary(Structure):
+	pass
+
+class AVIOContext(Structure):
 	pass
 
 class AVOption(Structure):
 	pass
 
-class AVOutputFormat(Structure):
-	pass
-
-class AVPacket(Structure):
-	pass
-
-class AVPacketList(Structure):
-	pass
-
-class AVPacketList(Structure):
-	pass
-
-class AVPanScan(Structure):
-	pass
-
-class AVPicture(Structure):
+class AVCodecTag(Structure):
 	pass
 
 class AVProbeData(Structure):
 	pass
 
-class AVProfile(Structure):
+class AVRational(Structure):
+	pass
+
+class AVFrac(Structure):
+	pass
+
+class AVClass(Structure):
+	pass
+
+class AVInputFormat(Structure):
+	pass
+
+class AVOutputFormat(Structure):
+	pass
+
+class AVStream(Structure):
+	pass
+
+class AVPacketList(Structure):
+	pass
+
+class AVStream(Structure):
+	pass
+
+class AVPacket(Structure):
 	pass
 
 class AVProgram(Structure):
 	pass
 
-class AVRational(Structure):
+class AVChapter(Structure):
 	pass
 
-class AVStream(Structure):
+class AVPacketList(Structure):
 	pass
 
-class AVStream(Structure):
+class AVFormatContext(Structure):
 	pass
 
-class AVSubtitle(Structure):
-	pass
-
-class AVSubtitleRect(Structure):
-	pass
-
-class N8AVOption4DOT_31E(Structure):
-	pass
-
-class N8AVPacket4DOT_30E(Structure):
-	pass
-
-class N8AVStream4DOT_30E(Structure):
-	pass
-
-class RcOverride(Structure):
+class AVPicture(Structure):
 	pass
 
 class SwsContext(Structure):
@@ -229,8 +211,26 @@ class SwsFilter(Structure):
 class SwsVector(Structure):
 	pass
 
-PixelFormat = AVPixelFormat # alias
+class AVCodecInternal(Structure):
+	pass
+
+class AVCodecDefault(Structure):
+	pass
+
+class AVIOInterruptCB(Structure):
+	pass
+
+class AVDictionaryEntry(Structure):
+	pass
+
+class AVSubtitle(Structure):
+	pass
+
+class AVSubtitleRect(Structure):
+	pass
+
 CodecID = AVCodecID # alias
+PixelFormat = AVPixelFormat # alias
 AVOptionType = c_int # enum
 
 RcOverride._fields_ = [
@@ -820,7 +820,7 @@ AVDictionaryEntry._fields_ = [
 ]
 AVDictionary._fields_ = [
 ]
-N8AVOption4DOT_31E._fields_ = [
+N8AVOption4DOT_30E._fields_ = [
     ('i64', int64_t),
     ('dbl', c_double),
     ('str', STRING),
@@ -831,7 +831,7 @@ AVOption._fields_ = [
     ('help', STRING),
     ('offset', c_int),
     ('type', AVOptionType),
-    ('default_val', N8AVOption4DOT_31E),
+    ('default_val', N8AVOption4DOT_30E),
     ('min', c_double),
     ('max', c_double),
     ('flags', c_int),

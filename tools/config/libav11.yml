@@ -81,8 +81,9 @@ alias:
     - AVOptionType
 
 class:
-    - N8AVPacket4DOT_28E
-    - N8AVStream4DOT_28E
+    #- N8AVPacket4DOT_30E
+    - N8AVStream4DOT_30E
+    - N8AVOption4DOT_30E
     - AVProfile
     - AVPanScan
     - AVCodec
@@ -129,7 +130,6 @@ class:
     - AVFormatInternal
     - AVBuffer
     - AVFrameSideData
-    - N8AVOption4DOT_29E
     # libav11
     - AVPacketSideData
 
