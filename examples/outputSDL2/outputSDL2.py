@@ -3,6 +3,15 @@
 '''
 demo video player (PySDL2)
 python outputSDL2.py -m file.avi
+
+.. note: 
+    * use yuv hardware acceleration if available
+    * no sound
+    * no video sync
+
+.. warning:
+    * this is a complex and low level example, 
+    see outputPygame2 for a simpler player
 '''
 
 import sys
@@ -38,13 +47,13 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     
     try:
-        m = Media(options.media)
+        media = Media(options.media)
     except IOError as e:
         print('Unable to open %s: %s' % (options.media, e))
         sys.exit(1)
 
     # dump info
-    mediaInfo = m.info()
+    mediaInfo = media.info()
 
     # select first video stream
     vstreams = [i for i, s in enumerate(mediaInfo['stream']) if s['type'] == 'video']
@@ -65,7 +74,7 @@ if __name__ == '__main__':
 
     print('output resolution: %dx%d' % (size)) 
 
-    # sdl2
+    # setup sdl2
     sdl2Version = sdl2.version_info
     print('Using sdl2 version: %d.%d.%d' % 
             (sdl2Version[0], sdl2Version[1], sdl2Version[2]))
@@ -146,7 +155,7 @@ if __name__ == '__main__':
     # -> yuv to rgb in software, upload rgb to graphic card + hardware scaling
     # mode 3: useTexture + useYuv == False
     # -> uyv to rgb + scaling in software 
-    # Note: in this example, we don't perform scaling
+    # note: in this example, we don't perform scaling
 
     if useTexture == True:         
         
@@ -197,20 +206,22 @@ if __name__ == '__main__':
                 running = False
                 break
 
-        p = m.next()
+        pkt = media.next()
 
-        if p.streamIndex() == vstream:
-            p.decode()
-            if p.decoded:
+        if pkt.streamIndex() == vstream:
+            pkt.decode()
+            if pkt.decoded:
              
                 if useYuv:
                    
-                    fc = p.frame.contents
+                    # upload yuv data
+                    
+                    frameData = pkt.frame.contents
                 
                     sdl2.SDL_UpdateYUVTexture(yuvTexture, None,
-                            fc.data[0], fc.linesize[0], 
-                            fc.data[1], fc.linesize[1], 
-                            fc.data[2], fc.linesize[2] )
+                            frameData.data[0], frameData.linesize[0], 
+                            frameData.data[1], frameData.linesize[1], 
+                            frameData.data[2], frameData.linesize[2] )
 
                     res = sdl2.SDL_RenderCopy(renderer, yuvTexture, None, None);
                     if res < 0:
@@ -219,7 +230,9 @@ if __name__ == '__main__':
 
                 else:
                     
-                    buf = p.swsFrame.contents.data[0]
+                    # upload rgb data
+                    
+                    buf = pkt.swsFrame.contents.data[0]
                     surface = sdl2.SDL_CreateRGBSurfaceFrom(buf, 
                             size[0], size[1], 24, 
                             size[0] * 3,

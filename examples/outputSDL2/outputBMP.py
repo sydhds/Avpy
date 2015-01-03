@@ -41,13 +41,13 @@ if __name__ == '__main__':
         sys.exit(1)
     
     try:
-        m = Media(options.media)
+        media = Media(options.media)
     except IOError as e:
         print('Unable to open %s: %s' % (options.media, e))
         sys.exit(1)
 
     # dump info
-    mediaInfo = m.info()
+    mediaInfo = media.info()
 
     # select first video stream
     vstreams = [ i for i, s in enumerate(mediaInfo['stream']) if s['type'] == 'video' ]
@@ -57,22 +57,26 @@ if __name__ == '__main__':
         print('No video stream in %s' % mediaInfo['name'])
         sys.exit(2)
 
+    # retrieve video width and height
     streamInfo = mediaInfo['stream'][vstream]
     size = streamInfo['width'], streamInfo['height']
 
     print('video stream index: %d' % vstream)
     print('video stream resolution: %dx%d' % (size[0], size[1]))
 
-    m.addScaler(vstream, *size)
+    # bmp format require rgb24 (24 bits)
+    media.addScaler(vstream, *size)
 
-    # sdl2
+    # setup sdl2
+    
+    # sdl2 version - debug only
     sdl2Version = sdl2.version_info
     print('Using sdl2 version: %d.%d.%d' % 
             (sdl2Version[0], sdl2Version[1], sdl2Version[2]))
     if sdl2.SDL_Init(0) != 0:
         print(sdl2.SDL_GetError())
         sys.exit(3)
-    
+     
     if sdl2.SDL_BYTEORDER == sdl2.SDL_LIL_ENDIAN:
         rmask = 0x000000ff
         gmask = 0x0000ff00
@@ -85,17 +89,19 @@ if __name__ == '__main__':
         amask = 0x000000ff
 
     decodedCount = 0
-    for p in m:
+    # iterate over media
+    for pkt in media:
         
-        if p.streamIndex() == vstream:
+        if pkt.streamIndex() == vstream:
            
+            # test only
             if options.copyPacket:
-                p2 = copy.copy(p) 
+                pkt2 = copy.copy(pkt) 
             else:
-                p2 = p
+                pkt2 = pkt
 
-            p2.decode()
-            if p2.decoded:
+            pkt2.decode()
+            if pkt2.decoded:
 
                 decodedCount += 1
                 print('decoded frame %d' % decodedCount)
@@ -103,15 +109,18 @@ if __name__ == '__main__':
                 if decodedCount >= options.offset:
                     print('saving frame...')
                     
-                    buf = p2.swsFrame.contents.data[0]
+                    buf = pkt2.swsFrame.contents.data[0]
                     
+                    # convert buffer to a SDL Surface
                     surface = sdl2.SDL_CreateRGBSurfaceFrom(buf, 
                             size[0], size[1], 24, 
                             size[0] * 3,
                             rmask, gmask,
                             bmask, amask)
+                    # save then free surface
                     sdl2.SDL_SaveBMP(surface, 'frame.%d.bmp' % decodedCount)
                     sdl2.SDL_FreeSurface(surface)
 
                 if decodedCount >= options.offset + options.frameCount:
                     break 
+

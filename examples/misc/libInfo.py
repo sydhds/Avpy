@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+
+'''
+Print information about pyav:
+- Version
+- C lib used
+- Supported formats and codecs
+'''
+
 from pprint import pprint
 
 from pyav import avMedia
@@ -20,9 +29,11 @@ if __name__ == '__main__':
     print('Using pyav version %s' % avMedia.__version__)
     pprint(avMedia.versions())
     
+    # supported formats (avi, mkv...)
     if options.formats:
         pprint(avMedia.formats())
 
+    # supported codecs (h264, mp3, ass...)
     if options.codecs:
         codecs = avMedia.codecs()
 

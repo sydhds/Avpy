@@ -1,5 +1,23 @@
 #!/usr/bin/env python
 
+'''
+Encode image, video or sound from auto generated data
+
+This example can only generate yuv data and s16 audio data; for other
+formats the ouput will be a black image or a silent sound
+
+video:
+* python -u examples/encoding/encode.py -m foo.avi -t video -c 15
+
+image:
+* python -u examples/encoding/encode.py -m foo.tiff -t image
+
+audio:
+* python -u examples/encoding/encode.py -m foo.mp2 -t audio -c 15
+
+This is a complex example, see encodeImage.py for simpler code.
+'''
+
 import sys
 import math
 import ctypes
@@ -8,6 +26,9 @@ from pyav import Media
 
 # Python3 compat stuff...
 def progress(msg):
+
+    ''' Print progress message
+    '''
 
     if sys.version_info >= (3, 0):
 
@@ -46,7 +67,7 @@ class SignalGen(object):
 
 def fillYuvImage(picture, frameIndex, width, height):
 
-    ''' yuv image generator
+    ''' Yuv image generator
     '''
 
     i = frameIndex
@@ -93,8 +114,10 @@ if __name__ == '__main__':
     # open
     if options.media:
         
-        m = Media(options.media, 'w', quiet=False)
+        # setup media encoder
+        media = Media(options.media, 'w', quiet=False)
         
+        # setup stream info
         if options.mediaType == 'image':
 
             resolution = (320, 240)
@@ -112,11 +135,11 @@ if __name__ == '__main__':
             else:
                 streamInfoVideo['pixelFormat'] = 'rgb24'
 
-            streamIndex = m.addStream('video', streamInfoVideo)
+            streamIndex = media.addStream('video', streamInfoVideo)
         
-            pkt = m.videoPacket(*resolution)
+            pkt = media.videoPacket(*resolution)
 
-            # restrict to 1 image only
+            # single image -> set frameCount to 1
             options.frameCount = 1
 
         elif options.mediaType == 'video':
@@ -132,9 +155,9 @@ if __name__ == '__main__':
                 'pixelFormat': 'yuv420p',
                 }
 
-            streamIndex = m.addStream('video', streamInfoVideo)
+            streamIndex = media.addStream('video', streamInfoVideo)
         
-            pkt = m.videoPacket(*resolution)
+            pkt = media.videoPacket(*resolution)
 
         elif options.mediaType == 'audio':
 
@@ -149,18 +172,20 @@ if __name__ == '__main__':
                 streamInfoAudio['sampleFmt'] = options.forceSampleFormat
             if options.forceCodec:
                 streamInfoAudio['codec'] = options.forceCodec
-
+            
+            # No generator available if sample format is not signed 16 bit
+            # patch welcome!
             if options.forceSampleFormat and options.forceSampleFormat != 's16':
                 print('Warning: will generate a silent sound!') 
 
-            streamIndex = m.addStream('audio',
+            streamIndex = media.addStream('audio',
                     streamInfo=streamInfoAudio)
 
-            info = m.info()
+            info = media.info()
             frameSize = info['stream'][0]['frameSize']
 
-            sg = SignalGen(streamInfoAudio['sampleRate'])
-            pkt = m.audioPacket(streamInfoAudio['channels'])
+            soundGen = SignalGen(streamInfoAudio['sampleRate'])
+            pkt = media.audioPacket(streamInfoAudio['channels'])
 
         elif options.mediaType == 'both':
 
@@ -169,10 +194,13 @@ if __name__ == '__main__':
         else:
             raise RuntimeError()
 
+        # see http://multimedia.cx/eggs/supplying-ffmpeg-with-metadata/
+        # for available metadata per container
         metadata = {'artist': 'me'}
-        m.writeHeader(metadata)
-
-        i = 0
+        media.writeHeader(metadata)
+        
+        # Presentation TimeStamp (pts)
+        pts = 0
         maxFrame = options.frameCount
 
         while True:
@@ -181,24 +209,24 @@ if __name__ == '__main__':
 
                 progress('Generating image frame...    ')
                 # TODO: need a fillRgbImage
+                # patch welcome!
                 #fillYuvImage(pkt.frame, i, *resolution) 
-                m.write(pkt, i+1, 'video')
+                media.write(pkt, pts+1, 'video')
             
             elif options.mediaType == 'video':
 
-                progress('Generating video frame %d/%d...    ' % (i, maxFrame))
-                fillYuvImage(pkt.frame, i, *resolution) 
-                m.write(pkt, i+1, options.mediaType)
+                progress('Generating video frame %d/%d...    ' % (pts, maxFrame))
+                fillYuvImage(pkt.frame, pts, *resolution) 
+                media.write(pkt, pts+1, options.mediaType)
 
             elif options.mediaType == 'audio':
 
-                # FIXME frame size
-                progress('Generating audio frame %d/%d...    ' % (i, maxFrame))
+                progress('Generating audio frame %d/%d...    ' % (pts, maxFrame))
                 
                 if 'sampleFmt' not in streamInfoAudio or streamInfoAudio['sampleFmt'] == 's16': 
-                    sg.audioFrame(pkt, frameSize, streamInfoAudio['channels'])
+                    soundGen.audioFrame(pkt, frameSize, streamInfoAudio['channels'])
 
-                m.write(pkt, i+1, options.mediaType) 
+                media.write(pkt, pts+1, options.mediaType) 
 
             elif options.mediaType == 'both':
 
@@ -207,10 +235,10 @@ if __name__ == '__main__':
             else:
                 raise RuntimeError()
            
-            i+=1
-            if i >= maxFrame:
+            pts+=1
+            if pts >= maxFrame:
                 break
 
-        m.writeTrailer()
+        media.writeTrailer()
         print('done writing %s' % options.media)
 

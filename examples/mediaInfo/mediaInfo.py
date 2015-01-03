@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+'''
+Print media information such as:
+- format or container (avi, mkv...)
+- metadata
+- duration
+- stream(s) info:
+    - codec info
+'''
+
 from pyav import Media, formats, codecs, codecInfo
 
 def printSep(ch='='):
@@ -25,19 +34,23 @@ if __name__ == '__main__':
     # open
     if options.media:
         
-        m = Media(options.media)
-        infoDict = m.info()
-
+        media = Media(options.media)
+        # retrieve media infos
+        infoDict = media.info()
+        
+        # general info
         print('%s info:' % options.media)
         print(' format: %s' % infoDict['format'])
         print(' metadata: %s' % infoDict['metadata'])
         print(' duration: %f' % infoDict['duration'])
 
+        # stream(s) info
         printSep() 
         print('stream(s):')
         for stream in infoDict['stream']:
             print('- %s' % stream)
-
+            
+            # codec info
             if options.info:
                 print('  %s info:' % stream['codec'])
                 info = codecInfo(stream['codec'])

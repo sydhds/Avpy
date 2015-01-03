@@ -4,8 +4,10 @@
 Decode the 5th first frame of the first video stream 
 and write tiff images
 
+Note that this example, use pyav to decode and encode image (no dependencies)
+
 python encodeImage.py -m file.avi -> save frame 1 to 5
-python encodeImage.py -m file.avi -o 140 -> save frame 140 to 145
+python encodeImage.py -m file.avi -o 140 -c 3 -> save frame 140 to 143
 '''
 
 import sys
@@ -36,13 +38,13 @@ if __name__ == '__main__':
         sys.exit(1)
 
     try:
-        m = Media(options.media)
+        media = Media(options.media)
     except IOError as e:
         print('Unable to open %s: %s' % (options.media, e))
         sys.exit(1)
 
     # dump info
-    mediaInfo = m.info()
+    mediaInfo = media.info()
 
     # select first video stream
     vstreams = [ i for i, s in enumerate(mediaInfo['stream']) if s['type'] == 'video' ]
@@ -52,42 +54,54 @@ if __name__ == '__main__':
         print('No video stream in %s' % mediaInfo['name'])
         sys.exit(2)
 
+    # retrieve video width and height
     streamInfo = mediaInfo['stream'][vstream]
     w, h = streamInfo['width'], streamInfo['height']
 
     print('video stream resolution: %dx%d' % (w, h))
+ 
+    # tiff format require rgb24 (24 bits)
+    media.addScaler(vstream, w, h)
 
-    m.addScaler(vstream, w, h)
+    # setup encoder (stream info)
+    streamInfoImage = {
+            'width': w,
+            'height': h,
+            'pixelFormat': 'rgb24',
+            'codec': 'tiff',
+            }
 
     decodedCount = 0
-    for _p in m:
+    # iterate over media
+    for pkt in media:
         
-        if _p.streamIndex() == vstream:
+        if pkt.streamIndex() == vstream:
             
-            p = copy.copy(_p)
-            p.decode()
+            # copy packet - not mandatory
+            # TODO: remove copy?
+            pkt2 = copy.copy(pkt)
+            pkt2.decode()
 
-            if p.decoded:
+            if pkt2.decoded:
 
                 decodedCount += 1
                 print('decoded frame %d' % decodedCount)
 
                 if decodedCount >= options.offset:
-                    print('saving frame...')
-                    fn = 'frame.%d.tiff' % decodedCount
-                    m2 = Media(fn, 'w', quiet=False)
-                    streamInfoImage = {
-                            'width': w,
-                            'height': h,
-                            'pixelFormat': 'rgb24',
-                            'codec': 'tiff',
-                            }
-                    m2.addStream('video', streamInfoImage)
-                    m2.writeHeader()
-                    m2.write(p, 1, 'video') 
-                    m2.writeTrailer()
+                    
+                    img = 'frame.%d.tiff' % decodedCount
+                    print('saving image %s...' % img)
+                    
+                    # setup output media
+                    imgMedia = Media(img, 'w', quiet=False)
+                    imgMedia.addStream('video', streamInfoImage)
 
-                    del(m2)
+                    # write data
+                    imgMedia.writeHeader()
+                    imgMedia.write(pkt2, 1, 'video') 
+                    imgMedia.writeTrailer()
+
+                    #del(imgMedia)
 
                 if decodedCount >= options.offset+options.frameCount:
                     break 

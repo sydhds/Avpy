@@ -3,6 +3,11 @@
 '''
 demo video player (pygame)
 python outputPygame2.py -m file.avi
+
+.. note: 
+    * use yuv hardware acceleration if available
+    * no sound
+    * no video sync
 '''
 
 import sys
@@ -38,13 +43,13 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     
     try:
-        m = Media(options.media)
+        media = Media(options.media)
     except IOError as e:
         print('Unable to open %s: %s' % (options.media, e))
         sys.exit(1)
 
     # dump info
-    mediaInfo = m.info()
+    mediaInfo = media.info()
 
     # select first video stream
     vstreams = [i for i, s in enumerate(mediaInfo['stream']) if s['type'] == 'video']
@@ -54,6 +59,7 @@ if __name__ == '__main__':
         print('No video stream in %s' % mediaInfo['name'])
         sys.exit(2)
 
+    # retrieve video width and height
     streamInfo = mediaInfo['stream'][vstream]
     size = streamInfo['width'], streamInfo['height']
 
@@ -65,6 +71,7 @@ if __name__ == '__main__':
 
     print('output resolution: %dx%d' % (size)) 
 
+    # setup pygame
     pygame.init()
  
     if options.fullscreen:
@@ -74,7 +81,6 @@ if __name__ == '__main__':
 
     useYuv = False
     if streamInfo['pixelFormat'] == 'yuv420p':
-
         overlay = pygame.Overlay(pygame.YV12_OVERLAY, size)
         overlay.set_location(0, 0, size[0], size[1]) 
         
@@ -83,11 +89,10 @@ if __name__ == '__main__':
             print('render: Hardware accelerated yuv overlay (fast)')
         else:
             print('render: Software yuv overlay (slow)')
-
     else:
         print('render: software rgb (very slow)')
         # add scaler to convert to rgb
-        m.addScaler(vstream, *size)
+        media.addScaler(vstream, *size)
 
     decodedCount = 0
     mainLoop = True
@@ -97,31 +102,33 @@ if __name__ == '__main__':
     while mainLoop:
         
         try:
-            p = m.next()
+            pkt = media.next()
         except StopIteration:
             mainLoop = False
             continue
 
-        if p.streamIndex() == vstream:
+        if pkt.streamIndex() == vstream:
            
             if options.copyPacket:
-                p2 = copy.copy(p)
+                pkt2 = copy.copy(pkt)
             else:
-                p2 = p
+                pkt2 = pkt
 
-            p2.decode()
-            if p2.decoded:
+            pkt2.decode()
+            if pkt2.decoded:
                 decodedCount += 1
 
                 if useYuv:
-                    
-                    size0 = p2.frame.contents.linesize[0] * p2.frame.contents.height
-                    size1 = p2.frame.contents.linesize[1] * (p2.frame.contents.height/2)
-                    size2 = p2.frame.contents.linesize[2] * (p2.frame.contents.height/2)
+                   
+                    # upload yuv data
 
-                    yuv = (ctypes.string_at(p2.frame.contents.data[0], size0),
-                            ctypes.string_at(p2.frame.contents.data[1], size1),
-                            ctypes.string_at(p2.frame.contents.data[2], size2))
+                    size0 = pkt2.frame.contents.linesize[0] * pkt2.frame.contents.height
+                    size1 = pkt2.frame.contents.linesize[1] * (pkt2.frame.contents.height/2)
+                    size2 = pkt2.frame.contents.linesize[2] * (pkt2.frame.contents.height/2)
+
+                    yuv = (ctypes.string_at(pkt2.frame.contents.data[0], size0),
+                            ctypes.string_at(pkt2.frame.contents.data[1], size1),
+                            ctypes.string_at(pkt2.frame.contents.data[2], size2))
                     
                     overlay.display(yuv)
                     
@@ -129,7 +136,10 @@ if __name__ == '__main__':
                     pygame.time.wait(20)
 
                 else:
-                    buf = p2.swsFrame.contents.data[0]
+
+                    # upload rgb data
+
+                    buf = pkt2.swsFrame.contents.data[0]
                     bufLen = size[0]*size[1]*3
                     surfaceStr = ctypes.string_at(buf, bufLen)
                     cSurface = pygame.image.fromstring(surfaceStr, size, 'RGB')
@@ -139,6 +149,7 @@ if __name__ == '__main__':
                
                     pygame.display.flip()
 
+                # event processing
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         mainLoop = False

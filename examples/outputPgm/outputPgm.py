@@ -5,6 +5,11 @@ Decode the 5th first frame of the first video stream and write pgm file
 
 python outputPgm.py -m file.avi -> save frame 1 to 5
 python outputPgm.py -m file.avi -o 140 -c 8 -> save frame 140 to 148
+
+This is a rather low level example (no dependencies), see: 
+* outputPIL: use PIL (or Pillow) to write and modify image
+* outputPygame: use Pygame (python2 only) to write jpg
+* outputSDL2: use PySDL2 to write bmp
 '''
 
 import sys
@@ -13,11 +18,18 @@ import array
 import ctypes
 from pyav import Media
 
-def ptr_add(ptr, offset):
+def ptrAdd(ptr, offset):
+
+    ''' C pointer add (see savePgm)
+    '''
+
     address = ctypes.addressof(ptr.contents) + offset
     return ctypes.pointer(type(ptr.contents).from_address(address))
 
-def saveFrame(frame, w, h, i):
+def savePgm(frame, w, h, index):
+
+    ''' Custom pgm writer
+    '''
 
     #a = array.array('B', [0]*(w*3))
     a = array.array('B', itertools.repeat(0, (w*3)))
@@ -27,11 +39,11 @@ def saveFrame(frame, w, h, i):
     if sys.version_info >= (3, 0):
         header = bytes(header, 'ascii')
 
-    with open('frame.%d.ppm' % i, 'wb') as f:
+    with open('frame.%d.ppm' % index, 'wb') as f:
         #header
         f.write(header)
         for i in range(h):
-            ptr = ptr_add(frame.contents.data[0], i*frame.contents.linesize[0])
+            ptr = ptrAdd(frame.contents.data[0], i*frame.contents.linesize[0])
             ctypes.memmove(a.buffer_info()[0], ptr, w*3)	
             a.tofile(f)
 
@@ -59,13 +71,13 @@ if __name__ == '__main__':
         sys.exit(1)
 
     try:
-        m = Media(options.media)
+        media = Media(options.media)
     except IOError as e:
         print('Unable to open %s: %s' % (options.media, e))
         sys.exit(1)
 
     # dump info
-    mediaInfo = m.info()
+    mediaInfo = media.info()
 
     # select first video stream
     vstreams = [ i for i, s in enumerate(mediaInfo['stream']) if s['type'] == 'video' ]
@@ -74,27 +86,32 @@ if __name__ == '__main__':
     else:
         print('No video stream in %s' % mediaInfo['name'])
         sys.exit(2)
-
+    
+    # retrieve video width and height
     streamInfo = mediaInfo['stream'][vstream]
     w, h = streamInfo['width'], streamInfo['height']
 
     print('video stream resolution: %dx%d' % (w, h))
 
-    m.addScaler(vstream, w, h)
+    # pgm format require rgb24 (24 bits)
+    media.addScaler(vstream, w, h)
 
+    # decode counter 
     decodedCount = 0
-    for p in m:
+
+    # iterate over media
+    for pkt in media:
         
-        if p.streamIndex() == vstream:
-            p.decode()
-            if p.decoded:
+        if pkt.streamIndex() == vstream:
+            pkt.decode()
+            if pkt.decoded:
 
                 decodedCount += 1
-                print('decoded frame %d' % decodedCount)
+                print('Decoded frame %d' % decodedCount)
 
                 if decodedCount >= options.offset:
-                    print('saving frame...')
-                    saveFrame(p.swsFrame, w, h, decodedCount)
+                    print('Saving frame...')
+                    savePgm(pkt.swsFrame, w, h, decodedCount)
 
                 if decodedCount >= options.offset+options.frameCount:
                     break 

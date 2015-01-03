@@ -38,9 +38,9 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # open media
-    m = Media(options.media)
+    media = Media(options.media)
     # dump info
-    mediaInfo = m.info()
+    mediaInfo = media.info()
 
     # select first audio stream
     astreams = [ i for i, s in enumerate(mediaInfo['stream']) if s['type'] == 'audio' ]
@@ -51,6 +51,7 @@ if __name__ == '__main__':
         sys.exit(2)
     
     # setup alsa output
+    # stream index, channel count, sampleRate
     si = mediaInfo['stream'][astream]
     channels = si['channels']
     fe = si['sampleRate']
@@ -65,25 +66,26 @@ if __name__ == '__main__':
     out.setrate(fe)
     out.setformat(aformat)
 
-    # size in bytes required for 1 second of audio
+    # Size in bytes required for 1 second of audio
     secondSize = si['channels'] * si['bytesPerSample'] * si['sampleRate']
     decodedSize = 0
 
     print('playing sound of %s (%s seconds)...' % (options.media, options.length))
 
     # let's play!
-    for i, p2 in enumerate(m):
+    for i, pkt2 in enumerate(media):
         
+        # test only
         if options.copyPacket:
-            p = copy(p2)
+            pkt = copy(pkt2)
         else:
-            p = p2
+            pkt = pkt2
 
-        if p.streamIndex() == astream:
-            p.decode()
-            if p.decoded:
-                buf = p.frame.contents.data[0]
-                bufLen = p.dataSize
+        if pkt.streamIndex() == astream:
+            pkt.decode()
+            if pkt.decoded:
+                buf = pkt.frame.contents.data[0]
+                bufLen = pkt.dataSize
                 out.write(ctypes.string_at(buf, bufLen))
                
                 decodedSize += bufLen

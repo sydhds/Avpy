@@ -28,9 +28,9 @@ if __name__ == '__main__':
 
     (options, args) = parser.parse_args()
 
-    m = Media(options.media)
+    media = Media(options.media)
     # dump info
-    mediaInfo = m.info()
+    mediaInfo = media.info()
 
     # select first subtitle stream
     stStreams = [i for i, s in enumerate(mediaInfo['stream']) if s['type'] == 'subtitle']
@@ -39,28 +39,31 @@ if __name__ == '__main__':
     else:
         print('No subtitle stream in %s' % mediaInfo['name'])
         sys.exit(2)
-
+    
+    # dump subtitle header
     print('header:')
     print(mediaInfo['stream'][stStream]['subtitleHeader'])
 
     count = 0
-    for p in m:
-        if p.streamIndex() == stStream:
+    # iterate over media and decode subtitle packet
+    for pkt in media:
+        if pkt.streamIndex() == stStream:
             
+            # test only
             if options.copyPacket:
-                p2 = copy.copy(p) 
+                pkt2 = copy.copy(pkt) 
             else:
-                p2 = p
+                pkt2 = pkt
 
-            p2.decode()
-            if p2.decoded:
+            pkt2.decode()
+            if pkt2.decoded:
                 
-                for i in range(p2.subtitle.num_rects):
+                for i in range(pkt2.subtitle.num_rects):
                     
-                    if p2.subtitleTypes[i] == 'text':
-                        print(p2.subtitle.rects[i].contents.text)
-                    elif p2.subtitleTypes[i] == 'ass':
-                        print(p2.subtitle.rects[i].contents.ass)
+                    if pkt2.subtitleTypes[i] == 'text':
+                        print(pkt2.subtitle.rects[i].contents.text)
+                    elif pkt2.subtitleTypes[i] == 'ass':
+                        print(pkt2.subtitle.rects[i].contents.ass)
                     else:
                         print('non text subtitle...')
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-Decode 90 seconds of the first audio stream
+Decode 20 seconds of the first audio stream
 and output it into a wav file
 '''
 
@@ -11,21 +11,35 @@ import wave
 
 from pyav import Media
 
+# wav data (see audioDump)
 waveData = []
+
 def audioDump2(buf, bufLen):
+
+    ''' Store audio data
+    '''
+
+    # TODO: unused, remove?
 
     global waveData	
     for i in range(bufLen):
         waveData.append(struct.pack('B', buf[i]))
 
-# faster than audioDump2
 def audioDump(buf, bufLen):
-    
+
+    ''' Store audio data 
+
+    .. note:: faster than audioDump2
+    '''
+
     import ctypes
     global waveData	
     waveData.append(ctypes.string_at(buf, bufLen))
 
 def writeWav(wp):
+
+    ''' Write wav file
+    '''
 
     global waveData
    
@@ -51,9 +65,9 @@ if __name__ == '__main__':
     
     (options, args) = parser.parse_args()
 
-    m = Media(options.media)
+    media = Media(options.media)
     # dump info
-    mediaInfo = m.info()
+    mediaInfo = media.info()
 
     # select first audio stream
     astreams = [ i for i, s in enumerate(mediaInfo['stream']) if s['type'] == 'audio' ]
@@ -63,9 +77,9 @@ if __name__ == '__main__':
         print('No audio stream in %s' % mediaInfo['name'])
         sys.exit(2)
     
-    # prepare wav file
-    output = 'out.wav'
-    wp = wave.open(output, 'w')
+    # setup output wav file
+    outputName = 'out.wav'
+    wp = wave.open(outputName, 'w')
     
     astreamInfo = mediaInfo['stream'][astream]
     
@@ -78,27 +92,29 @@ if __name__ == '__main__':
            'NONE', 
            'not compressed') )
     except wave.Error as e:
-        print('wrong parameters for wav file: %s' % e)
+        print('Wrong parameters for wav file: %s' % e)
         sys.exit(1)
 
-    # size in bytes required for 1 second of audio
+    # Size in bytes required for 1 second of audio
     secondSize = astreamInfo['channels'] * astreamInfo['bytesPerSample'] * astreamInfo['sampleRate']
     decodedSize = 0
 
-    for p in m:
+    # iterate over media and decode audio packet
+    for pkt in media:
 
-        if p.streamIndex() == astream:
-            p.decode()
-            if p.decoded:
-                # find a way to retrieve data after decoding
-                print('writing %s bytes...' % p.dataSize)
-                audioDump(p.frame.contents.data[0], p.dataSize)
+        if pkt.streamIndex() == astream:
+            pkt.decode()
+            if pkt.decoded:
+                print('writing %s bytes...' % pkt.dataSize)
+                audioDump(pkt.frame.contents.data[0], pkt.dataSize)
                 
-                decodedSize += p.dataSize
+                decodedSize += pkt.dataSize
                 # stop after ~ 90s (default)
                 # exact time will vary depending on dataSize
                 if decodedSize >= options.length*secondSize:
                     break
 
+    # all audio data have been decoded - write file
     writeWav(wp)
-    print('writing %s done!' % output) 
+    print('writing %s done!' % outputName) 
+

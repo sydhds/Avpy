@@ -1,6 +1,6 @@
-=================
+==============
  Pyav Examples
-=================
+==============
 
 
 * mediaInfo
@@ -37,14 +37,14 @@
 
   * outputPygame.py -> write jpg images
   
-  * outputPygame2.py -> dumb video player
+  * outputPygame2.py -> demo video player
 
 
 * dumpSubtitle
 
   * Decode first subtitle stream of media
   
-  * Dump to a text file
+  * Dump text data
 
 
 * outputPil
@@ -58,10 +58,10 @@
 
   * outputBMP.py -> write bmp images (first video stream)
 
-  * outputSDL2.py -> dump video player
+  * outputSDL2.py -> demo video player
 
 
 * misc
 
-  * libInfo.py -> print pyav and libav C libs info
+  * libInfo.py -> print pyav version, supported formats and codecs 
 
