@@ -157,7 +157,7 @@ if __name__ == '__main__':
                     streamInfo=streamInfoAudio)
 
             info = m.info()
-            frameSize = info['stream'][0]['frame_size']
+            frameSize = info['stream'][0]['frameSize']
 
             sg = SignalGen(streamInfoAudio['sampleRate'])
             pkt = m.audioPacket(streamInfoAudio['channels'])

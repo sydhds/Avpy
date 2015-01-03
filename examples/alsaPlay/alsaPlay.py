@@ -53,10 +53,10 @@ if __name__ == '__main__':
     # setup alsa output
     si = mediaInfo['stream'][astream]
     channels = si['channels']
-    fe = si['sample_rate']
+    fe = si['sampleRate']
   
     # S16P -> S16
-    sampleFmt = si['sample_fmt'].upper()
+    sampleFmt = si['sampleFmt'].upper()
     sampleFmt = sampleFmt[:-1] if sampleFmt.endswith('P') else sampleFmt
     aformat=getattr(alsaaudio, 'PCM_FORMAT_%s_%s' % (sampleFmt, 'LE' if sys.byteorder == 'little' else 'BE'))
 
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     out.setformat(aformat)
 
     # size in bytes required for 1 second of audio
-    secondSize = si['channels'] * si['bytes_per_sample'] * si['sample_rate']
+    secondSize = si['channels'] * si['bytesPerSample'] * si['sampleRate']
     decodedSize = 0
 
     print('playing sound of %s (%s seconds)...' % (options.media, options.length))

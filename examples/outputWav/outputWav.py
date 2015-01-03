@@ -47,7 +47,7 @@ if __name__ == '__main__':
     parser.add_option('-l', '--length', 
             help='decode at max seconds of audio',
             type='int',
-            default=90)
+            default=20)
     
     (options, args) = parser.parse_args()
 
@@ -64,15 +64,16 @@ if __name__ == '__main__':
         sys.exit(2)
     
     # prepare wav file
-    wp = wave.open('out.wav', 'w')
+    output = 'out.wav'
+    wp = wave.open(output, 'w')
     
     astreamInfo = mediaInfo['stream'][astream]
     
     try:
         # nchannels, sampwidth, framerate, nframes, comptype, compname 
         wp.setparams( (astreamInfo['channels'], 
-           astreamInfo['bytes_per_sample'], 
-           astreamInfo['sample_rate'], 
+           astreamInfo['bytesPerSample'], 
+           astreamInfo['sampleRate'], 
            0, 
            'NONE', 
            'not compressed') )
@@ -81,7 +82,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # size in bytes required for 1 second of audio
-    secondSize = astreamInfo['channels'] * astreamInfo['bytes_per_sample'] * astreamInfo['sample_rate']
+    secondSize = astreamInfo['channels'] * astreamInfo['bytesPerSample'] * astreamInfo['sampleRate']
     decodedSize = 0
 
     for p in m:
@@ -100,3 +101,4 @@ if __name__ == '__main__':
                     break
 
     writeWav(wp)
+    print('writing %s done!' % output) 

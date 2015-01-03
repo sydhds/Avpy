@@ -38,7 +38,7 @@ if __name__ == '__main__':
             type='choice',
             choices=modeChoices,
             default='buffer',
-            help='transfer from Pyav to PIL: %s (default: %default)' % modeChoices)
+            help='transfer from Pyav to PIL: %s' % modeChoices + '(default: %default)')
 
     (options, args) = parser.parse_args()
 

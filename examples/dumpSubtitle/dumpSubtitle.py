@@ -41,7 +41,7 @@ if __name__ == '__main__':
         sys.exit(2)
 
     print('header:')
-    print(mediaInfo['stream'][stStream]['subtitle_header'])
+    print(mediaInfo['stream'][stStream]['subtitleHeader'])
 
     count = 0
     for p in m:

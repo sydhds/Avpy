@@ -177,19 +177,19 @@ class Media(object):
             streamInfo['pixelFormat'] = pixFmtName(cCodecCtx.contents.pix_fmt)
         elif codecType == av.lib.AVMEDIA_TYPE_AUDIO:
             streamInfo['type'] = 'audio'
-            streamInfo['sample_rate'] = cCodecCtx.contents.sample_rate
+            streamInfo['sampleRate'] = cCodecCtx.contents.sample_rate
             streamInfo['channels'] = cCodecCtx.contents.channels
-            streamInfo['sample_fmt'] = av.lib.av_get_sample_fmt_name(cCodecCtx.contents.sample_fmt)
-            streamInfo['sample_fmt_id'] = cCodecCtx.contents.sample_fmt
-            streamInfo['frame_size'] = cCodecCtx.contents.frame_size
+            streamInfo['sampleFmt'] = av.lib.av_get_sample_fmt_name(cCodecCtx.contents.sample_fmt)
+            streamInfo['sampleFmtId'] = cCodecCtx.contents.sample_fmt
+            streamInfo['frameSize'] = cCodecCtx.contents.frame_size
 
-            if streamInfo['frame_size'] == 0:
-                streamInfo['frame_size'] = FRAME_SIZE_DEFAULT
+            if streamInfo['frameSize'] == 0:
+                streamInfo['frameSize'] = FRAME_SIZE_DEFAULT
 
-            streamInfo['bytes_per_sample'] = av.lib.av_get_bytes_per_sample(cCodecCtx.contents.sample_fmt)
+            streamInfo['bytesPerSample'] = av.lib.av_get_bytes_per_sample(cCodecCtx.contents.sample_fmt)
         elif codecType == av.lib.AVMEDIA_TYPE_SUBTITLE:
             streamInfo['type'] = 'subtitle'
-            streamInfo['subtitle_header'] = ctypes.string_at(cCodecCtx.contents.subtitle_header,
+            streamInfo['subtitleHeader'] = ctypes.string_at(cCodecCtx.contents.subtitle_header,
                     cCodecCtx.contents.subtitle_header_size)
         else:
             pass
@@ -452,7 +452,7 @@ class Media(object):
             if hasattr(av.lib, 'av_get_default_channel_layout'):
                 f = av.lib.av_get_default_channel_layout
             else:
-                f = guessChannelLayout
+                f = _guessChannelLayout
 
             c.contents.channel_layout = f(nbChannels)
 
@@ -903,7 +903,7 @@ def avError(res):
         return buf.value
 
 
-def guessChannelLayout(nbChannels):
+def _guessChannelLayout(nbChannels):
 
     # reimplement avcodec_guess_channel_layout (libav8)
 
@@ -1057,9 +1057,9 @@ def codecInfo(name, decode=True):
         ci['thread'] = None
         ci['framerates'] = []
         ci['samplerates'] = [] 
-        ci['pix_fmt'] = []
+        ci['pixFmts'] = []
         ci['profiles'] = []
-        ci['sample_fmts'] = []
+        ci['sampleFmts'] = []
         
         # thread caps
         caps = c.contents.capabilities & (av.lib.CODEC_CAP_FRAME_THREADS|av.lib.CODEC_CAP_SLICE_THREADS)
@@ -1071,10 +1071,10 @@ def codecInfo(name, decode=True):
             ci['thread'] = 'slice'
 
         # support auto thread
-        ci['auto_thread'] = False
+        ci['autoThread'] = False
         caps = c.contents.capabilities & (av.lib.CODEC_CAP_AUTO_THREADS)
         if caps == av.lib.CODEC_CAP_AUTO_THREADS:
-            ci['auto_thread'] = True
+            ci['autoThread'] = True
 
         # supported frame rates
         fps = c.contents.supported_framerates
@@ -1105,7 +1105,7 @@ def codecInfo(name, decode=True):
                     f = av.lib.avcodec_get_pix_fmt_name
                 else:
                     f = av.lib.av_get_pix_fmt_name
-                ci['pix_fmt'].append(f(p))
+                ci['pixFmts'].append(f(p))
 
         # profiles
         pf = c.contents.profiles
@@ -1121,7 +1121,7 @@ def codecInfo(name, decode=True):
             for s in sfmts:
                 if s == av.lib.AV_SAMPLE_FMT_NONE:
                     break
-                ci['sample_fmts'].append(av.lib.av_get_sample_fmt_name(s))
+                ci['sampleFmts'].append(av.lib.av_get_sample_fmt_name(s))
 
     else:
         raise ValueError('Unable to find codec %s' % name)
