@@ -3,7 +3,7 @@ Frequently Asked Questions
 
 .. contents::
 
-Does Pyav support Python 3?
+Does Avpy support Python 3?
 ------------------------------
 
 Yes :)

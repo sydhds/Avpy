@@ -4,7 +4,7 @@
 Decode the 5th first frame of the first video stream 
 and write tiff images
 
-Note that this example, use pyav to decode and encode image (no dependencies)
+Note that this example, use avpy to decode and encode image (no dependencies)
 
 python encodeImage.py -m file.avi -> save frame 1 to 5
 python encodeImage.py -m file.avi -o 140 -c 3 -> save frame 140 to 143
@@ -12,7 +12,7 @@ python encodeImage.py -m file.avi -o 140 -c 3 -> save frame 140 to 143
 
 import sys
 import copy
-from pyav import Media
+from avpy import Media
 
 if __name__ == '__main__':
     

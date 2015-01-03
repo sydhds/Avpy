@@ -1,7 +1,7 @@
 Packet
 ======
 
-.. automodule:: pyav
+.. automodule:: avpy
 
 .. autoclass:: Packet()	
    :members:

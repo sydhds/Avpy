@@ -1,7 +1,7 @@
 Media
 =====
 
-.. automodule:: pyav
+.. automodule:: avpy
 
 .. autoclass:: Media()	
    :members:

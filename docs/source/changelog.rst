@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Changes in Version 0.0.1
+Changes in Version 0.1.0
 ------------------------
 
-Initial release - WIP
+Initial release

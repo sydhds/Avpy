@@ -7,7 +7,7 @@ print subtitle (text based subtitles only)
 import sys
 import copy
 
-from pyav import Media
+from avpy import Media
 
 if __name__ == '__main__':
     

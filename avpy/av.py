@@ -9,20 +9,20 @@ def version():
     '''
   
     # find_library does not support LD_LIBRARY_PATH for python < 3.4
-    if 'PYAV_AVCODEC' in os.environ:
-        fold, base = os.path.split(os.environ['PYAV_AVCODEC'])
+    if 'AVPY_AVCODEC' in os.environ:
+        fold, base = os.path.split(os.environ['AVPY_AVCODEC'])
         
-        if 'PYAV_AVUTIL' in os.environ:
-            libavutil = os.environ['PYAV_AVUTIL']
+        if 'AVPY_AVUTIL' in os.environ:
+            libavutil = os.environ['AVPY_AVUTIL']
         else:
             libavutil = os.path.join(fold, re.sub('avcodec', 'avutil', base))
 
-        if 'PYAV_AVRESAMPLE' in os.environ:
-            libavresample = os.environ['PYAV_AVRESAMPLE']
+        if 'AVPY_AVRESAMPLE' in os.environ:
+            libavresample = os.environ['AVPY_AVRESAMPLE']
         else:
             libavresample = os.path.join(fold, re.sub('avcodec', 'avresample', base))
 
-        libavcodec = os.environ['PYAV_AVCODEC']
+        libavcodec = os.environ['AVPY_AVCODEC']
     else:
         libavutil = util.find_library('avutil')
         libavresample = util.find_library('avresample')
@@ -82,7 +82,7 @@ def findModuleName():
 
 _moduleName = findModuleName() 
 # import module
-_temp = __import__('pyav.version', globals(), locals(), [_moduleName])
+_temp = __import__('avpy.version', globals(), locals(), [_moduleName])
 # import as lib
 lib = getattr(_temp, _moduleName)
 

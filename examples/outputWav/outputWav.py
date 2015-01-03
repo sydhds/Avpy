@@ -9,7 +9,7 @@ import sys
 import struct
 import wave
 
-from pyav import Media
+from avpy import Media
 
 # wav data (see audioDump)
 waveData = []

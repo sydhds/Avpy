@@ -2,7 +2,7 @@
 API Reference
 =============
 
-.. warning:: Pyav is still in early development so the API is not yet stable. 
+.. warning:: Avpy is still in early development so the API is not yet stable. 
 
 Classes
 -------

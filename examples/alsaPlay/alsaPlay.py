@@ -12,7 +12,7 @@ from copy import copy
 
 import alsaaudio
 
-from pyav import Media
+from avpy import Media
 
 if __name__ == '__main__':
    

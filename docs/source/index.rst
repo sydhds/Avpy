@@ -1,10 +1,10 @@
-Welcome to Pyav's documentation!
+Welcome to Avpy's documentation!
 ================================
 
 Overview
 --------
 
-Pyav is a ctypes binding for libav and ffmpeg.
+Avpy is a ctypes (python) binding for libav and ffmpeg.
 
 :doc:`examples/index`
   Examples of how to perform specific tasks.
@@ -23,7 +23,7 @@ If you're having trouble or have questions, you can write me an email (sydhds __
 Issues
 ------
 
-All issues should reported at the `Pyav bug tracker <https://bitbucket.org/sydh/pyav/issues>`_. 
+All issues should reported at the `Avpy bug tracker <https://bitbucket.org/sydh/avpy/issues>`_. 
 
 Changes
 -------

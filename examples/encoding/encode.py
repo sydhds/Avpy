@@ -22,7 +22,7 @@ import sys
 import math
 import ctypes
 
-from pyav import Media
+from avpy import Media
 
 # Python3 compat stuff...
 def progress(msg):

@@ -16,7 +16,7 @@ import sys
 import itertools
 import array
 import ctypes
-from pyav import Media
+from avpy import Media
 
 def ptrAdd(ptr, offset):
 

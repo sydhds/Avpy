@@ -13,21 +13,21 @@ from ctypes import c_float
 from ctypes import c_double
 from ctypes import util
 
-if 'PYAV_AVCODEC' in os.environ:
-    fold, base = os.path.split(os.environ['PYAV_AVCODEC'])
-    libavutil = os.environ.get('PYAV_AVUTIL')
+if 'AVPY_AVCODEC' in os.environ:
+    fold, base = os.path.split(os.environ['AVPY_AVCODEC'])
+    libavutil = os.environ.get('AVPY_AVUTIL')
     if not libavutil:
         libavutil = os.path.join(fold, re.sub('avcodec', 'avutil', base))
-    libavformat = os.environ.get('PYAV_AVFORMAT')
+    libavformat = os.environ.get('AVPY_AVFORMAT')
     if not libavformat:
         libavformat = os.path.join(fold, re.sub('avcodec', 'avformat', base))
-    libavdevice = os.environ.get('PYAV_AVDEVICE')
+    libavdevice = os.environ.get('AVPY_AVDEVICE')
     if not libavdevice:
         libavdevice = os.path.join(fold, re.sub('avcodec', 'avdevice', base))
-    libswscale = os.environ.get('PYAV_SWSCALE')
+    libswscale = os.environ.get('AVPY_SWSCALE')
     if not libswscale:
         libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))
-    libavcodec = os.environ['PYAV_AVCODEC']
+    libavcodec = os.environ['AVPY_AVCODEC']
 else:
     libavutil = util.find_library('avutil')
     libavcodec = util.find_library('avcodec')
@@ -70,33 +70,33 @@ AVPictureType = c_int # enum
 int8_t = c_int8
 int32_t = c_int32
 
-SUBTITLE_ASS = 3
-SUBTITLE_BITMAP = 1
-PIX_FMT_NONE = -1
-AV_CODEC_ID_MPEG2VIDEO = 2
-AV_CODEC_ID_NONE = 0
-PIX_FMT_YUV420P = 0
-SUBTITLE_TEXT = 2
-PIX_FMT_RGB24 = 2
-SUBTITLE_NONE = 0
-AV_SAMPLE_FMT_S16 = 1
-AV_SAMPLE_FMT_NONE = -1
 AV_CODEC_ID_MPEG1VIDEO = 1
+AV_CODEC_ID_NONE = 0
+SUBTITLE_TEXT = 2
+SUBTITLE_BITMAP = 1
+SUBTITLE_ASS = 3
+AV_SAMPLE_FMT_S16 = 1
 AVMEDIA_TYPE_SUBTITLE = 3
 AVMEDIA_TYPE_AUDIO = 1
+AV_SAMPLE_FMT_NONE = -1
+PIX_FMT_RGB24 = 2
+PIX_FMT_NONE = -1
+PIX_FMT_YUV420P = 0
+AV_CODEC_ID_MPEG2VIDEO = 2
 AVMEDIA_TYPE_VIDEO = 0
+SUBTITLE_NONE = 0
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
 AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
 CODEC_CAP_AUTO_THREADS = 32768 # Variable c_int '32768'
 AV_PKT_FLAG_KEY = 1 # Variable c_int '1'
 CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
+CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
 CODEC_CAP_SLICE_THREADS = 8192 # Variable c_int '8192'
 AV_TIME_BASE = 1000000 # Variable c_int '1000000'
 AVIO_FLAG_WRITE = 2 # Variable c_int '2'
 AVFMT_NOFILE = 1 # Variable c_int '1'
 FF_COMPLIANCE_STRICT = 1 # Variable c_int '1'
-CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
 AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
 AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
 AVSEEK_FLAG_FRAME = 8 # Variable c_int '8'

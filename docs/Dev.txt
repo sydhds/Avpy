@@ -1,7 +1,7 @@
 Generate bindings
 =================
 
-The following information are only here for Pyav developers. 
+The following information are only here for Avpy developers. 
 See Readme.txt if you only intend to use the python lib. 
 
 Requirements
@@ -44,7 +44,7 @@ Generate bindings
 python gen.py -l libav -v 0.8.1
 python fix.py -s av008.py -d av008_fix.py -c config/libav08.yml
 python genClean.py -s av008_fix.py -d av8.py -c config/libav08.yml  
-cp -v av8.py ../pyav/version/
+cp -v av8.py ../avpy/version/
 
 note: See Generate binding config for detailed information.
 
@@ -56,28 +56,28 @@ python setup.py sdist
 Testing
 -------
 
-python -c 'from pyav import formats; print formats()'
+python -c 'from avpy import formats; print formats()'
 
 or
 
-PYAV_AVCODEC=PATH_TO/libavcodec.so PYTHONPATH=./:$PYTHONPATH python examples/mediaInfo/mediaInfo.py -m test.avi
+AVPY_AVCODEC=PATH_TO/libavcodec.so PYTHONPATH=./:$PYTHONPATH python examples/mediaInfo/mediaInfo.py -m test.avi
 
 Please note that LD_LIBRARY_PATH (Linux or DYLD_FALLBACK_LIBRARY_PATH - Mac OS X) is not supported for python < 3.4.
 
 The following env variables can also be used
-- PYAV_AVUTIL
-- PYAV_AVCODEC
-- PYAV_AVFORMAT
-- PYAV_AVDEVICE
-- PYAV_SWSCALE
+- AVPY_AVUTIL
+- AVPY_AVCODEC
+- AVPY_AVFORMAT
+- AVPY_AVDEVICE
+- AVPY_SWSCALE
 
 Testing in a virtualenvs
 ------------------------
 
-source ~/dev/virtualenvs/pyav/bin/activate
-pip uninstall Pyav
-pip install [...]/dist/Pyav-*.tar.gz
-python -c 'from pyav import formats; print formats()'
+source ~/dev/virtualenvs/avpy/bin/activate
+pip uninstall Avpy
+pip install [...]/dist/Avpy-*.tar.gz
+python -c 'from avpy import formats; print formats()'
 
 Generate binding config
 =======================

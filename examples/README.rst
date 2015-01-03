@@ -1,5 +1,5 @@
 ==============
- Pyav Examples
+ Avpy Examples
 ==============
 
 
@@ -63,5 +63,5 @@
 
 * misc
 
-  * libInfo.py -> print pyav version, supported formats and codecs 
+  * libInfo.py -> print avpy version, supported formats and codecs 
 

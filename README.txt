@@ -1,12 +1,12 @@
 ====
-Pyav
+Avpy
 ====
 
-Pyav is a ctypes binding for libav and ffmpeg (see www.libav.org or www.ffmpeg.org). 
+Avpy is a ctypes binding for libav and ffmpeg (see www.libav.org or www.ffmpeg.org). 
 
 Typical usage often looks like this:
 
->>> from pyav import formats, codecInfo, Media
+>>> from avpy import formats, codecInfo, Media
 >>> print formats()
 >>> print codecInfo('mp3', decode=True)
 >>> m = Media('test.avi')
@@ -25,7 +25,7 @@ FeatureMatrix:
     - Linux - BSD: done
     - MacOS: please report!
     - Windows: please report!
-- pyav:
+- avpy:
     - media info: done
     - basic video decoding: done
     - basic audio decoding: done
@@ -49,7 +49,7 @@ Missing features:
 
 - ffmpeg:
     - version ?: todo
-- pyav:
+- avpy:
     - filter: todo (see old filter branch)
     - audio resampling: todo
     - seeking: todo
@@ -74,7 +74,7 @@ Install from source:
 
 - Clone this repository
 - python setup.py sdist
-- pip install dist/Pyav-*.tar.gz
+- pip install dist/Avpy-*.tar.gz
 
 Please read doc/DEV.txt (virtualenvs) or doc/Windows.txt for additional information.
 

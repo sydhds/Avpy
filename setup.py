@@ -1,11 +1,11 @@
 from distutils.core import setup
 
 setup(
-    name='Pyav',
-    version='0.0.1',
+    name='Avpy',
+    version='0.1.0',
     author='Sylvain Delhomme',
     author_email='sydhds@gmail.com',
-    packages=['pyav', 'pyav.version'],
+    packages=['avpy', 'avpy.version'],
     url='',
     license='LICENSE.txt',
     description='ctypes python binding for libav',

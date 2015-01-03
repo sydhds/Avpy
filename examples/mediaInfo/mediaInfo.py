@@ -9,7 +9,7 @@ Print media information such as:
     - codec info
 '''
 
-from pyav import Media, formats, codecs, codecInfo
+from avpy import Media, formats, codecs, codecInfo
 
 def printSep(ch='='):
     print(ch*25)

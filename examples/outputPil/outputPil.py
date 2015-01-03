@@ -13,7 +13,7 @@ import copy
 
 from PIL import Image
 
-from pyav import Media
+from avpy import Media
 
 if __name__ == '__main__':
 
@@ -38,7 +38,7 @@ if __name__ == '__main__':
             type='choice',
             choices=modeChoices,
             default='buffer',
-            help='transfer from Pyav to PIL: %s' % modeChoices + '(default: %default)')
+            help='transfer from Avpy to PIL: %s' % modeChoices + '(default: %default)')
 
     (options, args) = parser.parse_args()
 

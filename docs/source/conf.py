@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Pyav documentation build configuration file, created by
+# Avpy documentation build configuration file, created by
 # sphinx-quickstart on Sat May 31 10:46:29 2014.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Pyav'
+project = u'Avpy'
 copyright = u'2014, sydh'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -164,7 +164,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Pyavdoc'
+htmlhelp_basename = 'Avpydoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -183,7 +183,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Pyav.tex', u'Pyav Documentation',
+  ('index', 'Avpy.tex', u'Avpy Documentation',
    u'sydh', 'manual'),
 ]
 
@@ -213,7 +213,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pyav', u'Pyav Documentation',
+    ('index', 'avpy', u'Avpy Documentation',
      [u'sydh'], 1)
 ]
 
@@ -227,8 +227,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Pyav', u'Pyav Documentation',
-   u'sydh', 'Pyav', 'One line description of project.',
+  ('index', 'Avpy', u'Avpy Documentation',
+   u'sydh', 'Avpy', 'One line description of project.',
    'Miscellaneous'),
 ]
 

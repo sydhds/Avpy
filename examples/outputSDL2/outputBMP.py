@@ -13,7 +13,7 @@ import copy
 
 import sdl2
 
-from pyav import Media
+from avpy import Media
 
 if __name__ == '__main__':
 
