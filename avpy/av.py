@@ -20,7 +20,7 @@ import os
 import re
 from ctypes import CDLL, RTLD_GLOBAL, util
 
-def version():
+def _version():
     
     '''
     Return libavcodec version as a tuple: major, minor, patch version
@@ -55,7 +55,7 @@ def version():
     return version >> 16 & 0xFF, version >> 8 & 0xFF, version & 0xFF
 
 
-def findModuleName():
+def _findModuleName():
    
     '''
     find libav python binding to import
@@ -79,7 +79,7 @@ def findModuleName():
                 }
             }
 
-    major, minor, micro = version()	
+    major, minor, micro = _version()	
 
     if major in versionDict:
         
@@ -98,7 +98,7 @@ def findModuleName():
 
     return libName
 
-_moduleName = findModuleName() 
+_moduleName = _findModuleName() 
 # import module
 _temp = __import__('avpy.version', globals(), locals(), [_moduleName])
 # import as lib

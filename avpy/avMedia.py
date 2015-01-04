@@ -30,13 +30,14 @@ class Media(object):
 
     def __init__(self, mediaName, mode='r', quiet=True):
         
-        '''Command constructor
+        ''' Initialize a media object for decoding or encoding
 
-	:param mediaName: media to open for reading or writing
+	:param mediaName: media to open
         :type label: str
-        :param mode: 'r' or 'w' 
+        :param mode: 'r' (decoding) or 'w' (encoding) 
 	:type mode: str
-
+        :param quiet: turn on/off libav or ffmpeg warnings
+        :type quiet: bool
 	'''
  
         if quiet:
@@ -131,7 +132,7 @@ class Media(object):
 
     def info(self):
 
-        ''' get media information
+        ''' Get media information
 
         :return: dict with the following fields: name, metadata, stream, duration
         :rtype: dict
@@ -139,6 +140,26 @@ class Media(object):
         * duration: media duration in seconds
         * name: media filename
         * stream: list of stream info (dict)
+
+        .. note:: 
+            each stream info will contains the following fields:
+            
+            - all:
+                - codec: codec short name
+                - type: video, audio or subtitle
+            - video:
+                - widht, height: video size
+                - fps: as a tuple of 3 values (num, den, ticks)
+                - pixelFormat: pixel format name (ie. rgb24, yuv420p ...)
+            - audio:
+                - sampleRate: sample rate (ie. )
+                - channels: channel count
+                - sampleFmt: sample format name (ie. s16 ...)
+                - sampleFmtId: sample format id (internal use)
+                - frameSize: frame size
+                - bytesPerSample: bytes for sample format (ie. 2 for s16)
+            - subtitle:
+                - subitle header: header string
         '''
         
         infoDict = {}
@@ -212,11 +233,11 @@ class Media(object):
 
     def metadata(self):
 
-        ''' get media metadata
+        ''' Get media metadata
 
         :return: a dict with key, value = metadata key, metadata value
 
-        .. note:: method is used to fullfill the metadata entry in :meth:`info`
+        .. note:: method is also called by :meth:`info`
         '''
 
         done = False
@@ -243,7 +264,7 @@ class Media(object):
 
     def next(self):
         
-        ''' iter over packet in media
+        ''' Iterate over Media
         
         :rtype: :class:`Packet`
         '''
@@ -259,7 +280,12 @@ class Media(object):
 
     def addScaler(self, streamIndex, width, height):
 
-        ''' add a scaler for given stream
+        ''' Add a scaler
+
+        A scaler is responsible for:
+        
+        - scaling a video
+        - converting output data format (ie yuv420p to rgb24) 
 
         :param streamIndex: stream index
 	:type streamIndex: int
@@ -267,6 +293,10 @@ class Media(object):
 	:type width: int
 	:param height: new stream height
 	:type height: int
+
+        .. note:: 
+            Selecting output data format is not yet available (rgb24 only)
+        
         '''
         
         if self.pkt is None:
@@ -280,6 +310,38 @@ class Media(object):
     def addStream(self, streamType, streamInfo):
 
         ''' Add a stream
+
+        After opening a media for encoding (writing), a stream of
+        desired type (video or audio) have to be added.
+
+        :param streamType: video or audio stream
+        :type streamType: str
+        :param streamInfo: stream parameters
+        :type streamInfo: dict
+
+        Supported stream parameters:
+        
+        - video:
+            - width, height: video size
+            - pixelFormat: pixel format name (ie. rgb24, yuv420p ...)
+            - codec: video codec name (ie. mp4), auto is a valid value
+            - timeBase: as a tuple (ie (1, 25) for 25 fps)
+            - bitRate: average bit rate (ie 64000 for 64kbits/s)
+        - audio:
+            - sampleRate: sample frequency (ie. 44100 for 44.1 kHz)
+            - bitRate: average bit rate (see video bit rate)
+            - channels channel count (ie. usually 2)
+            - codec: audio codec name, auto is a valid value
+            - sampleFmt: sample format (ie flt for float)
+        
+        .. note:: 
+            
+            - For an image, timeBase and bitRate parameters are ignored
+            - More parameters will be supported in the near futur
+            - Subtitle stream are not yet supported
+
+        .. note:: use :func:`codecInfo` to query codec caps
+
         '''
 
         if streamType == 'video':
@@ -486,8 +548,14 @@ class Media(object):
     
     def writeHeader(self, metaData=None):
         
-        ''' Start writing process (header) 
+        ''' Write media header 
 
+        Write media header. Call this method have to be called before any
+        call to :meth:`write` 
+
+        :param metaData: media metaData (ie. artist, year ...)
+        :type metaData: dict
+    
         .. note:: 
             see http://multimedia.cx/eggs/supplying-ffmpeg-with-metadata/
             for available metadata per container
@@ -525,14 +593,22 @@ class Media(object):
 
     def writeTrailer(self):
 
-        ''' End writing process (trailer)
+        ''' Write media trailer 
+            
+        Write media trailer. Call this method just before closing Media.
         '''
         
         av.lib.av_write_trailer(self.pFormatCtx)
    
     def videoPacket(self, width, height):
 
-        ''' Get a packet ready for encoding purpose  
+        ''' Get a video packet ready for encoding purpose  
+
+        Initialize and allocate data for a video packet. Data format will
+        depend to the previously added stream.
+
+        :return: video packet
+        :rtype: :class:`Packet`
         '''
 
         self.pkt = Packet(self.pFormatCtx)
@@ -549,6 +625,17 @@ class Media(object):
         return self.pkt
 
     def audioPacket(self, channels):
+        
+        ''' Get an audio packet ready for encoding purpose  
+
+        Initialize and allocate data for an audio packet. Data format will
+        depend to the previously added stream.
+
+        :return: video packet
+        :rtype: :class:`Packet`
+
+        :raises: RuntimeError if data could not be allocated
+        '''
 
         c = self.outStream.contents.codec
         
@@ -579,6 +666,12 @@ class Media(object):
     
     def write(self, packet, pts, mediaType='video'):
         
+        ''' Write packet to media
+
+        :param packet: packet to encode and add to media
+        :type packet: :class:`Packet`
+        '''
+
         c = self.outStream.contents.codec
         st = self.outStream
 
@@ -700,6 +793,11 @@ class Packet(object):
 
     def addScaler(self, streamIndex, width=None, height=None):
 
+        ''' Add a scaler
+
+        .. note:: called by :meth:`Media.addScaler`
+        '''
+
         scalerTuple = (width, height)
         if self.scaler[streamIndex] != scalerTuple:
 
@@ -803,7 +901,7 @@ class Packet(object):
 
     def decode(self):
        
-        ''' decode data
+        ''' Decode data
         '''
 
         codecCtx = self.codecCtx[self.pkt.stream_index]
@@ -872,7 +970,10 @@ class Packet(object):
 
 def versions():
 
-    ''' Return version & config & license (C libs)
+    ''' Return version & config & license of C libav or ffmpeg libs
+    
+    :return: dict with keys: version, configuration, license, path
+    :rtype: dict
     '''
 
     versions = {}
@@ -896,13 +997,23 @@ def versions():
 
 def avError(res):
 
-    '''
-    Return an error message according to AVERROR code 
+    ''' Return an error message from an error code
+
+    The libav or ffmpeg functions can return an error code, this function will
+    do its best to translate it to an human readable error message. 
+
+    :param res: error code
+    :type res: int
+    :return: error message
+    :rtype: str
+
+    .. note:: if error is unknown, return 'Unknown error code %d' 
     '''
 
     # cmdutils.c - print_error
 
     # setup error buffer
+    # TODO: size 255?
     bufSize = 128
     buf = ctypes.create_string_buffer(bufSize) 
     errRes = av.lib.av_strerror(res, buf, bufSize)
@@ -919,7 +1030,7 @@ def avError(res):
 
 def _guessChannelLayout(nbChannels):
 
-    # reimplement avcodec_guess_channel_layout (libav8)
+    # reimplement avcodec_guess_channel_layout (not exposed in libav8)
 
     channelMap = {
             1: av.lib.AV_CH_LAYOUT_MONO,
@@ -991,9 +1102,10 @@ def codecs():
 
 def formats():
 
-    ''' Return a dict with 2 keys: muxing & demuxing
-
-    each key value is a dict: key=format name, value: format long name
+    ''' Get all supported formats 
+    
+    :return: a dict with 2 keys: muxing and demuxing
+    :rtype: dict
     '''
 
     # port of show_formats function (cf cmdutils.c)
@@ -1029,8 +1141,23 @@ def codecInfo(name, decode=True):
     :type name: str
     :param decode: codec decoder info. Set decode to False to get codec encoder info.
     :type name: bool
-    :return: codec information as a dict with the following keys -> name, longname, type
+    :return: codec information
     :rtype: dict
+    :raises: ValueError if codec name is unknown
+
+    .. note::
+        codec information keys:
+        
+        - name
+        - longname
+        - type: video, audio or subtitle 
+        - thread: codec thread capacity
+        - autoThread: auto thread support
+        - framerates: supported frame rates 
+        - samplerates: supported sample rates
+        - pixFmts: supported pixel formats
+        - profiles: supported encoding profiles
+        - sampleFmts: supported sample formats
 
     '''
 

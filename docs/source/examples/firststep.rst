@@ -6,7 +6,7 @@ This example covers your first steps with Avpy.
 Importing
 ---------
 
-To start, let's select something in our scene
+Let's start with printing some media information:
 
 .. code-block:: python
 
@@ -21,6 +21,6 @@ Going further
 * Try the next example in :doc:`index` 
 * Explore the API documentation
 
- * :class:`~avpy.Media`
+ * :class:`~avpy.avMedia.Media`
  
 

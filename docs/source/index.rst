@@ -7,12 +7,12 @@ Overview
 Avpy is a ctypes (python) binding for libav and ffmpeg.
 
 :doc:`examples/index`
-  Examples of how to perform specific tasks.
+  Code examples.
 
 :doc:`faq`
   Some questions that come up often.
 
-:doc:`api/index`
+:doc:`api/modules`
   The complete API documentation, organized by classes and functions.
 
 Getting Help
@@ -23,7 +23,7 @@ If you're having trouble or have questions, you can write me an email (sydhds __
 Issues
 ------
 
-All issues should reported at the `Avpy bug tracker <https://bitbucket.org/sydh/avpy/issues>`_. 
+All issues should reported at the `Avpy bug tracker <https://www.bitbucket.org/sydh/avpy/issues>`_. 
 
 Changes
 -------
@@ -33,7 +33,7 @@ See the :doc:`changelog` for a full list of changes.
 Contributions
 -------------
 
-Fork the repo and submit a pull request. 
+Fork the `git repo <https://www.bitbucket.org/sydh/avpy>`_ and submit a pull request. 
 
 Indices and tables
 ------------------
@@ -47,6 +47,6 @@ Indices and tables
 
    examples/index
    faq
-   api/index
+   api/modules
    changelog
 
