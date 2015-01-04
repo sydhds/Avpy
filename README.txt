@@ -14,6 +14,13 @@ Typical usage often looks like this:
 
 More examples can be found in the examples folder.
 
+This software is licensed under the LGPL v.2.1+. Examples (and tools)
+are licensed under the Apache License 2.0.
+
+Read LICENSE.txt for details or:
+- http://choosealicense.com/licenses/lgpl-2.1
+- http://choosealicense.com/licenses/apache-2.0
+
 FeatureMatrix:
 
 - libav: 
