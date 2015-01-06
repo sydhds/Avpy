@@ -20,6 +20,36 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
+onRtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+if onRtd:
+    
+    # to import avpy 
+    sys.path.insert(0, os.path.abspath('../../'))
+    
+    # mock object - designed to mock ctypes.CDLL call
+    class Mock(object):
+        def __init__(self, *args, **kwargs):
+            if 'name' in kwargs:
+                self.name = kwargs['name']
+            else:
+                self.name = ''
+        @classmethod
+        def __getattr__(cls, value):
+            return Mock(name=value)
+
+        def __call__(self, *args, **kwargs):
+
+            if self.name == 'avcodec_version':
+                # emulate libav 11
+                return 3670272
+            else:
+                return Mock()
+    
+    # only patch ctypes.CDLL
+    import ctypes
+    globals()['CDLL'] = Mock()
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.

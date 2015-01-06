@@ -26,7 +26,7 @@ def _version():
     Return libavcodec version as a tuple: lib (libav or ffmpeg), major, minor 
     and patch version
     '''
-  
+
     # find_library does not support LD_LIBRARY_PATH for python < 3.4
     if 'AVPY_AVCODEC' in os.environ:
         fold, base = os.path.split(os.environ['AVPY_AVCODEC'])
@@ -53,24 +53,21 @@ def _version():
         libavresample = util.find_library('avresample')
         libavcodec = util.find_library('avcodec')
         
-    print(libavutil)
-    print(libavcodec)
-
     CDLL(libavutil, RTLD_GLOBAL)
     
     # ffmpeg have both libswresample and libavresample
     # libav only have libavresample
-    if os.path.exists(libswresample):
+    if libswresample and os.path.exists(libswresample):
         lib = 'ffmpeg'
     else:
         lib = 'libav'
 
     # libav11
-    if os.path.exists(libavresample):
+    if libavresample and os.path.exists(libavresample):
         CDLL(libavresample, RTLD_GLOBAL)
     
     version = CDLL(libavcodec, mode=RTLD_GLOBAL).avcodec_version() 
-    
+
     return lib, version >> 16 & 0xFF, version >> 8 & 0xFF, version & 0xFF
 
 
@@ -105,7 +102,6 @@ def _findModuleName():
             }
 
     lib, major, minor, micro = _version()	
-    print('%s %d %d %d' % (lib, major, minor, micro))	
 
     if lib == 'ffmpeg':
         versionDict = ffmpegVersion
@@ -130,7 +126,6 @@ def _findModuleName():
     return libName
 
 _moduleName = _findModuleName() 
-print('will import %s' % _moduleName)
 # import module
 _temp = __import__('avpy.version', globals(), locals(), [_moduleName])
 # import as lib

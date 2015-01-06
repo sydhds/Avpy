@@ -2,5 +2,11 @@ Generate Sphinx documentation
 -----------------------------
 
 cd docs
-PYTHONPATH=../:$PYTHONPATH make html
+rm -rf build && PYTHONPATH=../:$PYTHONPATH make html
+
+Rtd
+---
+
+cd docs
+rm -rf build/ && READTHEDOCS=True make html
 
