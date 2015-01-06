@@ -1,0 +1,265 @@
+type:
+    - int8_t
+    - uint8_t
+    - int16_t
+    - uint16_t
+    - int32_t
+    - uint32_t
+    - int64_t
+    - uint64_t
+    - size_t
+    - STRING
+    - AVCodecID
+    - AVPacketSideDataType
+    - AVDiscard
+    - AVStreamParseType
+    - AVColorPrimaries
+    - AVColorTransferCharacteristic
+    - AVColorSpace
+    - AVColorRange
+    - AVChromaLocation
+    #- AVLPCType
+    - AVAudioServiceType
+    - AVSampleFormat
+    - AVMediaType
+    - AVPixelFormat
+    - AVPictureType
+    - AVSubtitleType
+    - AVFieldOrder
+
+defineLong:
+    - AV_NOPTS_VALUE
+
+define:
+    - AV_DICT_IGNORE_SUFFIX
+    - AVMEDIA_TYPE_VIDEO
+    - AVMEDIA_TYPE_AUDIO
+    - AVMEDIA_TYPE_SUBTITLE
+    - AV_TIME_BASE
+    - PIX_FMT_NONE
+    - PIX_FMT_RGB24
+    - PIX_FMT_YUV420P
+    - SWS_BILINEAR
+    - AV_LOG_QUIET
+    - CODEC_CAP_FRAME_THREADS
+    - CODEC_CAP_SLICE_THREADS
+    - CODEC_CAP_AUTO_THREADS
+    # subtitle
+    - SUBTITLE_NONE
+    - SUBTITLE_BITMAP
+    - SUBTITLE_TEXT
+    - SUBTITLE_ASS
+    # encode
+    - CODEC_ID_MPEG2VIDEO
+    - CODEC_ID_MPEG1VIDEO
+    - CODEC_FLAG_GLOBAL_HEADER
+    - CODEC_ID_NONE
+    - AVFMT_GLOBALHEADER
+    - AVFMT_NOFILE
+    - AV_PKT_FLAG_KEY
+    - AVIO_FLAG_WRITE
+    - FF_COMPLIANCE_NORMAL
+    - FF_COMPLIANCE_STRICT
+    - AV_SAMPLE_FMT_NONE
+    - AV_SAMPLE_FMT_S16
+    # seek
+    - AVSEEK_FLAG_FRAME 
+    - AVSEEK_FLAG_BACKWARD 
+    - AVSEEK_FLAG_ANY 
+    - AVSEEK_FLAG_BYTE 
+
+alias:
+    #- ByteIOContext
+    #- AVMetadata
+    - CodecID
+    - PixelFormat
+    - AVOptionType
+    # ffmpeg
+    - AVDurationEstimationMethod
+    - AVClassCategory
+
+class:
+    - N8AVPacket4DOT_30E
+    - N8AVStream4DOT_30E
+    - N8AVOption4DOT_30E
+    - AVProfile
+    - AVPanScan
+    - AVCodec
+    - RcOverride
+    - AVFrame
+    #- AVPaletteControl
+    - AVHWAccel
+    - AVCodecParser
+    #- AVFormatParameters
+    - AVCodecContext
+    - AVCodecParserContext
+    - AVIndexEntry
+    - AVDictionary
+    - AVIOContext
+    - AVOption
+    - AVCodecTag
+    #- AVMetadataConv
+    - AVProbeData
+    - AVRational
+    - AVFrac
+    - AVClass
+    - AVInputFormat
+    - AVOutputFormat
+    - AVStream
+    - AVPacketList
+    - AVStream
+    - AVPacket
+    - AVProgram
+    - AVChapter
+    - AVPacketList
+    - AVFormatContext
+    - AVPicture
+    - SwsContext
+    - SwsFilter
+    - SwsVector
+    - AVCodecInternal
+    - AVCodecDefault
+    - AVIOInterruptCB
+    - AVDictionaryEntry
+    - AVSubtitle
+    - AVSubtitleRect
+    # ffmpeg
+    - AVCodecDescriptor
+    - AVOptionRanges
+    - AVOptionRange
+
+import:
+    - import os
+    - import re
+    - from ctypes import CDLL, RTLD_GLOBAL
+    - from ctypes import Structure, POINTER, CFUNCTYPE
+    - from ctypes import c_int, c_uint, c_char, c_void_p, c_char_p, c_ubyte
+    - from ctypes import c_short
+    - from ctypes import c_ulong
+    - from ctypes import c_int8, c_uint8
+    - from ctypes import c_int16, c_uint16
+    - from ctypes import c_int32, c_uint32
+    - from ctypes import c_int64, c_uint64
+    - from ctypes import c_float    
+    - from ctypes import c_double
+    - from ctypes import util
+
+cdll:
+    - "if 'AVPY_AVCODEC' in os.environ:"
+    - "    fold, base = os.path.split(os.environ['AVPY_AVCODEC'])"
+    - "    libavutil = os.environ.get('AVPY_AVUTIL')"
+    - "    if not libavutil:"
+    - "        libavutil = os.path.join(fold, re.sub('avcodec', 'avutil', base))"
+    - "    libavformat = os.environ.get('AVPY_AVFORMAT')"
+    - "    if not libavformat:"
+    - "        libavformat = os.path.join(fold, re.sub('avcodec', 'avformat', base))"
+    - "    libavdevice = os.environ.get('AVPY_AVDEVICE')"
+    - "    if not libavdevice:"
+    - "        libavdevice = os.path.join(fold, re.sub('avcodec', 'avdevice', base))"
+    - "    libswscale = os.environ.get('AVPY_SWSCALE')"
+    - "    if not libswscale:"
+    - "        libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))"
+    - "    libavcodec = os.environ['AVPY_AVCODEC']"
+    - "else:"
+    - "    libavutil = util.find_library('avutil')"
+    - "    libavcodec = util.find_library('avcodec')"
+    - "    libavformat = util.find_library('avformat')"
+    - "    libavdevice = util.find_library('avdevice')"
+    - "    libswscale = util.find_library('swscale')"
+    - ""
+    - "CDLL(libavutil, RTLD_GLOBAL)"
+    - "_libraries = {}"
+    - "_libraries['libavutil.so'] = CDLL(libavutil, mode=RTLD_GLOBAL)"
+    - "_libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)"
+    - "_libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)"
+    - "_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)"
+    - "_libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)"
+   
+function:
+    ## avutil
+    - av_dict_get
+    - av_dict_set
+    - av_strerror
+    - av_log_set_level
+    - av_malloc
+    - av_free
+    - av_get_pix_fmt
+    - av_get_default_channel_layout
+    - avutil_version
+    - avutil_configuration
+    - avutil_license
+    ## avformat
+    - av_register_all
+    - av_iformat_next
+    - av_oformat_next
+    - avformat_alloc_context
+    - avformat_new_stream
+    - avformat_open_input
+    - avformat_close_input
+    - avformat_find_stream_info
+    - av_guess_format
+    - av_guess_codec
+    - av_read_frame
+    - avformat_free_context
+    - avformat_version
+    - avformat_configuration
+    - avformat_license
+    # seek
+    - av_seek_frame
+    ## avocodec
+    - avcodec_find_decoder
+    - avcodec_find_decoder_by_name
+    - avcodec_find_encoder_by_name
+    - av_get_pix_fmt_name
+    - avcodec_decode_audio4
+    - av_samples_get_buffer_size
+    - avcodec_decode_video2
+    - avcodec_open2
+    - avcodec_close
+    - av_codec_next
+    - avpicture_alloc
+    - avpicture_free
+    - avcodec_alloc_frame
+    - avcodec_get_context_defaults3
+    - avcodec_version
+    - avcodec_configuration
+    - avcodec_license
+    ## avdevice
+    - avdevice_version
+    - avdevice_configuration
+    - avdevice_license
+    # test
+    - avpicture_get_size
+    - avpicture_fill
+    #- av_dup_packet
+    - av_free_packet
+    # encoding
+    - avcodec_find_encoder
+    - av_get_sample_fmt
+    - av_get_sample_fmt_name
+    - av_get_bytes_per_sample
+    - av_write_trailer
+    #- avcodec_encode_video
+    - avcodec_encode_video2
+    - av_codec_get_id
+    - av_init_packet
+    - av_interleaved_write_frame
+    #- av_set_parameters
+    - avformat_write_header
+    - avio_open
+    - avio_close
+    - avformat_query_codec
+    - avcodec_encode_audio2
+    - avcodec_get_frame_defaults
+    - avcodec_fill_audio_frame
+    # subtitle
+    - avcodec_decode_subtitle2
+    - avsubtitle_free
+    ## swsscale
+    - sws_getContext
+    - sws_freeContext
+    - sws_scale
+    - swscale_version
+    - swscale_configuration
+    - swscale_license
+
