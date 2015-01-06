@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
             streamIndex = media.addStream('video', streamInfoVideo)
         
-            pkt = media.videoPacket(*resolution)
+            pkt = media.videoPacket()
 
             # single image -> set frameCount to 1
             options.frameCount = 1
@@ -157,7 +157,7 @@ if __name__ == '__main__':
 
             streamIndex = media.addStream('video', streamInfoVideo)
         
-            pkt = media.videoPacket(*resolution)
+            pkt = media.videoPacket()
 
         elif options.mediaType == 'audio':
 
@@ -185,7 +185,7 @@ if __name__ == '__main__':
             frameSize = info['stream'][0]['frameSize']
 
             soundGen = SignalGen(streamInfoAudio['sampleRate'])
-            pkt = media.audioPacket(streamInfoAudio['channels'])
+            pkt = media.audioPacket()
 
         elif options.mediaType == 'both':
 

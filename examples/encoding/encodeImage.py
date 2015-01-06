@@ -38,7 +38,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     try:
-        media = Media(options.media)
+        media = Media(options.media, quiet=False)
     except IOError as e:
         print('Unable to open %s: %s' % (options.media, e))
         sys.exit(1)

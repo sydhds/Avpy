@@ -600,7 +600,7 @@ class Media(object):
         
         av.lib.av_write_trailer(self.pFormatCtx)
    
-    def videoPacket(self, width, height):
+    def videoPacket(self):
 
         ''' Get a video packet ready for encoding purpose  
 
@@ -614,6 +614,8 @@ class Media(object):
         self.pkt = Packet(self.pFormatCtx)
         
         c = self.outStream.contents.codec
+        width = c.contents.width
+        height = c.contents.height
         pixFmt = c.contents.pix_fmt
         
         av.lib.avpicture_alloc(
@@ -624,7 +626,7 @@ class Media(object):
 
         return self.pkt
 
-    def audioPacket(self, channels):
+    def audioPacket(self):
         
         ''' Get an audio packet ready for encoding purpose  
 
@@ -653,7 +655,7 @@ class Media(object):
         av.lib.avcodec_get_frame_defaults(self.pkt.frame) 
 
         self.pkt.frame.contents.nb_samples = int(bufSize / 
-                (channels * av.lib.av_get_bytes_per_sample(c.contents.sample_fmt)))
+                (c.contents.channels * av.lib.av_get_bytes_per_sample(c.contents.sample_fmt)))
         
         res = av.lib.avcodec_fill_audio_frame(self.pkt.frame, 
                 c.contents.channels, c.contents.sample_fmt,
