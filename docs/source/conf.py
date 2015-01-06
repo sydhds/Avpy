@@ -49,6 +49,7 @@ if onRtd:
     # only patch ctypes.CDLL
     import ctypes
     globals()['CDLL'] = Mock()
+    from avpy import av
 
 # -- General configuration ------------------------------------------------
 
