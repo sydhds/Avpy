@@ -52,7 +52,11 @@ def _version():
         libswresample = util.find_library('swresample')
         libavresample = util.find_library('avresample')
         libavcodec = util.find_library('avcodec')
-        
+    
+    print(libavutil)
+    print(libavcodec)
+    print(CDLL)
+
     CDLL(libavutil, RTLD_GLOBAL)
     
     # ffmpeg have both libswresample and libavresample
@@ -67,6 +71,8 @@ def _version():
         CDLL(libavresample, RTLD_GLOBAL)
     
     version = CDLL(libavcodec, mode=RTLD_GLOBAL).avcodec_version() 
+
+    print(version)
 
     return lib, version >> 16 & 0xFF, version >> 8 & 0xFF, version & 0xFF
 

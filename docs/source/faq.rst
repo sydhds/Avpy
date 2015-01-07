@@ -17,8 +17,8 @@ Does Avpy support Python 3?
 Yes for Python 3.2+ (pypy is supported as well). 
 Please report if something is broken for Python3.
 
-Is the hight level API stable?
-------------------------------
+Is the high level API stable?
+-----------------------------
 
 Short answer: Almost but not yet.
 
@@ -29,8 +29,8 @@ stable. Some additional code will be provided to abstract as much as possible
 any 'ctypes code' and to support new features (filtering, audio resampling, 
 seeking ...).    
 
-Does Avpy only provide a hight level API?
------------------------------------------
+Does Avpy only provide a high level API?
+----------------------------------------
 
 Short answer: A low level API is available but its usage is not recommended.
 
