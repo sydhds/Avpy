@@ -426,7 +426,8 @@ class Media(object):
                 c.contents.flags |= av.lib.CODEC_FLAG_GLOBAL_HEADER 
         
             # open codec
-            res = av.lib.avcodec_open2(c, None, None) 
+            #res = av.lib.avcodec_open2(c, None, None) 
+            res = av.lib.avcodec_open2(c, _codec, None) 
             if res < 0:
                 raise RuntimeError(avError(res))
             
@@ -536,7 +537,7 @@ class Media(object):
                 c.contents.flags |= av.lib.CODEC_FLAG_GLOBAL_HEADER 
             
             # open codec
-            res = av.lib.avcodec_open2(c, None, None) 
+            res = av.lib.avcodec_open2(c, _codec, None) 
             if res < 0:
                 raise RuntimeError(avError(res))
 
