@@ -27,13 +27,16 @@ if onRtd:
     # to import avpy 
     sys.path.insert(0, os.path.abspath('../../'))
     
-    # mock object - designed to mock ctypes.CDLL call
+    # mock object - designed to mock
+    # a subset of the python ctypes modules
     class Mock(object):
+
         def __init__(self, *args, **kwargs):
             if 'name' in kwargs:
                 self.name = kwargs['name']
             else:
                 self.name = ''
+        
         @classmethod
         def __getattr__(cls, value):
             return Mock(name=value)
@@ -45,10 +48,13 @@ if onRtd:
                 return 3670272
             else:
                 return Mock()
-    
-    # only patch ctypes.CDLL
+        
+        def __mul__(self, other):
+            return 0
+
+    # patch ctypes module
     import ctypes
-    globals()['CDLL'] = Mock()
+    sys.modules['ctypes'] = Mock()
     from avpy import av
 
 # -- General configuration ------------------------------------------------

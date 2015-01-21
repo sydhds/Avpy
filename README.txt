@@ -22,13 +22,15 @@ Read LICENSE.txt for details or:
 - http://choosealicense.com/licenses/lgpl-2.1
 - http://choosealicense.com/licenses/apache-2.0
 
-FeatureMatrix:
+Features:
 
 - libav: 
     - version 0.8: done
     - version 9: done
     - version 10: done
     - version 11: done
+- ffmpeg:
+    - version 1.2: done
 - OS: 
     - Linux - BSD: done
     - MacOS: please report!
@@ -55,8 +57,6 @@ FeatureMatrix:
 
 Missing features:
 
-- ffmpeg:
-    - version ?: todo
 - avpy:
     - filter: todo (see old filter branch)
     - audio resampling: todo

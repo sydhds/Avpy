@@ -53,9 +53,11 @@ def _version():
         libavresample = util.find_library('avresample')
         libavcodec = util.find_library('avcodec')
     
-    print(libavutil)
-    print(libavcodec)
-    print(CDLL)
+    # RTD tests (debug only)
+    #libavutil = None
+    #libavcodec = None
+    #libswresample = None
+    #libavresample = None
 
     CDLL(libavutil, RTLD_GLOBAL)
     
@@ -71,8 +73,6 @@ def _version():
         CDLL(libavresample, RTLD_GLOBAL)
     
     version = CDLL(libavcodec, mode=RTLD_GLOBAL).avcodec_version() 
-
-    print(version)
 
     return lib, version >> 16 & 0xFF, version >> 8 & 0xFF, version & 0xFF
 
