@@ -46,6 +46,8 @@ if onRtd:
             if self.name == 'avcodec_version':
                 # emulate libav 11
                 return 3670272
+            elif self.name == 'find_library':
+                return ''
             else:
                 return Mock()
         
