@@ -12,7 +12,8 @@ Typical usage often looks like this:
 >>> m = Media('test.avi')
 >>> print m.info()
 
-More examples can be found in the examples folder.
+More examples can be found in the examples folder. Documentation is available 
+online: https://avpy.readthedocs.org/ 
 
 This software is licensed under the LGPL v.2.1+. Examples (and tools)
 are licensed under the Apache License 2.0.
