@@ -152,14 +152,16 @@ class Media(object):
                 - fps: as a tuple of 3 values (num, den, ticks)
                 - pixelFormat: pixel format name (ie. rgb24, yuv420p ...)
             - audio:
-                - sampleRate: sample rate (ie. )
+                - sampleRate: sample rate
                 - channels: channel count
                 - sampleFmt: sample format name (ie. s16 ...)
                 - sampleFmtId: sample format id (internal use)
                 - frameSize: frame size
                 - bytesPerSample: bytes for sample format (ie. 2 for s16)
             - subtitle:
-                - subitle header: header string
+                - subtitle header: header string
+
+        .. seealso:: :meth:`writeHeader`
         '''
         
         infoDict = {}
@@ -238,6 +240,8 @@ class Media(object):
         :return: a dict with key, value = metadata key, metadata value
 
         .. note:: method is also called by :meth:`info`
+
+        .. seealso:: :meth:`writeHeader`
         '''
 
         done = False
@@ -338,7 +342,7 @@ class Media(object):
             
             - For an image, timeBase and bitRate parameters are ignored
             - More parameters will be supported in the near futur
-            - Subtitle stream are not yet supported
+            - Subtitle streams are not yet supported
 
         .. note:: use :func:`codecInfo` to query codec caps
 
@@ -551,7 +555,7 @@ class Media(object):
         
         ''' Write media header 
 
-        Write media header. Call this method have to be called before any
+        Write media header. This method have to be called before any
         call to :meth:`write` 
 
         :param metaData: media metaData (ie. artist, year ...)
@@ -596,7 +600,8 @@ class Media(object):
 
         ''' Write media trailer 
             
-        Write media trailer. Call this method just before closing Media.
+        Write media trailer. Call this method just before closing 
+        or deleting media.
         '''
         
         av.lib.av_write_trailer(self.pFormatCtx)
@@ -753,8 +758,16 @@ class Media(object):
 
 class Packet(object):
 
-    def __init__(self, formatCtx):
+    ''' Media data container
 
+    When decoding a media, a packet object will be returned and
+    might be decoded later.
+
+    When encoding, a packet is retrieved then written.
+    '''
+
+    def __init__(self, formatCtx):
+        
         # alloc packet and keep a ref (for Media.__next__)
         self.pkt = av.lib.AVPacket()
         self.pktRef = ctypes.byref(self.pkt)
