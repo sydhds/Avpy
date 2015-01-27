@@ -71,9 +71,7 @@ sudo apt-get install ffmpeg
 Install from source:
 --------------------
 
-- Clone this repository
-- python setup.py sdist
-- pip install dist/Avpy-*.tar.gz
+- pip install Avpy
 
 Please read doc/DEV.txt (virtualenvs) or doc/Windows.txt for additional information.
 

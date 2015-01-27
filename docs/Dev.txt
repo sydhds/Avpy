@@ -74,10 +74,11 @@ The following env variables can also be used
 Testing in a virtualenvs
 ------------------------
 
-source ~/dev/virtualenvs/avpy/bin/activate
-pip uninstall Avpy
-pip install [...]/dist/Avpy-*.tar.gz
-python -c 'from avpy import formats; print formats()'
+- source ~/dev/virtualenvs/avpy/bin/activate
+- pip uninstall Avpy
+- python setup.py sdist
+- pip install dist/Avpy-*.tar.gz
+- python -c 'from avpy import formats; print formats()'
 
 Generate binding config
 =======================
