@@ -56,16 +56,6 @@ Features:
     - Python3: done
     - PyPy: done
 
-Missing features:
-
-- avpy:
-    - filter: todo (see old filter branch)
-    - audio resampling: todo
-    - seeking: todo
-- examples:
-    - PySDL2 audio: todo
-    - PySDL2 video player: todo
-
 Install
 =======
 
