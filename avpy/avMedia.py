@@ -338,6 +338,8 @@ class Media(object):
             - codec: audio codec name, auto is a valid value
             - sampleFmt: sample format (ie flt for float)
         
+        More parameters are documented here: :doc:`../api/encoding`
+        
         .. note:: 
             
             - For an image, timeBase and bitRate parameters are ignored
@@ -416,8 +418,9 @@ class Media(object):
                 c.contents.time_base.den = FPS_DEFAULT[1]
                 c.contents.time_base.num = FPS_DEFAULT[0] 
 
-            # TODO: from info
-            #c.contents.gop_size = 12
+            # more parameters
+            if 'gopSize' in streamInfo:
+                c.contents.gop_size = streamInfo['gopSize'] 
 
             if sys.version_info >= (3, 0):
                 pixFmt = ctypes.c_char_p(streamInfo['pixelFormat'].encode('utf8'))
@@ -430,7 +433,6 @@ class Media(object):
                 c.contents.flags |= av.lib.CODEC_FLAG_GLOBAL_HEADER 
         
             # open codec
-            #res = av.lib.avcodec_open2(c, None, None) 
             res = av.lib.avcodec_open2(c, _codec, None) 
             if res < 0:
                 raise RuntimeError(avError(res))
