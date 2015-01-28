@@ -21,7 +21,7 @@ import sys
 import ctypes
 from . import av
 
-__version__ = '0.1.0'
+__version__ = '0.1.1.dev0'
 
 FRAME_SIZE_DEFAULT = 1152
 FPS_DEFAULT = (1, 24)

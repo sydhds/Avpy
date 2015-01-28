@@ -1,0 +1,14 @@
+Version
+-------
+
+- Update version in the following files:
+    - setup.py
+    - avpy/avMedia.py
+    - CHANGES.txt
+    - docs/source/conf.py
+
+Version spec
+------------
+
+https://www.python.org/dev/peps/pep-0440
+

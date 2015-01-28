@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='Avpy',
-    version='0.1.0',
+    version='0.1.1.dev0',
     author='Sylvain Delhomme',
     author_email='sydhds@gmail.com',
     packages=['avpy', 'avpy.version'],
