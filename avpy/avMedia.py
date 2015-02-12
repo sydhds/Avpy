@@ -228,6 +228,15 @@ class Media(object):
             if hasattr(av.lib, 'av_get_channel_name'):
                 # av_get_channel_name return None if format is planar
                 streamInfo['channelLayout'] = av.lib.av_get_channel_name(cCodecCtx.contents.channel_layout) or ''
+            else:
+                # libav 0.8 only
+                bufSize = 128
+                buf = ctypes.create_string_buffer(bufSize) 
+                av.lib.av_get_channel_layout_string(
+                        buf, bufSize, 
+                        streamInfo['channels'], cCodecCtx.contents.channel_layout)
+
+                streamInfo['channelLayout'] = buf.value
 
             streamInfo['planarFmt'] = bool(av.lib.av_sample_fmt_is_planar(cCodecCtx.contents.sample_fmt))
 

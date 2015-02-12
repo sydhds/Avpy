@@ -188,6 +188,7 @@ function:
     - avutil_version
     - avutil_configuration
     - avutil_license
+    - av_get_channel_layout_string
     - av_sample_fmt_is_planar
     ## avformat
     - av_register_all
