@@ -14,16 +14,16 @@ from avpy import Media
 # wav data (see audioDump)
 waveData = []
 
-def audioDump2(buf, bufLen):
+#def audioDump2(buf, bufLen):
 
-    ''' Store audio data
-    '''
+    #''' Store audio data
+    #'''
 
-    # TODO: unused, remove?
+    ## TODO: unused, remove?
 
-    global waveData	
-    for i in range(bufLen):
-        waveData.append(struct.pack('B', buf[i]))
+    #global waveData	
+    #for i in range(bufLen):
+        #waveData.append(struct.pack('B', buf[i]))
 
 def audioDump(buf, bufLen):
 
@@ -62,6 +62,12 @@ if __name__ == '__main__':
             help='decode at max seconds of audio',
             type='int',
             default=20)
+    parser.add_option('-q', '--quiet',
+            help='quiet mode',
+            action='store_true')
+    parser.add_option('-o', '--output',
+            help='sound output name',
+            default='sound.wav')
     
     (options, args) = parser.parse_args()
 
@@ -76,21 +82,35 @@ if __name__ == '__main__':
     else:
         print('No audio stream in %s' % mediaInfo['name'])
         sys.exit(2)
+        
+    astreamInfo = mediaInfo['stream'][astream]
+
+    # TODO: check channel count - wav module only support mono & stereo
+    if astreamInfo['planarFmt']:
+        
+        inAudio = {
+            'layout': 'stereo',
+            #'channels': astreamInfo['channels'],
+            'sampleRate': astreamInfo['sampleRate'],
+            'sampleFmt': astreamInfo['sampleFmt'] 
+            }
+        outAudio = dict(inAudio) # copy
+        outAudio['sampleFmt'] = 's16'
+ 
+        media.addResampler(astream, inAudio, outAudio)
     
     # setup output wav file
-    outputName = 'out.wav'
+    outputName = options.output
     wp = wave.open(outputName, 'w')
-    
-    astreamInfo = mediaInfo['stream'][astream]
-    
+
     try:
         # nchannels, sampwidth, framerate, nframes, comptype, compname 
-        wp.setparams( (astreamInfo['channels'], 
+        wp.setparams((astreamInfo['channels'], 
            astreamInfo['bytesPerSample'], 
            astreamInfo['sampleRate'], 
            0, 
            'NONE', 
-           'not compressed') )
+           'not compressed'))
     except wave.Error as e:
         print('Wrong parameters for wav file: %s' % e)
         sys.exit(1)
@@ -105,11 +125,16 @@ if __name__ == '__main__':
         if pkt.streamIndex() == astream:
             pkt.decode()
             if pkt.decoded:
-                print('writing %s bytes...' % pkt.dataSize)
-                audioDump(pkt.frame.contents.data[0], pkt.dataSize)
+                if not options.quiet:
+                    print('writing %s bytes...' % pkt.dataSize)
+                
+                if astreamInfo['planarFmt']:
+                    audioDump(pkt.resampledFrame.contents.data[0], pkt.dataSize)
+                else:
+                    audioDump(pkt.frame.contents.data[0], pkt.dataSize)
                 
                 decodedSize += pkt.dataSize
-                # stop after ~ 90s (default)
+                # stop after ~ 20s (default)
                 # exact time will vary depending on dataSize
                 if decodedSize >= options.length*secondSize:
                     break

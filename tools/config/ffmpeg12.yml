@@ -127,6 +127,8 @@ class:
     - AVCodecDescriptor
     - AVOptionRanges
     - AVOptionRange
+    # resample
+    - AVAudioResampleContext
 
 import:
     - import os
@@ -159,6 +161,9 @@ cdll:
     - "    libswscale = os.environ.get('AVPY_SWSCALE')"
     - "    if not libswscale:"
     - "        libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))"
+    - "    #libavresample = os.environ.get('AVPY_AVRESAMPLE')"
+    - "    #if not libavresample:"
+    - "    #    libavresample = os.path.join(fold, re.sub('avcodec', 'avresample', base))"
     - "    libavcodec = os.environ['AVPY_AVCODEC']"
     - "else:"
     - "    libavutil = util.find_library('avutil')"
@@ -166,10 +171,12 @@ cdll:
     - "    libavformat = util.find_library('avformat')"
     - "    libavdevice = util.find_library('avdevice')"
     - "    libswscale = util.find_library('swscale')"
+    - "    #libavresample = util.find_library('avresample')"
     - ""
     - "CDLL(libavutil, RTLD_GLOBAL)"
     - "_libraries = {}"
     - "_libraries['libavutil.so'] = CDLL(libavutil, mode=RTLD_GLOBAL)"
+    - "#_libraries['libavresample.so'] = CDLL(libavresample, mode=RTLD_GLOBAL)"
     - "_libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)"
     - "_libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)"
     - "_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)"
@@ -185,9 +192,13 @@ function:
     - av_free
     - av_get_pix_fmt
     - av_get_default_channel_layout
+    - av_get_channel_name
     - avutil_version
     - avutil_configuration
     - avutil_license
+    - av_sample_fmt_is_planar
+    - av_get_channel_layout
+    - av_get_channel_layout_nb_channels
     ## avformat
     - av_register_all
     - av_iformat_next
@@ -228,6 +239,10 @@ function:
     - avdevice_version
     - avdevice_configuration
     - avdevice_license
+    ## avresample
+    - avresample_version
+    - avresample_configuration
+    - avresample_license
     # test
     - avpicture_get_size
     - avpicture_fill
@@ -262,4 +277,16 @@ function:
     - swscale_version
     - swscale_configuration
     - swscale_license
-
+    ## avresample
+    - avresample_alloc_context
+    - avresample_open
+    #- avresample_is_open
+    - avresample_close
+    - avresample_free
+    - av_opt_set_int
+    - avresample_convert
+    - av_samples_alloc
+    #- avresample_get_out_samples
+    - avresample_get_delay
+    - avresample_available
+    - avresample_read

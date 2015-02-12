@@ -69,6 +69,7 @@ define:
     - AVSEEK_FLAG_BYTE 
     # filter
     #- AV_PERM_READ
+    - AV_CH_LAYOUT_STEREO
 
 alias:
     #- ByteIOContext
@@ -132,6 +133,8 @@ class:
     - AVFrameSideData
     # libav11
     - AVPacketSideData
+    # resample
+    - AVAudioResampleContext
 
 import:
     - import os
@@ -195,9 +198,13 @@ function:
     - av_free
     - av_get_pix_fmt
     - av_get_default_channel_layout
+    - av_get_channel_name
     - avutil_version
     - avutil_configuration
     - avutil_license
+    - av_sample_fmt_is_planar
+    - av_get_channel_layout
+    - av_get_channel_layout_nb_channels
     ## avformat
     - av_register_all
     - av_iformat_next
@@ -276,4 +283,17 @@ function:
     - swscale_version
     - swscale_configuration
     - swscale_license
+    ## avresample
+    - avresample_alloc_context
+    - avresample_open
+    #- avresample_is_open
+    - avresample_close
+    - avresample_free
+    - av_opt_set_int
+    - avresample_convert
+    - av_samples_alloc
+    - avresample_get_out_samples
+    - avresample_get_delay
+    - avresample_available
+    - avresample_read
 

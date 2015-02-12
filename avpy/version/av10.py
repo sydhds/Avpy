@@ -27,6 +27,9 @@ if 'AVPY_AVCODEC' in os.environ:
     libswscale = os.environ.get('AVPY_SWSCALE')
     if not libswscale:
         libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))
+    libavresample = os.environ.get('AVPY_AVRESAMPLE')
+    if not libavresample:
+        libavresample = os.path.join(fold, re.sub('avcodec', 'avresample', base))
     libavcodec = os.environ['AVPY_AVCODEC']
 else:
     libavutil = util.find_library('avutil')
@@ -34,18 +37,20 @@ else:
     libavformat = util.find_library('avformat')
     libavdevice = util.find_library('avdevice')
     libswscale = util.find_library('swscale')
+    libavresample = util.find_library('avresample')
 
 CDLL(libavutil, RTLD_GLOBAL)
 _libraries = {}
 _libraries['libavutil.so'] = CDLL(libavutil, mode=RTLD_GLOBAL)
+_libraries['libavresample.so'] = CDLL(libavresample, mode=RTLD_GLOBAL)
 _libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)
 _libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)
 _libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
 _libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)
 
 STRING = c_char_p
-size_t = c_ulong
 AVPixelFormat = c_int # enum
+size_t = c_ulong
 AVCodecID = c_int # enum
 AVMediaType = c_int # enum
 AVDiscard = c_int # enum
@@ -70,21 +75,21 @@ AVPictureType = c_int # enum
 int8_t = c_int8
 int32_t = c_int32
 
-AV_CODEC_ID_MPEG1VIDEO = 1
-AV_CODEC_ID_NONE = 0
+PIX_FMT_YUV420P = 0
 SUBTITLE_TEXT = 2
-SUBTITLE_BITMAP = 1
-SUBTITLE_ASS = 3
 AV_SAMPLE_FMT_S16 = 1
 AVMEDIA_TYPE_SUBTITLE = 3
 AVMEDIA_TYPE_AUDIO = 1
+AVMEDIA_TYPE_VIDEO = 0
+AV_CODEC_ID_MPEG2VIDEO = 2
+SUBTITLE_NONE = 0
+PIX_FMT_NONE = -1
+AV_CODEC_ID_MPEG1VIDEO = 1
 AV_SAMPLE_FMT_NONE = -1
 PIX_FMT_RGB24 = 2
-PIX_FMT_NONE = -1
-PIX_FMT_YUV420P = 0
-AV_CODEC_ID_MPEG2VIDEO = 2
-AVMEDIA_TYPE_VIDEO = 0
-SUBTITLE_NONE = 0
+SUBTITLE_ASS = 3
+AV_CODEC_ID_NONE = 0
+SUBTITLE_BITMAP = 1
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
 AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
@@ -239,6 +244,9 @@ class AVBuffer(Structure):
 	pass
 
 class AVFrameSideData(Structure):
+	pass
+
+class AVAudioResampleContext(Structure):
 	pass
 
 PixelFormat = AVPixelFormat # alias
@@ -783,6 +791,8 @@ AVIOContext._fields_ = [
     ('read_seek', CFUNCTYPE(int64_t, c_void_p, c_int, int64_t, c_int)),
     ('seekable', c_int),
 ]
+AVAudioResampleContext._fields_ = [
+]
 AVBuffer._fields_ = [
 ]
 AVBufferRef._fields_ = [
@@ -1051,6 +1061,39 @@ avio_open.argtypes = [POINTER(POINTER(AVIOContext)), STRING, c_int]
 avio_close = _libraries['libavformat.so'].avio_close
 avio_close.restype = c_int
 avio_close.argtypes = [POINTER(AVIOContext)]
+avresample_version = _libraries['libavresample.so'].avresample_version
+avresample_version.restype = c_uint
+avresample_version.argtypes = []
+avresample_configuration = _libraries['libavresample.so'].avresample_configuration
+avresample_configuration.restype = STRING
+avresample_configuration.argtypes = []
+avresample_license = _libraries['libavresample.so'].avresample_license
+avresample_license.restype = STRING
+avresample_license.argtypes = []
+avresample_alloc_context = _libraries['libavresample.so'].avresample_alloc_context
+avresample_alloc_context.restype = POINTER(AVAudioResampleContext)
+avresample_alloc_context.argtypes = []
+avresample_open = _libraries['libavresample.so'].avresample_open
+avresample_open.restype = c_int
+avresample_open.argtypes = [POINTER(AVAudioResampleContext)]
+avresample_close = _libraries['libavresample.so'].avresample_close
+avresample_close.restype = None
+avresample_close.argtypes = [POINTER(AVAudioResampleContext)]
+avresample_free = _libraries['libavresample.so'].avresample_free
+avresample_free.restype = None
+avresample_free.argtypes = [POINTER(POINTER(AVAudioResampleContext))]
+avresample_convert = _libraries['libavresample.so'].avresample_convert
+avresample_convert.restype = c_int
+avresample_convert.argtypes = [POINTER(AVAudioResampleContext), POINTER(POINTER(uint8_t)), c_int, c_int, POINTER(POINTER(uint8_t)), c_int, c_int]
+avresample_get_delay = _libraries['libavresample.so'].avresample_get_delay
+avresample_get_delay.restype = c_int
+avresample_get_delay.argtypes = [POINTER(AVAudioResampleContext)]
+avresample_available = _libraries['libavresample.so'].avresample_available
+avresample_available.restype = c_int
+avresample_available.argtypes = [POINTER(AVAudioResampleContext)]
+avresample_read = _libraries['libavresample.so'].avresample_read
+avresample_read.restype = c_int
+avresample_read.argtypes = [POINTER(AVAudioResampleContext), POINTER(POINTER(uint8_t)), c_int]
 avutil_version = _libraries['libavutil.so'].avutil_version
 avutil_version.restype = c_uint
 avutil_version.argtypes = []
@@ -1060,9 +1103,18 @@ avutil_configuration.argtypes = []
 avutil_license = _libraries['libavutil.so'].avutil_license
 avutil_license.restype = STRING
 avutil_license.argtypes = []
+av_get_channel_layout = _libraries['libavutil.so'].av_get_channel_layout
+av_get_channel_layout.restype = uint64_t
+av_get_channel_layout.argtypes = [STRING]
+av_get_channel_layout_nb_channels = _libraries['libavutil.so'].av_get_channel_layout_nb_channels
+av_get_channel_layout_nb_channels.restype = c_int
+av_get_channel_layout_nb_channels.argtypes = [uint64_t]
 av_get_default_channel_layout = _libraries['libavutil.so'].av_get_default_channel_layout
 av_get_default_channel_layout.restype = uint64_t
 av_get_default_channel_layout.argtypes = [c_int]
+av_get_channel_name = _libraries['libavutil.so'].av_get_channel_name
+av_get_channel_name.restype = STRING
+av_get_channel_name.argtypes = [uint64_t]
 av_dict_get = _libraries['libavutil.so'].av_dict_get
 av_dict_get.restype = POINTER(AVDictionaryEntry)
 av_dict_get.argtypes = [POINTER(AVDictionary), STRING, POINTER(AVDictionaryEntry), c_int]
@@ -1081,6 +1133,9 @@ av_malloc.argtypes = [size_t]
 av_free = _libraries['libavutil.so'].av_free
 av_free.restype = None
 av_free.argtypes = [c_void_p]
+av_opt_set_int = _libraries['libavutil.so'].av_opt_set_int
+av_opt_set_int.restype = c_int
+av_opt_set_int.argtypes = [c_void_p, STRING, int64_t, c_int]
 av_get_pix_fmt = _libraries['libavutil.so'].av_get_pix_fmt
 av_get_pix_fmt.restype = AVPixelFormat
 av_get_pix_fmt.argtypes = [STRING]
@@ -1096,9 +1151,15 @@ av_get_sample_fmt.argtypes = [STRING]
 av_get_bytes_per_sample = _libraries['libavutil.so'].av_get_bytes_per_sample
 av_get_bytes_per_sample.restype = c_int
 av_get_bytes_per_sample.argtypes = [AVSampleFormat]
+av_sample_fmt_is_planar = _libraries['libavutil.so'].av_sample_fmt_is_planar
+av_sample_fmt_is_planar.restype = c_int
+av_sample_fmt_is_planar.argtypes = [AVSampleFormat]
 av_samples_get_buffer_size = _libraries['libavutil.so'].av_samples_get_buffer_size
 av_samples_get_buffer_size.restype = c_int
 av_samples_get_buffer_size.argtypes = [POINTER(c_int), c_int, c_int, AVSampleFormat, c_int]
+av_samples_alloc = _libraries['libavutil.so'].av_samples_alloc
+av_samples_alloc.restype = c_int
+av_samples_alloc.argtypes = [POINTER(POINTER(uint8_t)), POINTER(c_int), c_int, c_int, AVSampleFormat, c_int]
 swscale_version = _libraries['libswscale.so'].swscale_version
 swscale_version.restype = c_uint
 swscale_version.argtypes = []
