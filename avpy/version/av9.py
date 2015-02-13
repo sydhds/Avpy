@@ -82,6 +82,7 @@ PIX_FMT_RGB24 = 2
 PIX_FMT_YUV420P = 0
 SUBTITLE_NONE = 0
 AV_SAMPLE_FMT_S16 = 1
+AV_ROUND_UP = 3
 AVMEDIA_TYPE_SUBTITLE = 3
 AVMEDIA_TYPE_VIDEO = 0
 PIX_FMT_NONE = -1
@@ -240,6 +241,7 @@ class AVAudioResampleContext(Structure):
 CodecID = AVCodecID # alias
 PixelFormat = AVPixelFormat # alias
 AVOptionType = c_int # enum
+AVRounding = c_int # enum
 
 RcOverride._fields_ = [
     ('start_frame', c_int),
@@ -1092,6 +1094,9 @@ av_strerror.argtypes = [c_int, STRING, size_t]
 av_log_set_level = _libraries['libavutil.so'].av_log_set_level
 av_log_set_level.restype = None
 av_log_set_level.argtypes = [c_int]
+av_rescale_rnd = _libraries['libavutil.so'].av_rescale_rnd
+av_rescale_rnd.restype = int64_t
+av_rescale_rnd.argtypes = [int64_t, int64_t, int64_t, AVRounding]
 av_malloc = _libraries['libavutil.so'].av_malloc
 av_malloc.restype = c_void_p
 av_malloc.argtypes = [size_t]

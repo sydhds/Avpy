@@ -67,6 +67,8 @@ define:
     - AVSEEK_FLAG_BACKWARD 
     - AVSEEK_FLAG_ANY 
     - AVSEEK_FLAG_BYTE 
+    # misc
+    - AV_ROUND_UP
 
 alias:
     #- ByteIOContext
@@ -74,6 +76,7 @@ alias:
     - CodecID
     - PixelFormat
     - AVOptionType
+    - AVRounding
 
 class:
     - N8AVPacket4DOT_30E
@@ -282,3 +285,4 @@ function:
     - avresample_get_delay
     - avresample_available
     - avresample_read
+    - av_rescale_rnd

@@ -1069,8 +1069,11 @@ class Packet(object):
                         inLineSize = self.frame.contents.linesize[0]
                         inSamples = self.frame.contents.nb_samples 
 
-                        outSamples = av.lib.avresample_get_out_samples(resamplerCtx,
+                        if hasattr(av.lib, 'avresample_get_out_samples'):
+                            outSamples = av.lib.avresample_get_out_samples(resamplerCtx,
                                 inSamples)
+                        else:
+                            outSamples = _getOutSamples(resamplerCtx, inSamples, *resamplerInfos )
                        
                         # alloc AVFrame
 
@@ -1241,6 +1244,33 @@ def _guessChannelLayout(nbChannels):
         res = channelMap[nbChannels]
 
     return res
+
+
+def _getOutSamples(avr, inNbSamples, inAudio, outAudio):
+
+    # reimplement avresample_get_out_samples 
+    # (not present in libav9 & libav10)
+    
+    import math
+    import errno
+
+    samples = av.lib.avresample_get_delay(avr) + inNbSamples
+
+    # ~ resample_needed 
+    if inAudio['sampleRate'] != outAudio['sampleRate']:
+        samples = av.lib.av_rescale_rnd(samples,
+                inAudio['sampleRate'],
+                outAudio['sampleRate'],
+                av.lib.AV_ROUND_UP)
+
+    samples += av.lib.avresample_available(avr)
+
+    # max signed integer value
+    maxInt = math.pow(2, ctypes.sizeof(ctypes.c_int)*8)/2
+    if samples > maxInt:
+        return -errno.EINVAL
+    
+    return samples
 
 
 def codecs():

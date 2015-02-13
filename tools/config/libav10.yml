@@ -69,6 +69,8 @@ define:
     - AVSEEK_FLAG_BYTE 
     # filter
     #- AV_PERM_READ
+    # misc
+    - AV_ROUND_UP
 
 alias:
     #- ByteIOContext
@@ -79,6 +81,7 @@ alias:
     - AVPictureStructure
     - AVFrameSideDataType
     - AVOptionType
+    - AVRounding
 
 class:
     - N8AVPacket4DOT_30E
@@ -293,3 +296,4 @@ function:
     - avresample_get_delay
     - avresample_available
     - avresample_read
+    - av_rescale_rnd
