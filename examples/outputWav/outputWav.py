@@ -85,29 +85,46 @@ if __name__ == '__main__':
         
     astreamInfo = mediaInfo['stream'][astream]
 
-    # TODO: check channel count - wav module only support mono & stereo
-    if astreamInfo['planarFmt']:
-        
-        inAudio = {
-            'layout': 'stereo',
-            #'channels': astreamInfo['channels'],
+    if not options.quiet:
+        print('Audio stream info:')
+        print(astreamInfo)
+
+    # forge out audio format
+    # write a standard stereo 16 bits wav file
+    # but keep original sample rate
+    outAudio = {
+            'channelLayout': 'stereo',
+            'channels': 2,
             'sampleRate': astreamInfo['sampleRate'],
-            'sampleFmt': astreamInfo['sampleFmt'] 
+            'sampleFmt': 's16',
+            'bytesPerSample': 2,
             }
-        outAudio = dict(inAudio) # copy
-        outAudio['sampleFmt'] = 's16'
- 
+
+    if outAudio['channelLayout'] != astreamInfo['channelLayout'] or\
+        outAudio['channels'] != astreamInfo['channels'] or\
+        outAudio['sampleFmt'] != outAudio['sampleFmt']:
+
+        # audio layout or audio sample format are different
+        # so add a resampler
+        # should support 5.1, 7.1, mono... -> stereo
+        # or fltp, s16p... -> s16
+
+        inAudio = astreamInfo
+        resampler = True
+
         media.addResampler(astream, inAudio, outAudio)
-    
+    else:
+        resampler = False
+
     # setup output wav file
     outputName = options.output
     wp = wave.open(outputName, 'w')
 
     try:
         # nchannels, sampwidth, framerate, nframes, comptype, compname 
-        wp.setparams((astreamInfo['channels'], 
-           astreamInfo['bytesPerSample'], 
-           astreamInfo['sampleRate'], 
+        wp.setparams((outAudio['channels'], 
+           outAudio['bytesPerSample'], 
+           outAudio['sampleRate'], 
            0, 
            'NONE', 
            'not compressed'))
@@ -116,7 +133,8 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # Size in bytes required for 1 second of audio
-    secondSize = astreamInfo['channels'] * astreamInfo['bytesPerSample'] * astreamInfo['sampleRate']
+    #secondSize = astreamInfo['channels'] * astreamInfo['bytesPerSample'] * astreamInfo['sampleRate']
+    secondSize = outAudio['channels'] * outAudio['bytesPerSample'] * outAudio['sampleRate']
     decodedSize = 0
 
     # iterate over media and decode audio packet
@@ -125,15 +143,19 @@ if __name__ == '__main__':
         if pkt.streamIndex() == astream:
             pkt.decode()
             if pkt.decoded:
-                if not options.quiet:
-                    print('writing %s bytes...' % pkt.dataSize)
+                #if not options.quiet:
+                    #print('writing %s bytes...' % pkt.dataSize)
                 
-                if astreamInfo['planarFmt']:
-                    audioDump(pkt.resampledFrame.contents.data[0], pkt.dataSize)
+                if resampler:
+                    dataSize = pkt.resampledFrame.contents.linesize[0]
+                    audioDump(pkt.resampledFrame.contents.data[0], dataSize)
                 else:
-                    audioDump(pkt.frame.contents.data[0], pkt.dataSize)
+                    #audioDump(pkt.frame.contents.data[0], pkt.dataSize)
+                    dataSize = pkt.frame.contents.linesize[0]
+                    audioDump(pkt.frame.contents.data[0], dataSize)
                 
-                decodedSize += pkt.dataSize
+                decodedSize += dataSize 
+                
                 # stop after ~ 20s (default)
                 # exact time will vary depending on dataSize
                 if decodedSize >= options.length*secondSize:

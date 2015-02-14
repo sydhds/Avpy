@@ -225,18 +225,28 @@ class Media(object):
             streamInfo['frameSize'] = cCodecCtx.contents.frame_size
             
             # FIXME
+
+                            
+            bufSize = 128
+            buf = ctypes.create_string_buffer(bufSize) 
+            av.lib.av_get_channel_layout_string(
+                    buf, bufSize, 
+                    streamInfo['channels'], cCodecCtx.contents.channel_layout)
+
+            streamInfo['channelLayoutDescription'] = buf.value
+            streamInfo['channelLayoutId'] = cCodecCtx.contents.channel_layout
+            
             if hasattr(av.lib, 'av_get_channel_name'):
                 # av_get_channel_name return None if format is planar
-                streamInfo['channelLayout'] = av.lib.av_get_channel_name(cCodecCtx.contents.channel_layout) or ''
+                streamInfo['channelLayout'] = av.lib.av_get_channel_name(
+                        cCodecCtx.contents.channel_layout) or ''
             else:
-                # libav 0.8 only
-                bufSize = 128
-                buf = ctypes.create_string_buffer(bufSize) 
-                av.lib.av_get_channel_layout_string(
-                        buf, bufSize, 
-                        streamInfo['channels'], cCodecCtx.contents.channel_layout)
-
-                streamInfo['channelLayout'] = buf.value
+                # libav8 only
+                # dirty workaround so user can easily guess if audio resampling is
+                # is needed (by comparing channel layout strings)
+                # see outputWav example 
+                # a proper fix could be to add a function like needResampling(...)
+                streamInfo['channelLayout'] = streamInfo['channelLayoutDescription']
 
             streamInfo['planarFmt'] = bool(av.lib.av_sample_fmt_is_planar(cCodecCtx.contents.sample_fmt))
 
@@ -930,7 +940,7 @@ class Packet(object):
             
             infos['sampleFmtId'] = av.lib.av_get_sample_fmt(infos['sampleFmt'])
 
-            if 'layout' not in infos:
+            if 'channelLayout' not in infos or not infos['channelLayout']:
 
                 # guess channel layout from number of channels
 
@@ -944,7 +954,7 @@ class Packet(object):
                 
             else:
 
-                infos['layoutId'] = av.lib.av_get_channel_layout(infos['layout'])
+                infos['layoutId'] = av.lib.av_get_channel_layout(infos['channelLayout'])
 
                 if 'channels' not in infos:
                     infos['channels'] = av.lib.av_get_channel_layout_nb_channels(infos['layoutId'])

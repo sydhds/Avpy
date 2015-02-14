@@ -205,6 +205,7 @@ function:
     - av_sample_fmt_is_planar
     - av_get_channel_layout
     - av_get_channel_layout_nb_channels
+    - av_get_channel_layout_string
     ## avformat
     - av_register_all
     - av_iformat_next
