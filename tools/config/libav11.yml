@@ -297,4 +297,5 @@ function:
     - avresample_get_delay
     - avresample_available
     - avresample_read
+    - avresample_convert_frame
 

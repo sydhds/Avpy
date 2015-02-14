@@ -1083,47 +1083,78 @@ class Packet(object):
                             outSamples = av.lib.avresample_get_out_samples(resamplerCtx,
                                 inSamples)
                         else:
-                            outSamples = _getOutSamples(resamplerCtx, inSamples, *resamplerInfos )
+                            outSamples = _getOutSamples(resamplerCtx, inSamples, *resamplerInfos)
                        
-                        # alloc AVFrame
-
-                        sampleFmt = resamplerInfos[1]['sampleFmtId']
-                        channels = resamplerInfos[1]['channels']
-                        bufSize = av.lib.av_samples_get_buffer_size(None, 
-                                channels, outSamples,
-                                sampleFmt, 0)
-                        buf = ctypes.cast(av.lib.av_malloc(bufSize),
-                                ctypes.POINTER(ctypes.c_ubyte))
-                        # silent sound - debug only
-                        #ctypes.memset(buf, 0, bufSize)
+                        if hasattr(av.lib, 'avresample_convert_frame'):
                         
-                        # TODO: free frame
-                        self.resampledFrame = av.lib.avcodec_alloc_frame()
+                            # libav 11
+                            self.resampledFrame = av.lib.avcodec_alloc_frame()
+                            av.lib.avcodec_get_frame_defaults(self.resampledFrame) 
+                            
+                            self.frame.contents.channel_layout = resamplerInfos[0]['layoutId']
+                            self.frame.contents.sample_rate = resamplerInfos[0]['sampleRate']
+                            self.frame.contents.format = resamplerInfos[0]['sampleFmtId']
 
-                        av.lib.avcodec_get_frame_defaults(self.resampledFrame) 
-                        
-                        self.resampledFrame.contents.nb_samples = outSamples 
+                            #self.resampledFrame.contents.nb_samples = outSamples 
+                            self.resampledFrame.contents.channel_layout = resamplerInfos[1]['layoutId']
+                            self.resampledFrame.contents.sample_rate =  resamplerInfos[1]['sampleRate']
+                            self.resampledFrame.contents.format =  resamplerInfos[1]['sampleFmtId']
+                            
+                            #print 'avresample_convert_frame...'
+                            result = av.lib.avresample_convert_frame(resamplerCtx,
+                                    self.resampledFrame,
+                                    self.frame)
+                           
+                            #print av.lib.AVERROR_INPUT_CHANGED
+                            #print av.lib.AVERROR_OUTPUT_CHANGED
+                            #print av.lib.AVERROR_INPUT_CHANGED|av.lib.AVERROR_OUTPUT_CHANGED
 
-                        res = av.lib.avcodec_fill_audio_frame(self.resampledFrame, 
-                                channels, sampleFmt, 
-                                buf, bufSize, 0)
+                            if result < 0:
+                                raise RuntimeError(avError(result))
 
-                        if res < 0:
-                            raise RuntimeError('fill audio frame failed: %s' % avError(res))
 
-                        # end alloc AVFrame
-                        
-                        # convert
-                        outSamples2 = av.lib.avresample_convert(resamplerCtx,
-                                self.resampledFrame.contents.extended_data,
-                                self.resampledFrame.contents.linesize[0],
-                                outSamples,
-                                inData, inLineSize, inSamples)
-                        
-                        if result < 0:
-                            raise RuntimeError(avError(result))
+                        else:
+                            # libav 9, 10
 
-                        # TODO: delay and flush resampler ctx
+                            # alloc AVFrame
+
+                            sampleFmt = resamplerInfos[1]['sampleFmtId']
+                            channels = resamplerInfos[1]['channels']
+                            bufSize = av.lib.av_samples_get_buffer_size(None, 
+                                    channels, outSamples,
+                                    sampleFmt, 0)
+                            buf = ctypes.cast(av.lib.av_malloc(bufSize),
+                                    ctypes.POINTER(ctypes.c_ubyte))
+                            # silent sound - debug only
+                            #ctypes.memset(buf, 0, bufSize)
+                            
+                            # TODO: free frame
+                            self.resampledFrame = av.lib.avcodec_alloc_frame()
+
+                            av.lib.avcodec_get_frame_defaults(self.resampledFrame) 
+                            
+                            self.resampledFrame.contents.nb_samples = outSamples 
+
+                            res = av.lib.avcodec_fill_audio_frame(self.resampledFrame, 
+                                    channels, sampleFmt, 
+                                    buf, bufSize, 0)
+
+                            if res < 0:
+                                raise RuntimeError('fill audio frame failed: %s' % avError(res))
+
+                            # end alloc AVFrame
+                            
+                            # convert
+                            outSamples2 = av.lib.avresample_convert(resamplerCtx,
+                                    self.resampledFrame.contents.extended_data,
+                                    self.resampledFrame.contents.linesize[0],
+                                    outSamples,
+                                    inData, inLineSize, inSamples)
+                            
+                            #if result < 0:
+                                #raise RuntimeError(avError(result))
+
+                            # TODO: delay and flush resampler ctx
 
                 else:
                     # FIXME: raise?
