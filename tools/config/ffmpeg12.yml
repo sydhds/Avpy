@@ -67,6 +67,8 @@ define:
     - AVSEEK_FLAG_BACKWARD 
     - AVSEEK_FLAG_ANY 
     - AVSEEK_FLAG_BYTE 
+    # misc
+    - AV_ROUND_UP
 
 alias:
     #- ByteIOContext
@@ -77,6 +79,7 @@ alias:
     # ffmpeg
     - AVDurationEstimationMethod
     - AVClassCategory
+    - AVRounding
 
 class:
     - N8AVPacket4DOT_30E
@@ -128,7 +131,8 @@ class:
     - AVOptionRanges
     - AVOptionRange
     # resample
-    - AVAudioResampleContext
+    #- AVAudioResampleContext
+    - SwrContext
 
 import:
     - import os
@@ -161,9 +165,9 @@ cdll:
     - "    libswscale = os.environ.get('AVPY_SWSCALE')"
     - "    if not libswscale:"
     - "        libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))"
-    - "    #libavresample = os.environ.get('AVPY_AVRESAMPLE')"
-    - "    #if not libavresample:"
-    - "    #    libavresample = os.path.join(fold, re.sub('avcodec', 'avresample', base))"
+    - "    libswresample = os.environ.get('AVPY_SWRESAMPLE')"
+    - "    if not libswresample:"
+    - "        libswresample = os.path.join(fold, re.sub('avcodec', 'swresample', base))"
     - "    libavcodec = os.environ['AVPY_AVCODEC']"
     - "else:"
     - "    libavutil = util.find_library('avutil')"
@@ -171,12 +175,12 @@ cdll:
     - "    libavformat = util.find_library('avformat')"
     - "    libavdevice = util.find_library('avdevice')"
     - "    libswscale = util.find_library('swscale')"
-    - "    #libavresample = util.find_library('avresample')"
+    - "    libswresample = util.find_library('swresample')"
     - ""
     - "CDLL(libavutil, RTLD_GLOBAL)"
     - "_libraries = {}"
     - "_libraries['libavutil.so'] = CDLL(libavutil, mode=RTLD_GLOBAL)"
-    - "#_libraries['libavresample.so'] = CDLL(libavresample, mode=RTLD_GLOBAL)"
+    - "_libraries['libswresample.so'] = CDLL(libswresample, mode=RTLD_GLOBAL)"
     - "_libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)"
     - "_libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)"
     - "_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)"
@@ -199,6 +203,7 @@ function:
     - av_sample_fmt_is_planar
     - av_get_channel_layout
     - av_get_channel_layout_nb_channels
+    - av_get_channel_layout_string
     ## avformat
     - av_register_all
     - av_iformat_next
@@ -239,10 +244,6 @@ function:
     - avdevice_version
     - avdevice_configuration
     - avdevice_license
-    ## avresample
-    - avresample_version
-    - avresample_configuration
-    - avresample_license
     # test
     - avpicture_get_size
     - avpicture_fill
@@ -277,16 +278,15 @@ function:
     - swscale_version
     - swscale_configuration
     - swscale_license
-    ## avresample
-    - avresample_alloc_context
-    - avresample_open
-    #- avresample_is_open
-    - avresample_close
-    - avresample_free
+    ## swresample
+    - swresample_version
+    - swresample_configuration
+    - swresample_license
+    - swr_alloc
+    - swr_init 
+    - swr_convert
+    - swr_get_delay
+    - swr_free
     - av_opt_set_int
-    - avresample_convert
-    - av_samples_alloc
-    #- avresample_get_out_samples
-    - avresample_get_delay
-    - avresample_available
-    - avresample_read
+    - av_opt_set_sample_fmt
+    - av_rescale_rnd

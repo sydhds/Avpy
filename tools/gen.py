@@ -56,6 +56,7 @@ def main(options):
     _addInclude = [
             'libavutil/channel_layout.h', # libav >= 9
             'libavresample/avresample.h', # libav >= 9
+            'libswresample/swresample.h', # ffmpeg >= 1.2
             'libavutil/frame.h', # libav >= 10
             ]
     addInclude = []
@@ -92,6 +93,7 @@ def main(options):
 
     if options.lib == 'ffmpeg':
         xml2pyCmd = 'xml2py {0} -o {1} -l {2}/lib/libavutil.so -l {2}/lib/libavcodec.so'\
+                ' -l {2}/lib/libswresample.so'\
                 ' -l {2}/lib/libavformat.so -l {2}/lib/libswscale.so'\
                 ' -l {2}/lib/libavfilter.so'\
                 ' -l {2}/lib/libavdevice.so'.format(xmlFile, pyFileTmp, buildDir) 
@@ -106,9 +108,10 @@ def main(options):
     if os.path.isfile(libResample):
         xml2pyCmd += ' -l %s' % libResample
         
-    libSwResample = os.path.join(buildDir, 'lib', 'libswresample.so')
-    if os.path.isfile(libSwResample):
-        xml2pyCmd += ' -l %s' % libSwResample
+    #libSwResample = os.path.join(buildDir, 'lib', 'libswresample.so')
+    #if os.path.isfile(libSwResample):
+        #xml2pyCmd += ' -l %s' % libSwResample
+    
     xml2pyCmd += preloads
     run(xml2pyCmd)
 
