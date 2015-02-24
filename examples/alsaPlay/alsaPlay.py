@@ -85,7 +85,7 @@ if __name__ == '__main__':
             pkt.decode()
             if pkt.decoded:
                 buf = pkt.frame.contents.data[0]
-                bufLen = pkt.dataSize
+                bufLen = pkt.frame.contents.linesize[0]
                 out.write(ctypes.string_at(buf, bufLen))
                
                 decodedSize += bufLen

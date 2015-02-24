@@ -234,6 +234,8 @@ function:
     - av_samples_get_buffer_size
     - avcodec_decode_video2
     - avcodec_open2
+    - avcodec_alloc_context3
+    - avcodec_copy_context
     - avcodec_close
     - av_codec_next
     - avpicture_alloc

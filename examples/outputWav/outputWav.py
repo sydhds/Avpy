@@ -146,14 +146,19 @@ if __name__ == '__main__':
                 #if not options.quiet:
                     #print('writing %s bytes...' % pkt.dataSize)
                 
-                if resampler:
-                    dataSize = pkt.resampledFrame.contents.linesize[0]
-                    audioDump(pkt.resampledFrame.contents.data[0], dataSize)
-                else:
-                    #audioDump(pkt.frame.contents.data[0], pkt.dataSize)
-                    dataSize = pkt.frame.contents.linesize[0]
-                    audioDump(pkt.frame.contents.data[0], dataSize)
-                
+                #if resampler and pkt.resamplingType == 'resampler':
+                    #dataSize = pkt.resampledFrame.contents.linesize[0]
+                    #audioDump(pkt.resampledFrame.contents.data[0], dataSize)
+                    ##dataSize = pkt.frame.contents.linesize[0]
+                    ##audioDump(pkt.frame.contents.data[0], dataSize)
+                #else:
+                    ##audioDump(pkt.frame.contents.data[0], pkt.dataSize)
+                    #dataSize = pkt.frame.contents.linesize[0]
+                    #audioDump(pkt.frame.contents.data[0], dataSize)
+
+                data, dataSize = pkt.data()
+                audioDump(data.contents.data[0], dataSize)
+
                 decodedSize += dataSize 
                 
                 # stop after ~ 20s (default)
