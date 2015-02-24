@@ -112,7 +112,13 @@ if __name__ == '__main__':
         inAudio = astreamInfo
         resampler = True
 
-        media.addResampler(astream, inAudio, outAudio)
+        try:
+            media.addResampler(astream, inAudio, outAudio)
+        except RuntimeError as e:
+            
+            print('Could not add an audio resampler: %s' % e)
+            sys.exit(3)
+
     else:
         resampler = False
 

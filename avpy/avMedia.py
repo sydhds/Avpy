@@ -989,8 +989,10 @@ class Packet(object):
         else:
             if 'libswresample.so' in av.lib._libraries:
                 self._addSwResampler(streamIndex, inAudio, outAudio)
-            else:
+            elif 'libavresample.so' in av.lib._libraries:
                 self._addAvResampler(streamIndex, inAudio, outAudio)
+            else:
+                raise RuntimeError('No audio resampling lib available') 
             self.resamplingType = 'resampler'
 
     def _addSwResampler(self, streamIndex, inAudio, outAudio):
