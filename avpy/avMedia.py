@@ -46,6 +46,8 @@ class Media(object):
         av.lib.av_register_all()
         self.pFormatCtx = ctypes.POINTER(av.lib.AVFormatContext)()
 
+        self._py3 = True if sys.version_info >= (3, 0) else False
+
         if mode == 'r':
             
             # prevent coredump
@@ -56,7 +58,8 @@ class Media(object):
             
             # XXX: ok for python3 and python2 with special characters
             # not sure this is a right/elegant solution 
-            if sys.version_info >= (3, 0):
+            #if sys.version_info >= (3, 0):
+            if self._py3:
                 _mediaName = mediaName.encode('utf-8')
             else:
                 _mediaName = mediaName
@@ -77,7 +80,7 @@ class Media(object):
 
             # XXX: ok for python3 and python2 with special characters
             # not sure this is a right/elegant solution 
-            if sys.version_info >= (3, 0):
+            if self._py3:
                 _mediaName = mediaName.encode('utf-8')
                 defaultCodec = ctypes.c_char_p('mpeg'.encode('utf8'))
             else:
@@ -185,6 +188,11 @@ class Media(object):
             if cStreamInfo:
                 infoDict['stream'].append(cStreamInfo)
 
+        # bytes -> str
+        if self._py3:
+            infoDict['name'] = infoDict['name'].decode()
+            infoDict['format'] = infoDict['format'].decode()
+
         return infoDict
 
     def _streamInfo(self, stream):
@@ -198,6 +206,8 @@ class Media(object):
         
         if c:
             streamInfo['codec'] = c.contents.name
+            if self._py3:
+                streamInfo['codec'] = streamInfo['codec'].decode()
 
         codecType = cCodecCtx.contents.codec_type
         if codecType == av.lib.AVMEDIA_TYPE_VIDEO:
@@ -214,7 +224,13 @@ class Media(object):
             except AttributeError:
                 pixFmtName = av.lib.av_get_pix_fmt_name
             
-            streamInfo['pixelFormat'] = pixFmtName(cCodecCtx.contents.pix_fmt)
+            pf = pixFmtName(cCodecCtx.contents.pix_fmt)
+
+            if self._py3:
+                streamInfo['pixelFormat'] = pf.decode()
+            else:
+                streamInfo['pixelFormat'] = pf
+
         elif codecType == av.lib.AVMEDIA_TYPE_AUDIO:
             
             streamInfo['type'] = 'audio'
@@ -224,9 +240,6 @@ class Media(object):
             streamInfo['sampleFmtId'] = cCodecCtx.contents.sample_fmt
             streamInfo['frameSize'] = cCodecCtx.contents.frame_size
             
-            # FIXME
-
-                            
             bufSize = 128
             buf = ctypes.create_string_buffer(bufSize) 
             av.lib.av_get_channel_layout_string(
@@ -254,10 +267,25 @@ class Media(object):
                 streamInfo['frameSize'] = FRAME_SIZE_DEFAULT
 
             streamInfo['bytesPerSample'] = av.lib.av_get_bytes_per_sample(cCodecCtx.contents.sample_fmt)
+
+            if self._py3:
+                _keys = ['channelLayoutDescription', 'channelLayout',
+                        'sampleFmt']
+                for k in _keys:
+                    # channelLayout & channelLayoutDescription
+                    # may be the same bytes/string
+                    if hasattr(streamInfo[k], 'decode'):
+                        streamInfo[k] = streamInfo[k].decode()
+
         elif codecType == av.lib.AVMEDIA_TYPE_SUBTITLE:
             streamInfo['type'] = 'subtitle'
-            streamInfo['subtitleHeader'] = ctypes.string_at(cCodecCtx.contents.subtitle_header,
+            sh =  ctypes.string_at(cCodecCtx.contents.subtitle_header,
                     cCodecCtx.contents.subtitle_header_size)
+            if self._py3:
+                streamInfo['subtitleHeader'] = sh.decode()
+            else:
+                streamInfo['subtitleHeader'] = sh
+
         else:
             pass
         
@@ -281,12 +309,16 @@ class Media(object):
         while not done:
             tag = av.lib.av_dict_get(self.pFormatCtx.contents.metadata, ''.encode('ascii'), tag, av.lib.AV_DICT_IGNORE_SUFFIX)
             if tag:
-                metaDict[tag.contents.key] = tag.contents.value
+                k = tag.contents.key
+                v = tag.contents.value
+                if self._py3:
+                    metaDict[k.decode()] = v.decode()
+                else:    
+                    metaDict[k.decode()] = v.decode()
             else:
                 done = True
         
         return metaDict
-
 
     # read
     def __iter__(self):
@@ -850,6 +882,8 @@ class Packet(object):
         # frame after conversion by scaler
         self.swsFrame = None
         self.resampledFrame = None
+
+        self._py3 = True if sys.version_info >= (3, 0) else False
         
         # after decode
 
@@ -936,7 +970,11 @@ class Packet(object):
         
         def queryAudioInfos(infos):
             
-            infos['sampleFmtId'] = av.lib.av_get_sample_fmt(infos['sampleFmt'])
+            sampleFmt = infos['sampleFmt']
+            if self._py3:
+                sampleFmt = sampleFmt.encode('utf-8')
+
+            infos['sampleFmtId'] = av.lib.av_get_sample_fmt(sampleFmt)
 
             if 'channelLayout' not in infos or not infos['channelLayout']:
 
@@ -951,8 +989,10 @@ class Packet(object):
                 infos['layoutId'] = f(infos['channels'])
                 
             else:
-
-                infos['layoutId'] = av.lib.av_get_channel_layout(infos['channelLayout'])
+                chl = infos['channelLayout']
+                if self._py3:
+                    chl = chl.encode('utf-8')
+                infos['layoutId'] = av.lib.av_get_channel_layout(chl)
 
                 if 'channels' not in infos:
                     infos['channels'] = av.lib.av_get_channel_layout_nb_channels(infos['layoutId'])
@@ -1000,16 +1040,32 @@ class Packet(object):
         resampleCtx = av.lib.swr_alloc()
         
         # in
-        av.lib.av_opt_set_int(resampleCtx, 'in_channel_layout', inAudio['layoutId'], 0)
-        av.lib.av_opt_set_int(resampleCtx, 'in_sample_rate', inAudio['sampleRate'], 0)
-        av.lib.av_opt_set_sample_fmt(resampleCtx, 'in_sample_fmt', 
-                inAudio['sampleFmtId'], 0)
+        if self._py3:
+            av.lib.av_opt_set_int(resampleCtx, 'in_channel_layout'.encode('utf-8'), 
+                    inAudio['layoutId'], 0)
+            av.lib.av_opt_set_int(resampleCtx, 'in_sample_rate'.encode('utf-8'), 
+                    inAudio['sampleRate'], 0)
+            av.lib.av_opt_set_sample_fmt(resampleCtx, 'in_sample_fmt'.encode('utf-8'), 
+                    inAudio['sampleFmtId'], 0)
+        else:
+            av.lib.av_opt_set_int(resampleCtx, 'in_channel_layout', inAudio['layoutId'], 0)
+            av.lib.av_opt_set_int(resampleCtx, 'in_sample_rate', inAudio['sampleRate'], 0)
+            av.lib.av_opt_set_sample_fmt(resampleCtx, 'in_sample_fmt', 
+                    inAudio['sampleFmtId'], 0)
         
         # out
-        av.lib.av_opt_set_int(resampleCtx, 'out_channel_layout', outAudio['layoutId'], 0)
-        av.lib.av_opt_set_int(resampleCtx, 'out_sample_rate', outAudio['sampleRate'], 0)
-        av.lib.av_opt_set_sample_fmt(resampleCtx, 'out_sample_fmt', 
-                outAudio['sampleFmtId'], 0)
+        if self._py3:
+            av.lib.av_opt_set_int(resampleCtx, 'out_channel_layout'.encode('utf-8'), 
+                    outAudio['layoutId'], 0)
+            av.lib.av_opt_set_int(resampleCtx, 'out_sample_rate'.encode('utf-8'), 
+                    outAudio['sampleRate'], 0)
+            av.lib.av_opt_set_sample_fmt(resampleCtx, 'out_sample_fmt'.encode('utf-8'), 
+                    outAudio['sampleFmtId'], 0)
+        else:
+            av.lib.av_opt_set_int(resampleCtx, 'out_channel_layout', outAudio['layoutId'], 0)
+            av.lib.av_opt_set_int(resampleCtx, 'out_sample_rate', outAudio['sampleRate'], 0)
+            av.lib.av_opt_set_sample_fmt(resampleCtx, 'out_sample_fmt', 
+                    outAudio['sampleFmtId'], 0)
  
         result = av.lib.swr_init(resampleCtx)
         
@@ -1023,15 +1079,32 @@ class Packet(object):
         resampleCtx = av.lib.avresample_alloc_context()
         
         # in
-        av.lib.av_opt_set_int(resampleCtx, 'in_channel_layout', inAudio['layoutId'], 0)
-        av.lib.av_opt_set_int(resampleCtx, 'in_sample_rate', inAudio['sampleRate'], 0)
-        av.lib.av_opt_set_int(resampleCtx, 'in_sample_fmt', inAudio['sampleFmtId'], 0)
-        
+        if self._py3:
+            av.lib.av_opt_set_int(resampleCtx, 'in_channel_layout'.encode('utf-8'),
+                    inAudio['layoutId'], 0)
+            av.lib.av_opt_set_int(resampleCtx, 'in_sample_rate'.encode('utf-8'), 
+                    inAudio['sampleRate'], 0)
+            av.lib.av_opt_set_int(resampleCtx, 'in_sample_fmt'.encode('utf-8'), 
+                    inAudio['sampleFmtId'], 0)
+        else:
+            av.lib.av_opt_set_int(resampleCtx, 'in_channel_layout', inAudio['layoutId'], 0)
+            av.lib.av_opt_set_int(resampleCtx, 'in_sample_rate', inAudio['sampleRate'], 0)
+            av.lib.av_opt_set_int(resampleCtx, 'in_sample_fmt', inAudio['sampleFmtId'], 0)
+
         # out
-        av.lib.av_opt_set_int(resampleCtx, 'out_channel_layout', outAudio['layoutId'], 0)
-        av.lib.av_opt_set_int(resampleCtx, 'out_sample_rate', outAudio['sampleRate'], 0)
-        av.lib.av_opt_set_int(resampleCtx, 'out_sample_fmt', outAudio['sampleFmtId'], 0)
- 
+        if self._py3:
+            av.lib.av_opt_set_int(resampleCtx, 'out_channel_layout'.encode('utf-8'),
+                    outAudio['layoutId'], 0)
+            av.lib.av_opt_set_int(resampleCtx, 'out_sample_rate'.encode('utf-8'), 
+                    outAudio['sampleRate'], 0)
+            av.lib.av_opt_set_int(resampleCtx, 'out_sample_fmt'.encode('utf-8'),
+                    outAudio['sampleFmtId'], 0)
+        else:
+
+            av.lib.av_opt_set_int(resampleCtx, 'out_channel_layout', outAudio['layoutId'], 0)
+            av.lib.av_opt_set_int(resampleCtx, 'out_sample_rate', outAudio['sampleRate'], 0)
+            av.lib.av_opt_set_int(resampleCtx, 'out_sample_fmt', outAudio['sampleFmtId'], 0)
+
         result = av.lib.avresample_open(resampleCtx)
         
         if result < 0: 
