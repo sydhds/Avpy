@@ -44,8 +44,8 @@ _libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
 _libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)
 
 STRING = c_char_p
-size_t = c_ulong
 AVPixelFormat = c_int # enum
+size_t = c_ulong
 AVCodecID = c_int # enum
 AVMediaType = c_int # enum
 AVDiscard = c_int # enum
@@ -70,20 +70,20 @@ AVPictureType = c_int # enum
 int8_t = c_int8
 int32_t = c_int32
 
-AV_CODEC_ID_MPEG1VIDEO = 1
-AV_CODEC_ID_NONE = 0
-SUBTITLE_TEXT = 2
-SUBTITLE_BITMAP = 1
-SUBTITLE_ASS = 3
-AV_SAMPLE_FMT_S16 = 1
-AVMEDIA_TYPE_SUBTITLE = 3
-AVMEDIA_TYPE_AUDIO = 1
-AV_SAMPLE_FMT_NONE = -1
 PIX_FMT_RGB24 = 2
 PIX_FMT_NONE = -1
 PIX_FMT_YUV420P = 0
+AVMEDIA_TYPE_AUDIO = 1
 AV_CODEC_ID_MPEG2VIDEO = 2
+AV_CODEC_ID_MPEG1VIDEO = 1
+AV_CODEC_ID_NONE = 0
+AVMEDIA_TYPE_SUBTITLE = 3
 AVMEDIA_TYPE_VIDEO = 0
+AV_SAMPLE_FMT_S16 = 1
+AV_SAMPLE_FMT_NONE = -1
+SUBTITLE_BITMAP = 1
+SUBTITLE_ASS = 3
+SUBTITLE_TEXT = 2
 SUBTITLE_NONE = 0
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'

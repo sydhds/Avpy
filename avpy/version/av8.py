@@ -71,22 +71,22 @@ AVSubtitleType = c_int # enum
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
-SUBTITLE_ASS = 3
-SUBTITLE_TEXT = 2
-PIX_FMT_RGB24 = 2
-PIX_FMT_YUV420P = 0
-SUBTITLE_BITMAP = 1
-PIX_FMT_RGB8 = 22
-PIX_FMT_NONE = -1
-CODEC_ID_MPEG2VIDEO = 2
-CODEC_ID_MPEG1VIDEO = 1
-CODEC_ID_NONE = 0
+AV_SAMPLE_FMT_NONE = -1
 AV_SAMPLE_FMT_S16 = 1
 AVMEDIA_TYPE_VIDEO = 0
-AV_SAMPLE_FMT_NONE = -1
+CODEC_ID_NONE = 0
 AVMEDIA_TYPE_SUBTITLE = 3
 AVMEDIA_TYPE_AUDIO = 1
+CODEC_ID_MPEG2VIDEO = 2
+CODEC_ID_MPEG1VIDEO = 1
 AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
+SUBTITLE_ASS = 3
+PIX_FMT_RGB8 = 22
+PIX_FMT_RGB24 = 2
+PIX_FMT_YUV420P = 0
+PIX_FMT_NONE = -1
+SUBTITLE_TEXT = 2
+SUBTITLE_BITMAP = 1
 SUBTITLE_NONE = 0
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
@@ -240,13 +240,13 @@ class AVSubtitle(Structure):
 class AVSubtitleRect(Structure):
 	pass
 
-AV_CH_LAYOUT_7POINT1 = 1599 # Variable c_int '1599'
-AV_CH_LAYOUT_QUAD = 51 # Variable c_int '51'
-AV_CH_LAYOUT_STEREO = 3 # Variable c_int '3'
-AV_CH_LAYOUT_5POINT1 = 1551 # Variable c_int '1551'
-AV_CH_LAYOUT_5POINT0 = 1543 # Variable c_int '1543'
 AV_CH_LAYOUT_MONO = 4 # Variable c_int '4'
+AV_CH_LAYOUT_5POINT0 = 1543 # Variable c_int '1543'
+AV_CH_LAYOUT_7POINT1 = 1599 # Variable c_int '1599'
 AV_CH_LAYOUT_SURROUND = 7 # Variable c_int '7'
+AV_CH_LAYOUT_QUAD = 51 # Variable c_int '51'
+AV_CH_LAYOUT_5POINT1 = 1551 # Variable c_int '1551'
+AV_CH_LAYOUT_STEREO = 3 # Variable c_int '3'
 AVMetadata = AVDictionary
 ByteIOContext = AVIOContext
 AVOptionType = c_int # enum

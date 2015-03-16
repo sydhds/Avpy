@@ -240,6 +240,7 @@ function:
     - avdevice_version
     - avdevice_configuration
     - avdevice_license
+    - avdevice_register_all
     ## avresample
     - avresample_version
     - avresample_configuration

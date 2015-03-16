@@ -80,35 +80,30 @@ def main(options):
     # libav has libavresample
     # ffmpeg has libswresample
     preloads = ' --preload ' + os.path.join(buildDir, 'lib', 'libavutil.so')
+    
+    libFlag = ''
     libResample = os.path.join(buildDir, 'lib', 'libavresample.so')
     if os.path.isfile(libResample):
         preloads += (' --preload ' + libResample)
+        libFlag = '-l ' + libResample
 
-    libSwResample = os.path.join(buildDir, 'lib', 'libswresample.so')
-    if os.path.isfile(libSwResample):
-        preloads += (' --preload ' + libSwResample)
+    libResample = os.path.join(buildDir, 'lib', 'libswresample.so')
+    if os.path.isfile(libResample):
+        preloads += (' --preload ' + libResample)
+        libFlag = '-l ' + libResample
 
     print('generating python module')
 
     if options.lib == 'ffmpeg':
-        xml2pyCmd = 'xml2py {0} -o {1} -l {2}/lib/libavutil.so -l {2}/lib/libavcodec.so'\
+        xml2pyCmd = 'xml2py {0} -o {1} -l {2}/lib/libavutil.so {3} -l {2}/lib/libavcodec.so'\
                 ' -l {2}/lib/libavformat.so -l {2}/lib/libswscale.so'\
                 ' -l {2}/lib/libavfilter.so'\
-                ' -l {2}/lib/libavdevice.so'.format(xmlFile, pyFileTmp, buildDir) 
+                ' -l {2}/lib/libavdevice.so'.format(xmlFile, pyFileTmp, buildDir, libFlag) 
     else:
-        xml2pyCmd = 'xml2py {0} -o {1} -l {2}/lib/libavutil.so -l {2}/lib/libavcodec.so'\
+        xml2pyCmd = 'xml2py {0} -o {1} -l {2}/lib/libavutil.so {3} -l {2}/lib/libavcodec.so'\
                 ' -l {2}/lib/libavformat.so -l {2}/lib/libavdevice.so'\
-                ' -l {2}/lib/libswscale.so'.format(xmlFile, pyFileTmp, buildDir) 
+                ' -l {2}/lib/libswscale.so'.format(xmlFile, pyFileTmp, buildDir, libFlag) 
    
-    
-    # append resample lib
-    libResample = os.path.join(buildDir, 'lib', 'libavresample.so')
-    if os.path.isfile(libResample):
-        xml2pyCmd += ' -l %s' % libResample
-        
-    libSwResample = os.path.join(buildDir, 'lib', 'libswresample.so')
-    if os.path.isfile(libSwResample):
-        xml2pyCmd += ' -l %s' % libSwResample
     xml2pyCmd += preloads
     run(xml2pyCmd)
 
