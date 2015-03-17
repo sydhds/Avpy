@@ -42,6 +42,8 @@ _libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)
 _libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)
 _libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
 _libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)
+_libraries['name'] = 'ffmpeg'
+_libraries['version'] = 1.2
 
 STRING = c_char_p
 AVPixelFormat = c_int # enum

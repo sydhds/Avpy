@@ -399,7 +399,7 @@ class Media(object):
             stream = av.lib.avformat_new_stream(self.pFormatCtx, _codec)
             if not stream:
                 raise RuntimeError('Could not alloc stream')
-
+            
             c = stream.contents.codec
 
             av.lib.avcodec_get_context_defaults3(c, _codec)
@@ -410,13 +410,23 @@ class Media(object):
             c.contents.width = streamInfo['width']
             c.contents.height = streamInfo['height']
             
+            # starting from libav 11 - time base has to be set on
+            # stream instead of codec
+            # but stream.contents.time_base exists for all version
+            # so we have no choice but to check lib version
+            if av.lib._libraries['name'] == 'libav' and \
+                    av.lib._libraries['version'] >= 11:
+                timeBase = stream.contents.time_base
+            else:
+                timeBase = c.contents.time_base
+
             if 'timeBase' in streamInfo:
-                c.contents.time_base.den = streamInfo['timeBase'][1]
-                c.contents.time_base.num = streamInfo['timeBase'][0]
+                timeBase.den = streamInfo['timeBase'][1]
+                timeBase.num = streamInfo['timeBase'][0]
             else:
                 # note: even for writing an image, a time base is required
-                c.contents.time_base.den = FPS_DEFAULT[1]
-                c.contents.time_base.num = FPS_DEFAULT[0] 
+                timeBase.den = FPS_DEFAULT[1]
+                timeBase.num = FPS_DEFAULT[0] 
 
             # more parameters
             if 'gopSize' in streamInfo:

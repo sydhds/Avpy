@@ -184,6 +184,8 @@ cdll:
     - "_libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)"
     - "_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)"
     - "_libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)"
+    - "_libraries['name'] = 'libav'"
+    - "_libraries['version'] = 11"
  
 function:
     ## avutil
