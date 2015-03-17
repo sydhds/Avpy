@@ -1151,6 +1151,36 @@ def formats():
     return f
 
 
+def devices():
+    
+    # TODO facto
+
+    av.lib.avdevice_register_all() 
+
+    ofmt = None
+    ifmt = None
+    devices = {'in': {}, 'out': {}}
+
+    while 1:
+        ofmt = av.lib.av_oformat_next(ofmt)
+        if ofmt:
+            if ofmt.contents.flags & av.lib.AVFMT_NOFILE:
+                devices['out'][ofmt.contents.name] = ofmt.contents.long_name
+        else:
+            break
+
+    while 1:
+        ifmt = av.lib.av_iformat_next(ifmt)
+        
+        if ifmt:
+            if ifmt.contents.flags & av.lib.AVFMT_NOFILE:
+                devices['in'][ifmt.contents.name] = ifmt.contents.long_name
+        else:
+            break
+
+    return devices
+
+
 def codecInfo(name, decode=True):
 
     ''' Retrieve specific codec information
