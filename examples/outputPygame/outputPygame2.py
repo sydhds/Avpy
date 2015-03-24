@@ -39,6 +39,9 @@ if __name__ == '__main__':
     parser.add_option('-f', '--fullscreen', 
             action='store_true',
             help='turn on full screen mode')
+    #parser.add_option('--scaling', 
+            #default='bilinear',
+            #help='scaling algorithm')
 
     (options, args) = parser.parse_args()
     
@@ -93,6 +96,7 @@ if __name__ == '__main__':
         print('render: software rgb (very slow)')
         # add scaler to convert to rgb
         media.addScaler(vstream, *size)
+        #media.addScaler(vstream, *size, scaling='gauss')
 
     decodedCount = 0
     mainLoop = True

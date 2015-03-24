@@ -19,6 +19,7 @@
 import os
 import sys
 import ctypes
+
 from . import av
 
 __version__ = '0.1.1.dev0'
@@ -282,7 +283,10 @@ class Media(object):
         # end of generator
         raise StopIteration
 
-    def addScaler(self, streamIndex, width, height):
+    def addScaler(self, streamIndex, width, height, 
+            pixelFormat='rgb24',
+            scaling='bilinear'
+            ):
 
         ''' Add a scaler
 
@@ -297,19 +301,46 @@ class Media(object):
 	:type width: int
 	:param height: new stream height
 	:type height: int
+        :param pixelFormat: output pixel format 
+        :type pixelFormat: str
+        :param scaling: scaling algorithm 
+        :type scaling: str
+
+        .. seealso:: 
+            * https://en.wikipedia.org/wiki/Image_scaling
 
         .. note:: 
-            Selecting output data format is not yet available (rgb24 only)
-        
+            available scaling algorithm
+            * fast_bilinear
+            * bilinear
+            * bicubic
+            * area
+            * bicubiclin (bicubic for luma, bilinear for chroma)
+            * gauss
+            * sinc
+            * lanczos
+            * spline 
         '''
         
         if self.pkt is None:
             self.pkt = Packet(self.pFormatCtx)
-      
-        scaler = (streamIndex, width, height)
+     
+        if pixelFormat == 'rgb24':
+            pixelFormatId = av.lib.PIX_FMT_RGB24
+        else:
+            pixelFormatId = av.lib.av_get_pix_fmt(pixelFormat) 
+        
+        if scaling == 'bilinear':
+            scalingId = av.lib.SWS_BILINEAR
+        else:
+            scalingId = _guessScaling(scaling) 
+            if not scalingId:
+                raise ValueError('Unknown scaling algorithm %s' % scaling)
+
+        scaler = (streamIndex, width, height, pixelFormatId, scalingId)
 
         self.pkt.scaler[streamIndex] = scaler         
-        self.pkt.addScaler(*scaler)
+        self.pkt._addScaler(streamIndex)
 
     def addStream(self, streamType, streamInfo):
 
@@ -819,52 +850,47 @@ class Packet(object):
             self.swsCtx.append(None)
             self.scaler.append(None)
 
-    def addScaler(self, streamIndex, width=None, height=None):
+    def _addScaler(self, streamIndex):
 
         ''' Add a scaler
 
         .. note:: called by :meth:`Media.addScaler`
         '''
 
-        scalerTuple = (width, height)
-        if self.scaler[streamIndex] != scalerTuple:
+        scaler = self.scaler[streamIndex]
 
-            self.scaler[streamIndex] = scalerTuple
-            
-            codecCtx = self.codecCtx[streamIndex]
-           
-            if width:
-                newWidth = width
-            else:
-                newWidth = codecCtx.contents.width
-            
-            if height:
-                newHeight = height
-            else:
-                newHeight = codecCtx.contents.height
+        width = scaler[1]
+        height = scaler[2]
+        pixelFmt = scaler[3]
+        scalingId = scaler[4]
+        codecCtx = self.codecCtx[streamIndex]
 
-            self.swsCtx[streamIndex] = av.lib.sws_getContext(
-                codecCtx.contents.width,
-                codecCtx.contents.height,
-                codecCtx.contents.pix_fmt,
-                newWidth,
-                newHeight,
-                av.lib.PIX_FMT_RGB24,
-                av.lib.SWS_BILINEAR,
-                None,
-                None,
-                None)
-            
-            self.swsFrame = av.lib.avcodec_alloc_frame()
-            if not self.swsFrame:
-                raise RuntimeError('Could not alloc frame')
+        print(scalingId, av.lib.SWS_BILINEAR)
+        #raise
 
-            # FIXME perf - let the user alloc a buffer?
-            av.lib.avpicture_alloc(
-                    ctypes.cast(self.swsFrame, ctypes.POINTER(av.lib.AVPicture)), 
-                    av.lib.PIX_FMT_RGB24,
-                    newWidth, 
-                    newHeight)
+        self.swsCtx[streamIndex] = av.lib.sws_getContext(
+            codecCtx.contents.width,
+            codecCtx.contents.height,
+            codecCtx.contents.pix_fmt,
+            width,
+            height,
+            pixelFmt,
+            #av.lib.SWS_BILINEAR,
+            scalingId,
+            None,
+            None,
+            None)
+        
+        self.swsFrame = av.lib.avcodec_alloc_frame()
+        if not self.swsFrame:
+            raise RuntimeError('Could not alloc frame')
+
+        # FIXME perf - let the user alloc a buffer?
+        av.lib.avpicture_alloc(
+                ctypes.cast(self.swsFrame, ctypes.POINTER(av.lib.AVPicture)), 
+                pixelFmt,
+                width,
+                height)
 
     def __copy__(self):
 
@@ -906,8 +932,8 @@ class Packet(object):
         # scaler copy
         for streamIndex, scaler in enumerate(self.scaler):
             if scaler:
-                p.scaler.append(scaler)
-                p.addScaler(streamIndex, scaler[0], scaler[1])
+                p.scaler[streamIndex] = scaler
+                p._addScaler(streamIndex)
 
         return p
 
@@ -1076,6 +1102,24 @@ def _guessChannelLayout(nbChannels):
 
     return res
 
+
+def _guessScaling(scaling):
+
+    #av.lib.SWS_X -> experimental?
+    #av.lib.SWS_POINT -> nearest neighbor?
+    scalingMap = {
+        'fast_bilinear' : av.lib.SWS_FAST_BILINEAR,
+        'bilinear'      : av.lib.SWS_BILINEAR,
+        'bicubic'       : av.lib.SWS_BICUBIC,
+        'area'          : av.lib.SWS_AREA,
+        'bicubiclin'    : av.lib.SWS_BICUBLIN,
+        'gaus'          : av.lib.SWS_GAUSS,
+        'sinc'          : av.lib.SWS_SINC,
+        'lanczos'       : av.lib.SWS_LANCZOS,
+        'spline'        : av.lib.SWS_SPLINE,
+        }
+
+    return scalingMap.get(scaling, None)
 
 def codecs():
 

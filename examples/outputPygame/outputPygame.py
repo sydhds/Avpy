@@ -34,6 +34,10 @@ if __name__ == '__main__':
             action='store_true',
             help='copy packet (debug only)')
 
+    parser.add_option('--scaling', 
+            default='bilinear',
+            help='scaling algorithm')
+
     (options, args) = parser.parse_args()
 
     if not options.media:
@@ -64,7 +68,7 @@ if __name__ == '__main__':
     print('video stream resolution: %dx%d' % (size[0], size[1]))
 
     # pygame format require rgb24 (24 bits)
-    media.addScaler(vstream, *size)
+    media.addScaler(vstream, *size, scaling=options.scaling)
 
     decodedCount = 0
     # iterate over media
