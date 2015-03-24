@@ -310,16 +310,18 @@ class Media(object):
             * https://en.wikipedia.org/wiki/Image_scaling
 
         .. note:: 
-            available scaling algorithm
-            * fast_bilinear
-            * bilinear
-            * bicubic
-            * area
-            * bicubiclin (bicubic for luma, bilinear for chroma)
-            * gauss
-            * sinc
-            * lanczos
-            * spline 
+            Available scaling algorithm
+            
+            - fast_bilinear
+            - bilinear
+            - bicubic
+            - area
+            - bicubiclin (bicubic for luma, bilinear for chroma)
+            - gauss
+            - sinc
+            - lanczos
+            - spline 
+
         '''
         
         if self.pkt is None:
