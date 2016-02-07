@@ -1,0 +1,85 @@
+Testing
+=======
+
+Requirements
+------------
+
+tox
+
+for ubuntu users, please run the following command:
+
+sudo apt-get install python-tox python-nose
+
+Note:
+
+Tox >= 1.8 is required
+
+If required, install tox in a virtualenv:
+
+virtualenv ~/dev/virtualenvs/tox
+source ~/dev/virtualenvs/tox/bin/activate
+pip install tox
+
+then run tox:
+
+~/dev/virtualenvs/tox/bin/tox --version
+
+Python versions:
+
+Tests are run against the following python version:
+- 2.6, 2.7
+- 3.2, 3.3, 3.4
+- pypy
+
+For ubunutu users, use the following ppa:
+
+https://launchpad.net/~fkrull/+archive/ubuntu/deadsnakes
+
+(sudo add-apt-repository ppa:fkrull/deadsnakes)
+
+Setup for the tests
+-------------------
+
+Tox (tox.ini) assumes the two following folders are present:
+
+build folder (see tox.ini - BUILDDIR): libav + ffmpeg builds
+media folder (see tox.ini - MEDIADIR): media samples
+
+setup build folder:
+
+mkdir ../Avpy_builds
+git clone {LIBAV_GIT} libav_git # see www.libav.org for git url
+git clone {FFMPEG_GIT} ffmpeg_git # see www.ffmpeg.org for git url
+./tools/build.py -l libav -v 0.8.1 -r ../Avpy_builds
+./tools/build.py -l libav -v 9.1 -r ../Avpy_builds
+./tools/build.py -l libav -v 10.1 -r ../Avpy_builds
+./tools/build.py -l libav -v 11.1 -r ../Avpy_builds
+./tools/build.py -l ffmpeg -v 1.2.1 -r ../Avpy_builds
+
+media folder:
+
+TODO TODO
+
+Run tests with tox
+------------------
+
+tox
+
+or 
+
+tox -l --> show tox env list
+tox -e py34-libav11 --> only run tests with python 3.4 + libav11
+
+# only run TestVersion (in test_misc.py) with python 2.7 + libav9
+tox -e py27-libav9 -- -v -s tests/test_misc.py:TestVersion
+
+Run tests with Nose
+-------------------
+
+In order to run tests with Nose (without using Tox): 
+
+LD_LIBRARY_PATH={BUILDIR}/libav_0.8.13/lib AVPY_AVCODEC={BUILDDIR}/libav_0.8.13/lib/libavcodec.so PYTHONPATH=./:$PYTHONPATH nosetests -v --with-doctest -w tests/
+
+# use system libav or ffmpeg
+PYTHONPATH=./:$PYTHONPATH nosetests -v --with-doctest -w tests/
+
