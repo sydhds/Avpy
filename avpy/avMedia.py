@@ -21,11 +21,13 @@ import sys
 import ctypes
 
 from . import av
+from .avUtil import toString, toCString
 
 __version__ = '0.1.1.dev0'
 
 FRAME_SIZE_DEFAULT = 1152
 FPS_DEFAULT = (1, 24)
+PY3 = True if sys.version_info >= (3, 0) else False
 
 class Media(object):
 
@@ -166,14 +168,14 @@ class Media(object):
         '''
         
         infoDict = {}
-        infoDict['name'] = self.pFormatCtx.contents.filename
+        infoDict['name'] = toString(self.pFormatCtx.contents.filename)
 
         if self.mode == 'r':
             avFormat = self.pFormatCtx.contents.iformat
         else:
             avFormat = self.pFormatCtx.contents.oformat
 
-        infoDict['format'] = avFormat.contents.name
+        infoDict['format'] = toString(avFormat.contents.name)
         infoDict['metadata'] = self.metadata()
         infoDict['stream'] = []
         infoDict['duration'] = float(self.pFormatCtx.contents.duration)/av.lib.AV_TIME_BASE
@@ -196,7 +198,7 @@ class Media(object):
         c = av.lib.avcodec_find_decoder(cCodecCtx.contents.codec_id)
         
         if c:
-            streamInfo['codec'] = c.contents.name
+            streamInfo['codec'] = toString(c.contents.name)
 
         codecType = cCodecCtx.contents.codec_type
         if codecType == av.lib.AVMEDIA_TYPE_VIDEO:
@@ -212,12 +214,12 @@ class Media(object):
             except AttributeError:
                 pixFmtName = av.lib.av_get_pix_fmt_name
             
-            streamInfo['pixelFormat'] = pixFmtName(cCodecCtx.contents.pix_fmt)
+            streamInfo['pixelFormat'] = toString(pixFmtName(cCodecCtx.contents.pix_fmt))
         elif codecType == av.lib.AVMEDIA_TYPE_AUDIO:
             streamInfo['type'] = 'audio'
             streamInfo['sampleRate'] = cCodecCtx.contents.sample_rate
             streamInfo['channels'] = cCodecCtx.contents.channels
-            streamInfo['sampleFmt'] = av.lib.av_get_sample_fmt_name(cCodecCtx.contents.sample_fmt)
+            streamInfo['sampleFmt'] = toString(av.lib.av_get_sample_fmt_name(cCodecCtx.contents.sample_fmt))
             streamInfo['sampleFmtId'] = cCodecCtx.contents.sample_fmt
             streamInfo['frameSize'] = cCodecCtx.contents.frame_size
 
@@ -227,8 +229,8 @@ class Media(object):
             streamInfo['bytesPerSample'] = av.lib.av_get_bytes_per_sample(cCodecCtx.contents.sample_fmt)
         elif codecType == av.lib.AVMEDIA_TYPE_SUBTITLE:
             streamInfo['type'] = 'subtitle'
-            streamInfo['subtitleHeader'] = ctypes.string_at(cCodecCtx.contents.subtitle_header,
-                    cCodecCtx.contents.subtitle_header_size)
+            streamInfo['subtitleHeader'] = toString(ctypes.string_at(cCodecCtx.contents.subtitle_header,
+                    cCodecCtx.contents.subtitle_header_size))
         else:
             pass
         
@@ -252,7 +254,7 @@ class Media(object):
         while not done:
             tag = av.lib.av_dict_get(self.pFormatCtx.contents.metadata, ''.encode('ascii'), tag, av.lib.AV_DICT_IGNORE_SUFFIX)
             if tag:
-                metaDict[tag.contents.key] = tag.contents.value
+                metaDict[toString(tag.contents.key)] = toString(tag.contents.value)
             else:
                 done = True
         
@@ -1196,14 +1198,16 @@ def formats():
     while 1:
         ofmt = av.lib.av_oformat_next(ofmt)
         if ofmt:
-            f['muxing'][ofmt.contents.name] = ofmt.contents.long_name
+            k = toString(ofmt.contents.name)
+            f['muxing'][k] = toString(ofmt.contents.long_name)
         else:
             break
 
     while 1:
         ifmt = av.lib.av_iformat_next(ifmt)
         if ifmt:
-            f['demuxing'][ifmt.contents.name] = ifmt.contents.long_name
+            k = toString(ifmt.contents.name)
+            f['demuxing'][k] = toString(ifmt.contents.long_name)
         else:
             break
 
@@ -1253,13 +1257,13 @@ def codecInfo(name, decode=True):
     av.lib.av_register_all()
 
     if decode:
-        c = av.lib.avcodec_find_decoder_by_name(name)
+        c = av.lib.avcodec_find_decoder_by_name(toCString(name))
     else:
-        c = av.lib.avcodec_find_encoder_by_name(name)
+        c = av.lib.avcodec_find_encoder_by_name(toCString(name))
 
     if c:
-        ci['name'] = c.contents.name
-        ci['longName'] = c.contents.long_name
+        ci['name'] = toString(c.contents.name)
+        ci['longName'] = toString(c.contents.long_name)
         
         codecType = c.contents.type
         if codecType == av.lib.AVMEDIA_TYPE_VIDEO:
@@ -1323,7 +1327,7 @@ def codecInfo(name, decode=True):
                     f = av.lib.avcodec_get_pix_fmt_name
                 else:
                     f = av.lib.av_get_pix_fmt_name
-                ci['pixFmts'].append(f(p))
+                ci['pixFmts'].append(toString(f(p)))
 
         # profiles
         pf = c.contents.profiles
@@ -1331,7 +1335,7 @@ def codecInfo(name, decode=True):
             for p in pf:
                 if not p.name:
                     break
-                ci['profiles'].append(p.name)
+                ci['profiles'].append(toString(p.name))
 
         # sample_fmts
         sfmts = c.contents.sample_fmts
@@ -1339,7 +1343,7 @@ def codecInfo(name, decode=True):
             for s in sfmts:
                 if s == av.lib.AV_SAMPLE_FMT_NONE:
                     break
-                ci['sampleFmts'].append(av.lib.av_get_sample_fmt_name(s))
+                ci['sampleFmts'].append(toString(av.lib.av_get_sample_fmt_name(s)))
 
     else:
         raise ValueError('Unable to find codec %s' % name)

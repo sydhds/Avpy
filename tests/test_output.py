@@ -38,7 +38,7 @@ class TestOutput(object):
     def compareAudioData(self, frame, dataSize):
 
         # 16 bits data
-        _a = array.array('B', [1, 0, 2, 0]*(dataSize/4))
+        _a = array.array('B', [1, 0, 2, 0]*int(dataSize/4))
         a = array.array('B', [0]*(dataSize))
        
         ptr = frame.contents.data[0]

@@ -10,8 +10,9 @@ class TestMediaInfo(object):
         mediaName = os.environ['BBB_MOVIE']
         media = avMedia.Media(mediaName)
         infoDict = media.info() 
-        print(infoDict)
+        #print(infoDict)
         assert infoDict['name'] == mediaName
+        assert 'mov' in infoDict['format']
         assert infoDict['stream'][0]['width'] == 320
         assert infoDict['stream'][0]['height'] == 180
 
@@ -34,8 +35,11 @@ class TestFormats(object):
     def test(self):
 
         f = avMedia.formats()
+
         assert f['muxing']['avi']
+        assert f['muxing']['avi'] == 'AVI (Audio Video Interleaved)' 
         assert f['demuxing']['avi']
+        assert f['demuxing']['avi'] == 'AVI (Audio Video Interleaved)' 
 
 class TestCodecInfo(object):
 

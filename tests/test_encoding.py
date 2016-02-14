@@ -36,8 +36,8 @@ class TestEncoding(object):
     def fillRgb(self, frame, width, height):
 
         linesize = frame.contents.linesize[0]
-        for i in xrange(0, height):
-            for j in xrange(0, width):
+        for i in range(0, height):
+            for j in range(0, width):
                 frame.contents.data[0][i*linesize+j*3] = 109 
                 frame.contents.data[0][i*linesize+j*3+1] = 219
                 frame.contents.data[0][i*linesize+j*3+2] = 1
