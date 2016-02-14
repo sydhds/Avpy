@@ -1035,6 +1035,9 @@ def versions():
     versions = {}
     for lib in av.lib._libraries:
 
+            if lib in ['name', 'version']:
+                continue
+
             prefix = lib[3:-3]
             fversion = getattr(av.lib, prefix+'_version')
             fconfig = getattr(av.lib, prefix+'_configuration')
