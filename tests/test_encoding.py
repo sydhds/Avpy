@@ -1,3 +1,4 @@
+import os
 import array
 import ctypes
 
@@ -87,6 +88,9 @@ class TestEncoding(object):
 
         # writing done
         # now read image and check data
+
+        assert(os.path.exists(mediaName))
+        assert(os.path.getsize(mediaName) > 0)
 
         media2 = avMedia.Media(mediaName)
         mediaInfo = media2.info()

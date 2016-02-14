@@ -37,9 +37,11 @@ class TestFormats(object):
         f = avMedia.formats()
 
         assert f['muxing']['avi']
-        assert f['muxing']['avi'] == 'AVI (Audio Video Interleaved)' 
+        #print(f['muxing']['avi'])
+        assert f['muxing']['avi'] in ['AVI format', 'AVI (Audio Video Interleaved)']
         assert f['demuxing']['avi']
-        assert f['demuxing']['avi'] == 'AVI (Audio Video Interleaved)' 
+        #print(f['demuxing']['avi'])
+        assert f['demuxing']['avi'] in ['AVI format', 'AVI (Audio Video Interleaved)']
 
 class TestCodecInfo(object):
 
