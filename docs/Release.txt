@@ -12,3 +12,10 @@ Version spec
 
 https://www.python.org/dev/peps/pep-0440
 
+Pypi release
+------------
+
+python setup.py sdist upload -r pypi
+
+(see http://peterdowns.com/posts/first-time-with-pypi.html)
+
