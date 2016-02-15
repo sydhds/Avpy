@@ -467,6 +467,12 @@ class Media(object):
             if 'gopSize' in streamInfo:
                 c.contents.gop_size = streamInfo['gopSize'] 
 
+            if 'maxBFrames' in streamInfo:
+                c.contents.maxi_b_frames = sreamInfo['maxBFrames']
+
+            if 'mbDecision' in streamInfo:
+                c.contents.mb_decision = streamInfo['mbDecision']
+
             if sys.version_info >= (3, 0):
                 pixFmt = ctypes.c_char_p(streamInfo['pixelFormat'].encode('utf8'))
             else:
