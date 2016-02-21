@@ -216,6 +216,7 @@ class Media(object):
             
             streamInfo['pixelFormat'] = toString(pixFmtName(cCodecCtx.contents.pix_fmt))
         elif codecType == av.lib.AVMEDIA_TYPE_AUDIO:
+            
             streamInfo['type'] = 'audio'
             streamInfo['sampleRate'] = cCodecCtx.contents.sample_rate
             streamInfo['channels'] = cCodecCtx.contents.channels
@@ -226,8 +227,31 @@ class Media(object):
             if streamInfo['frameSize'] == 0:
                 streamInfo['frameSize'] = FRAME_SIZE_DEFAULT
 
+            streamInfo['channels'] = cCodecCtx.contents.channels
             streamInfo['bytesPerSample'] = av.lib.av_get_bytes_per_sample(cCodecCtx.contents.sample_fmt)
+            bufSize = 128
+            buf = ctypes.create_string_buffer(bufSize) 
+            av.lib.av_get_channel_layout_string(
+                    buf, bufSize, 
+                    streamInfo['channels'], cCodecCtx.contents.channel_layout)
+
+            streamInfo['channelLayoutDescription'] = buf.value
+            streamInfo['channelLayoutId'] = cCodecCtx.contents.channel_layout
+            
+            if hasattr(av.lib, 'av_get_channel_name'):
+                # av_get_channel_name return None if format is planar
+                streamInfo['channelLayout'] = av.lib.av_get_channel_name(
+                        cCodecCtx.contents.channel_layout) or ''
+            else:
+                # libav8 only
+                # dirty workaround so user can easily guess if audio resampling is
+                # is needed (by comparing channel layout strings)
+                # see outputWav example 
+                # a proper fix could be to add a function like needResampling(...)
+                streamInfo['channelLayout'] = streamInfo['channelLayoutDescription']
+
         elif codecType == av.lib.AVMEDIA_TYPE_SUBTITLE:
+            
             streamInfo['type'] = 'subtitle'
             streamInfo['subtitleHeader'] = toString(ctypes.string_at(cCodecCtx.contents.subtitle_header,
                     cCodecCtx.contents.subtitle_header_size))
@@ -345,6 +369,40 @@ class Media(object):
 
         self.pkt.scaler[streamIndex] = scaler         
         self.pkt._addScaler(streamIndex)
+
+    def addResampler(self, streamIndex, inAudio, outAudio):
+
+        ''' Add an audio resampler
+        
+        A resampler is responsible for:
+        
+        - resampling audio (frequency, layout)
+        - converting output data format (ie s16p -> s16) 
+
+        :param inAudio: audio input info
+        :type inAudio: dict
+        :param outAudio: audio output info
+        :type outAudio: dict
+
+        .. note:: 
+            each audio info requires the following fields:
+            
+            - sampleRate: sample rate
+            - sampleFmt: sample format name (ie s16)
+            - layout (optional): channel layout (ie. mono, stereo...)
+            - channels (optional): channel count
+
+            if 'layout' is not specified, its value is guessed from the channel
+            count
+
+        '''
+
+        if self.pkt is None:
+            self.pkt = Packet(self.pFormatCtx)
+
+        resampler = (inAudio, outAudio)
+        self.pkt.resampler[streamIndex] = resampler
+        self.pkt.addResampler(streamIndex)
 
     def addStream(self, streamType, streamInfo):
 
@@ -809,6 +867,7 @@ class Media(object):
         else:
             raise RuntimeError('Unknown media type %s' % mediaType)
 
+
 class Packet(object):
 
     ''' Media data container
@@ -833,6 +892,8 @@ class Packet(object):
 
         # frame after conversion by scaler
         self.swsFrame = None
+        # frame after conversion by audio resampler
+        self.resampledFrame = None
         
         # after decode
         self.dataSize = -1
@@ -841,6 +902,8 @@ class Packet(object):
         self.codecCtx = []
         self.swsCtx = []
         self.scaler = []
+        self.resampler = []
+        self.resamplerCtx = []
 
         self.f = formatCtx
         formatCtxCt = formatCtx.contents
@@ -859,6 +922,8 @@ class Packet(object):
             
             self.swsCtx.append(None)
             self.scaler.append(None)
+            self.resampler.append(None)
+            self.resamplerCtx.append(None)
 
     def _addScaler(self, streamIndex):
 
@@ -959,9 +1024,147 @@ class Packet(object):
        
         av.lib.av_free(self.frame)
         av.lib.av_free_packet(ctypes.byref(self.pkt))
+
+    def addResampler(self, streamIndex):
+
+        ''' Add an audio resampler
+
+        .. note:: called by :meth:`Media.addResampler`
+        '''
         
+        if 'libswresample.so' in av.lib._libraries:
+            self._addSwResampler(streamIndex)
+        else:
+            self._addAvResampler(streamIndex)
+
+    def _addSwResampler(self, streamIndex):
+
+        resampleCtx = av.lib.swr_alloc()
+        
+        def queryAudioInfos(infos):
+            
+            infos['sampleFmtId'] = av.lib.av_get_sample_fmt(infos['sampleFmt'])
+
+            if 'channelLayout' not in infos or not infos['channelLayout']:
+
+                # guess channel layout from number of channels
+
+                if hasattr(av.lib, 'av_get_default_channel_layout'):
+                    
+                    f = av.lib.av_get_default_channel_layout
+                else:
+                    f = _guessChannelLayout
+
+                infos['layoutId'] = f(infos['channels'])
+                
+            else:
+                
+                infos['layoutId'] = av.lib.av_get_channel_layout(infos['channelLayout'])
+
+                if 'channels' not in infos:
+                    infos['channels'] = av.lib.av_get_channel_layout_nb_channels(infos['layoutId'])
+        
+        # in
+        inAudio = self.resampler[streamIndex][0]
+        queryAudioInfos(inAudio)
+        
+        # out
+        outAudio = self.resampler[streamIndex][1]
+        queryAudioInfos(outAudio)
+
+        av.lib.swr_alloc_set_opts(resampleCtx, 
+                outAudio['layoutId'], outAudio['sampleFmtId'], outAudio['sampleRate'],
+                inAudio['layoutId'], inAudio['sampleFmtId'], inAudio['sampleRate'],
+                0, None)
+		
+        result = av.lib.swr_init(resampleCtx)
+        
+        if result < 0: 
+            raise RuntimeError(avError(result))
+        
+        self.resamplerCtx[streamIndex] = resampleCtx
+        
+    def _addAvResampler(self, streamIndex):
+       
+        resampleCtx = av.lib.avresample_alloc_context()
+        
+        def queryAudioInfos(infos):
+            
+            infos['sampleFmtId'] = av.lib.av_get_sample_fmt(infos['sampleFmt'])
+
+            if 'channelLayout' not in infos or not infos['channelLayout']:
+
+                # guess channel layout from number of channels
+
+                if hasattr(av.lib, 'av_get_default_channel_layout'):
+                    
+                    f = av.lib.av_get_default_channel_layout
+                else:
+                    f = _guessChannelLayout
+
+                infos['layoutId'] = f(infos['channels'])
+                
+            else:
+
+                infos['layoutId'] = av.lib.av_get_channel_layout(infos['channelLayout'])
+
+                if 'channels' not in infos:
+                    infos['channels'] = av.lib.av_get_channel_layout_nb_channels(infos['layoutId'])
+
+        # in
+        inAudio = self.resampler[streamIndex][0]
+        queryAudioInfos(inAudio)
+        av.lib.av_opt_set_int(resampleCtx, 'in_channel_layout', inAudio['layoutId'], 0)
+        av.lib.av_opt_set_int(resampleCtx, 'in_sample_rate', inAudio['sampleRate'], 0)
+        av.lib.av_opt_set_int(resampleCtx, 'in_sample_fmt', inAudio['sampleFmtId'], 0)
+        
+        # out
+        outAudio = self.resampler[streamIndex][1]
+        queryAudioInfos(outAudio)
+        av.lib.av_opt_set_int(resampleCtx, 'out_channel_layout', outAudio['layoutId'], 0)
+        av.lib.av_opt_set_int(resampleCtx, 'out_sample_rate', outAudio['sampleRate'], 0)
+        av.lib.av_opt_set_int(resampleCtx, 'out_sample_fmt', outAudio['sampleFmtId'], 0)
+ 
+        result = av.lib.avresample_open(resampleCtx)
+        
+        if result < 0: 
+            raise RuntimeError(avError(result))
+        
+        self.resamplerCtx[streamIndex] = resampleCtx        
+
     def streamIndex(self):
         return self.pkt.stream_index
+
+    def _allocAudioFrame(self, resamplerInfos, outSamples):
+
+        # alloc AVFrame
+
+        sampleFmt = resamplerInfos[1]['sampleFmtId']
+        channels = resamplerInfos[1]['channels']
+        bufSize = av.lib.av_samples_get_buffer_size(None, 
+                channels, outSamples,
+                sampleFmt, 0)
+        buf = ctypes.cast(av.lib.av_malloc(bufSize),
+                ctypes.POINTER(ctypes.c_ubyte))
+        # silent sound - debug only
+        ctypes.memset(buf, 0, bufSize)
+        
+        # TODO: free frame
+        resampledFrame = av.lib.avcodec_alloc_frame()
+
+        av.lib.avcodec_get_frame_defaults(resampledFrame) 
+        
+        resampledFrame.contents.nb_samples = outSamples 
+        resampledFrame.contents.format = sampleFmt
+
+        res = av.lib.avcodec_fill_audio_frame(resampledFrame, 
+                channels, sampleFmt, 
+                buf, bufSize, 0)
+
+        if res < 0:
+            raise RuntimeError('fill audio frame failed: %s' % avError(res)) 
+
+        return resampledFrame
 
     def decode(self):
        
@@ -982,6 +1185,50 @@ class Packet(object):
                     self.dataSize = av.lib.av_samples_get_buffer_size(None, 
                             codecCtx.contents.channels, self.frame.contents.nb_samples, 
                             codecCtx.contents.sample_fmt, 1)
+
+                    resamplerCtx = self.resamplerCtx[self.pkt.stream_index]
+                    if resamplerCtx:
+
+                        resamplerInfos = self.resampler[self.pkt.stream_index]
+                        
+                        inData = self.frame.contents.extended_data
+                        inSamples = self.frame.contents.nb_samples
+
+                        #inData = self.frame.contents.data
+                        #inSamples = self.frame.contents.nb_samples 
+
+                        if av.lib._libraries['name'] == 'ffmpeg':
+                            
+                            delay = av.lib.swr_get_delay(resamplerCtx, resamplerInfos[0]['sampleRate'])
+                            outSamples = av.lib.av_rescale_rnd(
+                                    delay+inSamples, 
+                                    resamplerInfos[1]['sampleRate'], resamplerInfos[0]['sampleRate'],
+                                    av.lib.AV_ROUND_UP)
+
+                            self.resampledFrame = self._allocAudioFrame(resamplerInfos, outSamples) 
+
+                            outSamples = av.lib.swr_convert(resamplerCtx,
+                                    self.resampledFrame.contents.extended_data,
+                                    self.resampledFrame.contents.nb_samples,
+                                    inData,
+                                    inSamples)
+                                    # self.frame.contents.data,
+                                    # self.frame.contents.nb_samples)
+                            #print outSamples, self.resampledFrame.contents.nb_samples
+
+                            self.rDataSize = av.lib.av_samples_get_buffer_size(None, 
+                                resamplerInfos[1]['channels'],
+                                outSamples,
+                                #self.resampledFrame.contents.nb_samples, 
+                                self.resampledFrame.contents.format,
+                                1)
+
+
+                        elif av.lib._libraries['name'] == 'libav':
+                            
+                            raise NotImplementedError
+
+
                 else:
                     # FIXME: raise?
                     print('failed decode...')
@@ -1153,7 +1400,7 @@ def codecs():
     
     while 1:
         c = av.lib.av_codec_next(c)
-        if c :
+        if c:
 
             codecName = c.contents.name
 
@@ -1356,4 +1603,41 @@ def codecInfo(name, decode=True):
     
 
     return ci
+
+#def _getOutSamples(resampleCtx, inNbSamples, inAudio, outAudio):
+
+    ## reimplement avresample_get_out_samples 
+    ## (not present in libav9 & libav10 & ffmpeg 1.2)
+    
+    #import math
+    #import errno
+
+    #if 'libswresample.so' in av.lib._libraries:
+
+        #samples = av.lib.av_rescale_rnd(av.lib.swr_get_delay(resampleCtx, outAudio['sampleRate'])
+                #+ inNbSamples, 
+                #inAudio['sampleRate'], outAudio['sampleRate'],
+                #av.lib.AV_ROUND_UP)
+
+        ## check for int overflow?
+
+    #else:
+
+        #samples = av.lib.avresample_get_delay(resampleCtx) + inNbSamples
+
+        ## ~ resample_needed 
+        #if inAudio['sampleRate'] != outAudio['sampleRate']:
+            #samples = av.lib.av_rescale_rnd(samples,
+                    #inAudio['sampleRate'],
+                    #outAudio['sampleRate'],
+                    #av.lib.AV_ROUND_UP)
+
+        #samples += av.lib.avresample_available(resampleCtx)
+
+        ## max signed integer value
+        #maxInt = math.pow(2, ctypes.sizeof(ctypes.c_int)*8)/2
+        #if samples > maxInt:
+            #return -errno.EINVAL
+   
+    #return samples
 

@@ -76,18 +76,51 @@ if __name__ == '__main__':
     else:
         print('No audio stream in %s' % mediaInfo['name'])
         sys.exit(2)
+   
+    astreamInfo = mediaInfo['stream'][astream]
+
+    # forge out audio format
+    # write a standard stereo 16 bits wav file
+    # but keep original sample rate
+    outAudio = {
+            'layout': 'stereo', # XXX: channelLayout?
+            'channels': 2,
+            'sampleRate': 44100,
+            'sampleFmt': 's16',
+            'bytesPerSample': 2,
+            }
+
+    if outAudio['layout'] != astreamInfo['channelLayout'] or\
+        outAudio['channels'] != astreamInfo['channels'] or\
+        outAudio['sampleFmt'] != astreamInfo['sampleFmt'] or\
+        outAudio['sampleRate'] != astreamInfo['sampleRate']:
+
+        # audio layout or audio sample format are different
+        # so add a resampler
+        # should support 5.1, 7.1, mono... -> stereo
+        # or fltp, s16p... -> s16
+
+        inAudio = astreamInfo
+        resampler = True
+
+        try:
+            media.addResampler(astream, inAudio, outAudio)
+        except RuntimeError as e:
+            
+            print('Could not add an audio resampler: %s' % e)
+            sys.exit(3)
+
+    else:
+        resampler = False
     
     # setup output wav file
     outputName = 'out.wav'
-    wp = wave.open(outputName, 'w')
-    
-    astreamInfo = mediaInfo['stream'][astream]
-    
+    wp = wave.open(outputName, 'w') 
     try:
         # nchannels, sampwidth, framerate, nframes, comptype, compname 
-        wp.setparams( (astreamInfo['channels'], 
-           astreamInfo['bytesPerSample'], 
-           astreamInfo['sampleRate'], 
+        wp.setparams( (outAudio['channels'], 
+           outAudio['bytesPerSample'], 
+           outAudio['sampleRate'], 
            0, 
            'NONE', 
            'not compressed') )
@@ -106,9 +139,16 @@ if __name__ == '__main__':
             pkt.decode()
             if pkt.decoded:
                 print('writing %s bytes...' % pkt.dataSize)
-                audioDump(pkt.frame.contents.data[0], pkt.dataSize)
                 
-                decodedSize += pkt.dataSize
+                if resampler:
+                    audioDump(pkt.resampledFrame.contents.data[0], 
+                            pkt.rDataSize)
+                    decodedSize += pkt.rDataSize
+                else:
+                    audioDump(pkt.frame.contents.data[0],
+                            pkt.dataSize)
+                    decodedSize += pkt.dataSize
+
                 # stop after ~ 90s (default)
                 # exact time will vary depending on dataSize
                 if decodedSize >= options.length*secondSize:

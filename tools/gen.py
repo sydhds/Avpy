@@ -56,6 +56,7 @@ def main(options):
     _addInclude = [
             'libavutil/channel_layout.h', # libav >= 9
             'libavresample/avresample.h', # libav >= 9
+            'libswresample/swresample.h', # ffmpeg >= 1.2
             'libavutil/frame.h', # libav >= 10
             ]
     addInclude = []
