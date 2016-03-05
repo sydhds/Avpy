@@ -76,6 +76,8 @@ define:
     - AVSEEK_FLAG_BACKWARD 
     - AVSEEK_FLAG_ANY 
     - AVSEEK_FLAG_BYTE 
+    # misc
+    - AV_ROUND_UP
 
 alias:
     #- ByteIOContext
@@ -83,6 +85,7 @@ alias:
     - CodecID
     - PixelFormat
     - AVOptionType
+    - AVRounding
 
 class:
     - N8AVPacket4DOT_30E
@@ -129,6 +132,7 @@ class:
     - AVDictionaryEntry
     - AVSubtitle
     - AVSubtitleRect
+    - AVAudioResampleContext
 
 import:
     - import os
@@ -161,6 +165,9 @@ cdll:
     - "    libswscale = os.environ.get('AVPY_SWSCALE')"
     - "    if not libswscale:"
     - "        libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))"
+    - "    libavresample = os.environ.get('AVPY_AVRESAMPLE')"
+    - "    if not libavresample:"
+    - "        libavresample = os.path.join(fold, re.sub('avcodec', 'avresample', base))"
     - "    libavcodec = os.environ['AVPY_AVCODEC']"
     - "else:"
     - "    libavutil = util.find_library('avutil')"
@@ -168,6 +175,7 @@ cdll:
     - "    libavformat = util.find_library('avformat')"
     - "    libavdevice = util.find_library('avdevice')"
     - "    libswscale = util.find_library('swscale')"
+    - "    libavresample = util.find_library('avresample')"
     - ""
     - "CDLL(libavutil, RTLD_GLOBAL)"
     - "_libraries = {}"
@@ -176,6 +184,7 @@ cdll:
     - "_libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)"
     - "_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)"
     - "_libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)"
+    - "_libraries['libavresample.so'] = CDLL(libavresample, mode=RTLD_GLOBAL)"
     - "_libraries['name'] = 'libav'"
     - "_libraries['version'] = 9"
 
@@ -190,9 +199,14 @@ function:
     - av_free
     - av_get_pix_fmt
     - av_get_default_channel_layout
+    - av_get_channel_name
     - avutil_version
     - avutil_configuration
     - avutil_license
+    - av_sample_fmt_is_planar
+    - av_get_channel_layout
+    - av_get_channel_layout_nb_channels
+    - av_get_channel_layout_string
     ## avformat
     - av_register_all
     - av_iformat_next
@@ -267,4 +281,19 @@ function:
     - swscale_version
     - swscale_configuration
     - swscale_license
+    ## avresample
+    - avresample_version
+    - avresample_configuration
+    - avresample_license
+    - avresample_alloc_context
+    - avresample_open
+    - avresample_close
+    - avresample_free
+    - av_opt_set_int
+    - avresample_convert
+    - av_samples_alloc
+    - avresample_get_delay
+    - avresample_available
+    - avresample_read
+    - av_rescale_rnd
 

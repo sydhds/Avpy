@@ -80,8 +80,7 @@ if __name__ == '__main__':
     astreamInfo = mediaInfo['stream'][astream]
 
     # forge out audio format
-    # write a standard stereo 16 bits wav file
-    # but keep original sample rate
+    # write a standard stereo 16 bits 44.1 kHz wav file
     outAudio = {
             'layout': 'stereo', # XXX: channelLayout?
             'channels': 2,
@@ -94,11 +93,6 @@ if __name__ == '__main__':
         outAudio['channels'] != astreamInfo['channels'] or\
         outAudio['sampleFmt'] != astreamInfo['sampleFmt'] or\
         outAudio['sampleRate'] != astreamInfo['sampleRate']:
-
-        # audio layout or audio sample format are different
-        # so add a resampler
-        # should support 5.1, 7.1, mono... -> stereo
-        # or fltp, s16p... -> s16
 
         inAudio = astreamInfo
         resampler = True

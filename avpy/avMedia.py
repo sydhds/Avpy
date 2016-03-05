@@ -1226,7 +1226,28 @@ class Packet(object):
 
                         elif av.lib._libraries['name'] == 'libav':
                             
-                            raise NotImplementedError
+                            delay = av.lib.avresample_get_delay(resamplerCtx)
+                            outSamples = av.lib.av_rescale_rnd(
+                                    delay+inSamples, 
+                                    resamplerInfos[1]['sampleRate'], resamplerInfos[0]['sampleRate'],
+                                    av.lib.AV_ROUND_UP)
+
+                            self.resampledFrame = self._allocAudioFrame(resamplerInfos, outSamples) 
+
+                            outSamples = av.lib.avresample_convert(resamplerCtx,
+                                    self.resampledFrame.contents.extended_data,
+                                    0,
+                                    self.resampledFrame.contents.nb_samples,
+                                    inData,
+                                    0,
+                                    inSamples)
+
+                            self.rDataSize = av.lib.av_samples_get_buffer_size(None, 
+                                resamplerInfos[1]['channels'],
+                                outSamples,
+                                self.resampledFrame.contents.format,
+                                1)
+
 
 
                 else:
@@ -1601,43 +1622,5 @@ def codecInfo(name, decode=True):
     else:
         raise ValueError('Unable to find codec %s' % name)
     
-
     return ci
-
-#def _getOutSamples(resampleCtx, inNbSamples, inAudio, outAudio):
-
-    ## reimplement avresample_get_out_samples 
-    ## (not present in libav9 & libav10 & ffmpeg 1.2)
-    
-    #import math
-    #import errno
-
-    #if 'libswresample.so' in av.lib._libraries:
-
-        #samples = av.lib.av_rescale_rnd(av.lib.swr_get_delay(resampleCtx, outAudio['sampleRate'])
-                #+ inNbSamples, 
-                #inAudio['sampleRate'], outAudio['sampleRate'],
-                #av.lib.AV_ROUND_UP)
-
-        ## check for int overflow?
-
-    #else:
-
-        #samples = av.lib.avresample_get_delay(resampleCtx) + inNbSamples
-
-        ## ~ resample_needed 
-        #if inAudio['sampleRate'] != outAudio['sampleRate']:
-            #samples = av.lib.av_rescale_rnd(samples,
-                    #inAudio['sampleRate'],
-                    #outAudio['sampleRate'],
-                    #av.lib.AV_ROUND_UP)
-
-        #samples += av.lib.avresample_available(resampleCtx)
-
-        ## max signed integer value
-        #maxInt = math.pow(2, ctypes.sizeof(ctypes.c_int)*8)/2
-        #if samples > maxInt:
-            #return -errno.EINVAL
-   
-    #return samples
 
