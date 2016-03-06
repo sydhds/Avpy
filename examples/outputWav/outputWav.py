@@ -9,7 +9,7 @@ import sys
 import struct
 import wave
 
-from avpy import Media
+from avpy import avMedia, Media
 
 # wav data (see audioDump)
 waveData = []
@@ -79,12 +79,17 @@ if __name__ == '__main__':
    
     astreamInfo = mediaInfo['stream'][astream]
 
-    # forge out audio format
+    # forge output audio format
     # write a standard stereo 16 bits 44.1 kHz wav file
+
+    # only force sample rate resampling if supported 
+    # libav 0.8 does not support audio resampling
+    # outSampleRate = astreamInfo['sampleRate']
+    outSampleRate = 44100 if avMedia.AVPY_RESAMPLE_SUPPORT else astreamInfo['sampleRate']
     outAudio = {
             'layout': 'stereo', # XXX: channelLayout?
             'channels': 2,
-            'sampleRate': 44100,
+            'sampleRate': outSampleRate,
             'sampleFmt': 's16',
             'bytesPerSample': 2,
             }
@@ -143,7 +148,7 @@ if __name__ == '__main__':
                             pkt.dataSize)
                     decodedSize += pkt.dataSize
 
-                # stop after ~ 90s (default)
+                # stop after ~ 20s (default)
                 # exact time will vary depending on dataSize
                 if decodedSize >= options.length*secondSize:
                     break

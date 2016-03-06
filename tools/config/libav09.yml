@@ -243,6 +243,8 @@ function:
     - avcodec_version
     - avcodec_configuration
     - avcodec_license
+    - avcodec_alloc_context3
+    - avcodec_copy_context
     ## avdevice
     - avdevice_version
     - avdevice_configuration
