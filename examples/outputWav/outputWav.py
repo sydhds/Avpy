@@ -128,7 +128,8 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # Size in bytes required for 1 second of audio
-    secondSize = astreamInfo['channels'] * astreamInfo['bytesPerSample'] * astreamInfo['sampleRate']
+    # secondSize = astreamInfo['channels'] * astreamInfo['bytesPerSample'] * astreamInfo['sampleRate']
+    secondSize = outAudio['channels'] * outAudio['bytesPerSample'] * outAudio['sampleRate']
     decodedSize = 0
 
     # iterate over media and decode audio packet
