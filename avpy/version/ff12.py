@@ -27,6 +27,9 @@ if 'AVPY_AVCODEC' in os.environ:
     libswscale = os.environ.get('AVPY_SWSCALE')
     if not libswscale:
         libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))
+    libswresample = os.environ.get('AVPY_SWRESAMPLE')
+    if not libswresample:
+        libswresample = os.path.join(fold, re.sub('avcodec', 'swresample', base))
     libavcodec = os.environ['AVPY_AVCODEC']
 else:
     libavutil = util.find_library('avutil')
@@ -34,10 +37,12 @@ else:
     libavformat = util.find_library('avformat')
     libavdevice = util.find_library('avdevice')
     libswscale = util.find_library('swscale')
+    libswresample = util.find_library('swresample')
 
 CDLL(libavutil, RTLD_GLOBAL)
 _libraries = {}
 _libraries['libavutil.so'] = CDLL(libavutil, mode=RTLD_GLOBAL)
+_libraries['libswresample.so'] = CDLL(libswresample, mode=RTLD_GLOBAL)
 _libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)
 _libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)
 _libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)
@@ -46,9 +51,9 @@ _libraries['name'] = 'ffmpeg'
 _libraries['version'] = 1.2
 
 STRING = c_char_p
+size_t = c_ulong
 AVPixelFormat = c_int # enum
 AVCodecID = c_int # enum
-size_t = c_ulong
 AVMediaType = c_int # enum
 AVDiscard = c_int # enum
 AVColorPrimaries = c_int # enum
@@ -72,47 +77,48 @@ AVSubtitleType = c_int # enum
 AVStreamParseType = c_int # enum
 int32_t = c_int32
 
-PIX_FMT_RGB24 = 2
+SUBTITLE_BITMAP = 1
 PIX_FMT_NONE = -1
 PIX_FMT_YUV420P = 0
+PIX_FMT_RGB24 = 2
 CODEC_ID_NONE = 0
-CODEC_ID_MPEG1VIDEO = 1
 CODEC_ID_MPEG2VIDEO = 2
-SUBTITLE_TEXT = 2
-SUBTITLE_ASS = 3
-SUBTITLE_NONE = 0
-SUBTITLE_BITMAP = 1
+CODEC_ID_MPEG1VIDEO = 1
 AV_SAMPLE_FMT_S16 = 1
+SUBTITLE_ASS = 3
 AV_SAMPLE_FMT_NONE = -1
+SUBTITLE_TEXT = 2
+SUBTITLE_NONE = 0
 AVMEDIA_TYPE_SUBTITLE = 3
 AVMEDIA_TYPE_AUDIO = 1
 AVMEDIA_TYPE_VIDEO = 0
+AV_ROUND_UP = 3
 AVSEEK_FLAG_BACKWARD = 1 # Variable c_int '1'
-FF_COMPLIANCE_STRICT = 1 # Variable c_int '1'
 SWS_BILINEAR = 2 # Variable c_int '2'
-AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
+AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
 CODEC_CAP_AUTO_THREADS = 32768 # Variable c_int '32768'
 AV_PKT_FLAG_KEY = 1 # Variable c_int '1'
+CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
 SWS_SINC = 256 # Variable c_int '256'
 CODEC_FLAG_GLOBAL_HEADER = 4194304 # Variable c_int '4194304'
 CODEC_CAP_SLICE_THREADS = 8192 # Variable c_int '8192'
-CODEC_CAP_FRAME_THREADS = 4096 # Variable c_int '4096'
-SWS_GAUSS = 128 # Variable c_int '128'
+SWS_LANCZOS = 512 # Variable c_int '512'
+SWS_FAST_BILINEAR = 1 # Variable c_int '1'
 AV_TIME_BASE = 1000000 # Variable c_int '1000000'
 SWS_BICUBIC = 4 # Variable c_int '4'
-AVIO_FLAG_WRITE = 2 # Variable c_int '2'
 AVFMT_NOFILE = 1 # Variable c_int '1'
+FF_COMPLIANCE_STRICT = 1 # Variable c_int '1'
+AVIO_FLAG_WRITE = 2 # Variable c_int '2'
 AV_DICT_IGNORE_SUFFIX = 2 # Variable c_int '2'
-AV_LOG_QUIET = -8 # Variable c_int '-0x00000000000000008'
-AVSEEK_FLAG_FRAME = 8 # Variable c_int '8'
-SWS_LANCZOS = 512 # Variable c_int '512'
+FF_COMPLIANCE_NORMAL = 0 # Variable c_int '0'
+AVFMT_GLOBALHEADER = 64 # Variable c_int '64'
 SWS_BICUBLIN = 64 # Variable c_int '64'
+AVSEEK_FLAG_FRAME = 8 # Variable c_int '8'
 AVSEEK_FLAG_BYTE = 2 # Variable c_int '2'
 AVSEEK_FLAG_ANY = 4 # Variable c_int '4'
-SWS_FAST_BILINEAR = 1 # Variable c_int '1'
+SWS_GAUSS = 128 # Variable c_int '128'
 SWS_SPLINE = 1024 # Variable c_int '1024'
 SWS_AREA = 32 # Variable c_int '32'
-FF_COMPLIANCE_NORMAL = 0 # Variable c_int '0'
 
 AV_NOPTS_VALUE = -9223372036854775808 # Variable c_long '-0x08000000000000000'
 
@@ -248,11 +254,15 @@ class AVOptionRanges(Structure):
 class AVOptionRange(Structure):
 	pass
 
+class SwrContext(Structure):
+	pass
+
 PixelFormat = AVPixelFormat # alias
 CodecID = AVCodecID # alias
 AVDurationEstimationMethod = c_int # enum
 AVClassCategory = c_int # enum
 AVOptionType = c_int # enum
+AVRounding = c_int # enum
 
 AVCodecDescriptor._fields_ = [
     ('id', AVCodecID),
@@ -941,6 +951,8 @@ AVOptionRanges._fields_ = [
     ('range', POINTER(POINTER(AVOptionRange))),
     ('nb_ranges', c_int),
 ]
+SwrContext._fields_ = [
+]
 SwsVector._fields_ = [
     ('coeff', POINTER(c_double)),
     ('length', c_int),
@@ -966,9 +978,15 @@ avcodec_configuration.argtypes = []
 avcodec_license = _libraries['libavcodec.so'].avcodec_license
 avcodec_license.restype = STRING
 avcodec_license.argtypes = []
+avcodec_alloc_context3 = _libraries['libavcodec.so'].avcodec_alloc_context3
+avcodec_alloc_context3.restype = POINTER(AVCodecContext)
+avcodec_alloc_context3.argtypes = [POINTER(AVCodec)]
 avcodec_get_context_defaults3 = _libraries['libavcodec.so'].avcodec_get_context_defaults3
 avcodec_get_context_defaults3.restype = c_int
 avcodec_get_context_defaults3.argtypes = [POINTER(AVCodecContext), POINTER(AVCodec)]
+avcodec_copy_context = _libraries['libavcodec.so'].avcodec_copy_context
+avcodec_copy_context.restype = c_int
+avcodec_copy_context.argtypes = [POINTER(AVCodecContext), POINTER(AVCodecContext)]
 avcodec_alloc_frame = _libraries['libavcodec.so'].avcodec_alloc_frame
 avcodec_alloc_frame.restype = POINTER(AVFrame)
 avcodec_alloc_frame.argtypes = []
@@ -1119,9 +1137,21 @@ avutil_configuration.argtypes = []
 avutil_license = _libraries['libavutil.so'].avutil_license
 avutil_license.restype = STRING
 avutil_license.argtypes = []
+av_get_channel_layout = _libraries['libavutil.so'].av_get_channel_layout
+av_get_channel_layout.restype = uint64_t
+av_get_channel_layout.argtypes = [STRING]
+av_get_channel_layout_string = _libraries['libavutil.so'].av_get_channel_layout_string
+av_get_channel_layout_string.restype = None
+av_get_channel_layout_string.argtypes = [STRING, c_int, c_int, uint64_t]
+av_get_channel_layout_nb_channels = _libraries['libavutil.so'].av_get_channel_layout_nb_channels
+av_get_channel_layout_nb_channels.restype = c_int
+av_get_channel_layout_nb_channels.argtypes = [uint64_t]
 av_get_default_channel_layout = _libraries['libavutil.so'].av_get_default_channel_layout
 av_get_default_channel_layout.restype = int64_t
 av_get_default_channel_layout.argtypes = [c_int]
+av_get_channel_name = _libraries['libavutil.so'].av_get_channel_name
+av_get_channel_name.restype = STRING
+av_get_channel_name.argtypes = [uint64_t]
 av_dict_get = _libraries['libavutil.so'].av_dict_get
 av_dict_get.restype = POINTER(AVDictionaryEntry)
 av_dict_get.argtypes = [POINTER(AVDictionary), STRING, POINTER(AVDictionaryEntry), c_int]
@@ -1134,6 +1164,9 @@ av_strerror.argtypes = [c_int, STRING, size_t]
 av_log_set_level = _libraries['libavutil.so'].av_log_set_level
 av_log_set_level.restype = None
 av_log_set_level.argtypes = [c_int]
+av_rescale_rnd = _libraries['libavutil.so'].av_rescale_rnd
+av_rescale_rnd.restype = int64_t
+av_rescale_rnd.argtypes = [int64_t, int64_t, int64_t, AVRounding]
 av_malloc = _libraries['libavutil.so'].av_malloc
 av_malloc.restype = c_void_p
 av_malloc.argtypes = [size_t]
@@ -1155,9 +1188,39 @@ av_get_sample_fmt.argtypes = [STRING]
 av_get_bytes_per_sample = _libraries['libavutil.so'].av_get_bytes_per_sample
 av_get_bytes_per_sample.restype = c_int
 av_get_bytes_per_sample.argtypes = [AVSampleFormat]
+av_sample_fmt_is_planar = _libraries['libavutil.so'].av_sample_fmt_is_planar
+av_sample_fmt_is_planar.restype = c_int
+av_sample_fmt_is_planar.argtypes = [AVSampleFormat]
 av_samples_get_buffer_size = _libraries['libavutil.so'].av_samples_get_buffer_size
 av_samples_get_buffer_size.restype = c_int
 av_samples_get_buffer_size.argtypes = [POINTER(c_int), c_int, c_int, AVSampleFormat, c_int]
+swr_alloc = _libraries['libswresample.so'].swr_alloc
+swr_alloc.restype = POINTER(SwrContext)
+swr_alloc.argtypes = []
+swr_init = _libraries['libswresample.so'].swr_init
+swr_init.restype = c_int
+swr_init.argtypes = [POINTER(SwrContext)]
+swr_alloc_set_opts = _libraries['libswresample.so'].swr_alloc_set_opts
+swr_alloc_set_opts.restype = POINTER(SwrContext)
+swr_alloc_set_opts.argtypes = [POINTER(SwrContext), int64_t, AVSampleFormat, c_int, int64_t, AVSampleFormat, c_int, c_int, c_void_p]
+swr_free = _libraries['libswresample.so'].swr_free
+swr_free.restype = None
+swr_free.argtypes = [POINTER(POINTER(SwrContext))]
+swr_convert = _libraries['libswresample.so'].swr_convert
+swr_convert.restype = c_int
+swr_convert.argtypes = [POINTER(SwrContext), POINTER(POINTER(uint8_t)), c_int, POINTER(POINTER(uint8_t)), c_int]
+swr_get_delay = _libraries['libswresample.so'].swr_get_delay
+swr_get_delay.restype = int64_t
+swr_get_delay.argtypes = [POINTER(SwrContext), int64_t]
+swresample_version = _libraries['libswresample.so'].swresample_version
+swresample_version.restype = c_uint
+swresample_version.argtypes = []
+swresample_configuration = _libraries['libswresample.so'].swresample_configuration
+swresample_configuration.restype = STRING
+swresample_configuration.argtypes = []
+swresample_license = _libraries['libswresample.so'].swresample_license
+swresample_license.restype = STRING
+swresample_license.argtypes = []
 swscale_version = _libraries['libswscale.so'].swscale_version
 swscale_version.restype = c_uint
 swscale_version.argtypes = []
