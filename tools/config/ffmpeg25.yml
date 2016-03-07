@@ -244,6 +244,7 @@ function:
     - avpicture_free
     - avcodec_alloc_frame
     - avcodec_get_context_defaults3
+    - av_packet_move_ref
     - avcodec_version
     - avcodec_configuration
     - avcodec_license

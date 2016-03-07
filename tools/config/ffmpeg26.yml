@@ -195,7 +195,7 @@ cdll:
     - "_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)"
     - "_libraries['libswscale.so'] = CDLL(libswscale, mode=RTLD_GLOBAL)"
     - "_libraries['name'] = 'ffmpeg'"
-    - "_libraries['version'] = 2.5"
+    - "_libraries['version'] = 2.6"
 
    
 function:
@@ -244,6 +244,7 @@ function:
     - avpicture_free
     - avcodec_alloc_frame
     - avcodec_get_context_defaults3
+    - av_packet_move_ref
     - avcodec_version
     - avcodec_configuration
     - avcodec_license
