@@ -104,11 +104,20 @@ def _findModuleName():
     ffmpegVersion = {
             54: {
                 (90, 93): 'ff12',
-                }
+                },
+            56: {
+                (13, 20): 'ff25',
+                (26, 30): 'ff26',
+                (40, 50): 'ff27',
+                (60, 65): 'ff28',
+                },
+            # 57: {
+                # (24, 30): 'ff30',
+                # }
             }
 
     lib, major, minor, micro = _version()	
-
+    
     if lib == 'ffmpeg':
         versionDict = ffmpegVersion
     else:
