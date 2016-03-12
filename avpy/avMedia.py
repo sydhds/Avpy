@@ -405,7 +405,7 @@ class Media(object):
 
         resampler = (inAudio, outAudio)
         self.pkt.resampler[streamIndex] = resampler
-        self.pkt.addResampler(streamIndex)
+        return self.pkt.addResampler(streamIndex)
 
     def addStream(self, streamType, streamInfo):
 

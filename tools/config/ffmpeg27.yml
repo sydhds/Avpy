@@ -78,6 +78,8 @@ define:
     - AVSEEK_FLAG_BACKWARD 
     - AVSEEK_FLAG_ANY 
     - AVSEEK_FLAG_BYTE 
+    # misc
+    - AV_ROUND_UP
 
 alias:
     #- ByteIOContext
@@ -85,6 +87,7 @@ alias:
     #- CodecID
     - PixelFormat
     - AVOptionType
+    - AVRounding
     # ffmpeg
     - AVDurationEstimationMethod
     - AVClassCategory
@@ -138,6 +141,7 @@ class:
     - AVCodecDescriptor
     - AVOptionRanges
     - AVOptionRange
+    - SwrContext
     - AVBufferRef
     - AVPacketSideData
     - MpegEncContext
@@ -179,6 +183,9 @@ cdll:
     - "    libswscale = os.environ.get('AVPY_SWSCALE')"
     - "    if not libswscale:"
     - "        libswscale = os.path.join(fold, re.sub('avcodec', 'swscale', base))"
+    - "    libswresample = os.environ.get('AVPY_SWRESAMPLE')"
+    - "    if not libswresample:"
+    - "        libswresample = os.path.join(fold, re.sub('avcodec', 'swresample', base))"
     - "    libavcodec = os.environ['AVPY_AVCODEC']"
     - "else:"
     - "    libavutil = util.find_library('avutil')"
@@ -186,10 +193,12 @@ cdll:
     - "    libavformat = util.find_library('avformat')"
     - "    libavdevice = util.find_library('avdevice')"
     - "    libswscale = util.find_library('swscale')"
+    - "    libswresample = util.find_library('swresample')"
     - ""
     - "CDLL(libavutil, RTLD_GLOBAL)"
     - "_libraries = {}"
     - "_libraries['libavutil.so'] = CDLL(libavutil, mode=RTLD_GLOBAL)"
+    - "_libraries['libswresample.so'] = CDLL(libswresample, mode=RTLD_GLOBAL)"
     - "_libraries['libavcodec.so'] = CDLL(libavcodec, mode=RTLD_GLOBAL)"
     - "_libraries['libavformat.so'] = CDLL(libavformat, mode=RTLD_GLOBAL)"
     - "_libraries['libavdevice.so'] = CDLL(libavdevice, mode=RTLD_GLOBAL)"
@@ -211,6 +220,11 @@ function:
     - avutil_version
     - avutil_configuration
     - avutil_license
+    - av_sample_fmt_is_planar
+    - av_get_channel_name
+    - av_get_channel_layout
+    - av_get_channel_layout_nb_channels
+    - av_get_channel_layout_string
     ## avformat
     - av_register_all
     - av_iformat_next
@@ -248,6 +262,8 @@ function:
     - avcodec_version
     - avcodec_configuration
     - avcodec_license
+    - avcodec_alloc_context3
+    - avcodec_copy_context
     ## avdevice
     - avdevice_version
     - avdevice_configuration
@@ -286,4 +302,15 @@ function:
     - swscale_version
     - swscale_configuration
     - swscale_license
+    ## swresample
+    - swresample_version
+    - swresample_configuration
+    - swresample_license
+    - swr_alloc
+    - swr_init 
+    - swr_convert
+    - swr_get_delay
+    - swr_free
+    - swr_alloc_set_opts
+    - av_rescale_rnd
 
