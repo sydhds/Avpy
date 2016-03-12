@@ -1048,7 +1048,8 @@ class Packet(object):
         
         def queryAudioInfos(infos):
             
-            infos['sampleFmtId'] = av.lib.av_get_sample_fmt(infos['sampleFmt'])
+            sampleFmt = toCString(infos['sampleFmt']) 
+            infos['sampleFmtId'] = av.lib.av_get_sample_fmt(sampleFmt)
 
             if 'channelLayout' not in infos or not infos['channelLayout']:
 
@@ -1141,14 +1142,20 @@ class Packet(object):
         resampleCtx = av.lib.avresample_alloc_context()
         
         # in
-        av.lib.av_opt_set_int(resampleCtx, 'in_channel_layout', inAudio['layoutId'], 0)
-        av.lib.av_opt_set_int(resampleCtx, 'in_sample_rate', inAudio['sampleRate'], 0)
-        av.lib.av_opt_set_int(resampleCtx, 'in_sample_fmt', inAudio['sampleFmtId'], 0)
+        av.lib.av_opt_set_int(resampleCtx, toCString('in_channel_layout'), 
+                inAudio['layoutId'], 0)
+        av.lib.av_opt_set_int(resampleCtx, toCString('in_sample_rate'), 
+                inAudio['sampleRate'], 0)
+        av.lib.av_opt_set_int(resampleCtx, toCString('in_sample_fmt'), 
+                inAudio['sampleFmtId'], 0)
         
         # out
-        av.lib.av_opt_set_int(resampleCtx, 'out_channel_layout', outAudio['layoutId'], 0)
-        av.lib.av_opt_set_int(resampleCtx, 'out_sample_rate', outAudio['sampleRate'], 0)
-        av.lib.av_opt_set_int(resampleCtx, 'out_sample_fmt', outAudio['sampleFmtId'], 0)
+        av.lib.av_opt_set_int(resampleCtx, toCString('out_channel_layout'), 
+                outAudio['layoutId'], 0)
+        av.lib.av_opt_set_int(resampleCtx, toCString('out_sample_rate'), 
+                outAudio['sampleRate'], 0)
+        av.lib.av_opt_set_int(resampleCtx, toCString('out_sample_fmt'), 
+                outAudio['sampleFmtId'], 0)
  
         result = av.lib.avresample_open(resampleCtx)
         
