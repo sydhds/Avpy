@@ -37,7 +37,7 @@ class TestOutput(object):
     def testImage(self):
 
         mediaName = os.environ['TIFF_IMAGE']
-        media = avMedia.Media(mediaName)
+        media = avMedia.Media(mediaName, quiet=False)
         mediaInfo = media.info()
 
         # retrieve video width and height

@@ -24,7 +24,7 @@ class TestAudio(object):
     def testAudio(self):
 
         mediaName = os.environ['CONSTANT_WAV']
-        media = avMedia.Media(mediaName)
+        media = avMedia.Media(mediaName, quiet=False)
         mediaInfo = media.info()
 
         astream = 0 # audio stream index
@@ -61,7 +61,7 @@ class TestAudio(object):
     def testAudioResampling(self):
 
         mediaName = os.environ['CONSTANT_WAV']
-        media = avMedia.Media(mediaName)
+        media = avMedia.Media(mediaName, quiet=False)
         mediaInfo = media.info()
 
         astream = 0 # audio stream index
@@ -83,6 +83,7 @@ class TestAudio(object):
         duration = frames / float(rate)
         assert duration == mediaInfo['duration']
         
+        # inital sample rate / 2
         outSampleRate = 22050 
         outAudio = {
             'layout': 'stereo', # XXX: channelLayout?
@@ -123,7 +124,7 @@ class TestAudio(object):
     def testCopyPacket(self):
 
         mediaName = os.environ['CONSTANT_WAV']
-        media = avMedia.Media(mediaName)
+        media = avMedia.Media(mediaName, quiet=False)
         mediaInfo = media.info()
 
         astream = 0 # audio stream index

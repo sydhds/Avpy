@@ -8,7 +8,7 @@ class TestMediaInfo(object):
     def test(self):
 
         mediaName = os.environ['BBB_MOVIE']
-        media = avMedia.Media(mediaName)
+        media = avMedia.Media(mediaName, quiet=False)
         infoDict = media.info() 
         #print(infoDict)
         assert infoDict['name'] == mediaName
@@ -18,6 +18,7 @@ class TestMediaInfo(object):
         assert infoDict['stream'][0]['height'] == 180
         assert infoDict['stream'][1]['type'] == 'audio'
         assert infoDict['stream'][1]['channels'] == 2
+        # FIXME
         #assert infoDict['stream'][1]['channelLayout'] == 'stereo'
 
 class TestVersion(object):
