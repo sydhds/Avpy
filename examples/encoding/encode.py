@@ -56,11 +56,11 @@ class SignalGen(object):
         samples = ctypes.cast(pkt.frame.contents.data[0],
                 ctypes.POINTER(ctypes.c_uint16))
 
-        for j in xrange(frameSize):
-            samples[2*j] = int(math.sin(self.t)*10000)
+        for j in xrange(frameSize/nbChannels):
+            samples[j] = int(math.sin(self.t)*10000)
             
             for k in xrange(1, nbChannels):
-                samples[2*j+k] = samples[2*j]
+                samples[j+k] = samples[2*j]
 
             self.t += self.tincr
 

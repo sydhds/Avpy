@@ -6,17 +6,6 @@ import wave
 
 from avpy import avMedia 
 
-def audioDump(buf, bufLen):
-
-    ''' Store audio data 
-
-    .. note:: faster than audioDump2
-    '''
-
-    import ctypes
-    global waveData	
-    waveData.append(ctypes.string_at(buf, bufLen))
-
 class TestAudio(object):
 
     def compareAudioData(self, frame, dataSize):
@@ -125,11 +114,11 @@ class TestAudio(object):
         print('decodedSize', decodedSize)
         print('expectedSize', expectedSize)
         print('frame size', streamInfo['frameSize'])
-        secondsDif = float(expectedSize-decodedSize)/secondSize
-        print('diff (in seconds)', secondsDif) 
+        secondsDiff = float(expectedSize-decodedSize)/secondSize
+        print('diff (in seconds)', secondsDiff) 
         # XXX: accept a small margin error for now
         # wondering if this is normal or not...
-        assert secondsDif < 0.01
+        assert secondsDiff < 0.01
 
     def testCopyPacket(self):
 

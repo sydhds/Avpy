@@ -763,11 +763,11 @@ class Media(object):
         
         if c.contents.frame_size == 0:
             # frame size is set to 0 for pcm codec
-            bufSize = FRAME_SIZE_DEFAULT * c.contents.channels * av.lib.av_get_bytes_per_sample(c.contents.sample_fmt) 
+            bufSize = FRAME_SIZE_DEFAULT 
         else:
             bufSize = av.lib.av_samples_get_buffer_size(None, c.contents.channels, c.contents.frame_size,
                     c.contents.sample_fmt, 0)
-        
+       
         buf = av.lib.av_malloc(bufSize)
         
         self.pkt = Packet(self.pFormatCtx)
