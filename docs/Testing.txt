@@ -55,10 +55,17 @@ git clone {FFMPEG_GIT} ffmpeg_git # see www.ffmpeg.org for git url
 ./tools/build.py -l libav -v 10.1 -r ../Avpy_builds
 ./tools/build.py -l libav -v 11.1 -r ../Avpy_builds
 ./tools/build.py -l ffmpeg -v 1.2.1 -r ../Avpy_builds
+./tools/build.py -l ffmpeg -v 2.5.1 -r ../Avpy_builds
+./tools/build.py -l ffmpeg -v 2.6.1 -r ../Avpy_builds
+./tools/build.py -l ffmpeg -v 2.7.1 -r ../Avpy_builds
+./tools/build.py -l ffmpeg -v 2.8.1 -r ../Avpy_builds
 
 media folder:
 
-TODO TODO
+cd ..
+git clone https://bitbucket.org/sydh/avpy_testdatas.git 
+
+then read README.txt
 
 Run tests with tox
 ------------------
