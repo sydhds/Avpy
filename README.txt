@@ -2,7 +2,7 @@
 Avpy
 ====
 
-Avpy is a ctypes binding for libav and ffmpeg (see www.libav.org or www.ffmpeg.org). 
+Avpy is a Python binding for ffmpeg and libav (see www.ffmpeg.org or www.libav.org).
 
 Typical usage often looks like this:
 
@@ -18,43 +18,10 @@ online: https://avpy.readthedocs.org/
 This software is licensed under the LGPL v.2.1+. Examples (and tools)
 are licensed under the Apache License 2.0.
 
-Read LICENSE.txt for details or:
-
-- http://choosealicense.com/licenses/lgpl-2.1
-- http://choosealicense.com/licenses/apache-2.0
-
-Features:
-
-- libav: 
-    - version 0.8: done
-    - version 9: done
-    - version 10: done
-    - version 11: done
-- ffmpeg:
-    - version 1.2: done
-- OS: 
-    - Linux - BSD: done
-    - MacOS: please report!
-    - Windows: please report!
-- avpy:
-    - media info: done
-    - basic video decoding: done
-    - basic audio decoding: done
-    - basic encoding: done
-    - subtitle support: done
-- doc:
-    - sphinx doc: done
-- examples:
-    - dump image/wav/subtitle: done
-    - alsaaudio: done
-    - Pygame: done
-    - PIL, pillow: done
-    - PySDL2 video: done
-    - encoding: done
-- misc:
-    - Python2.6, 2.7: done
-    - Python3: done
-    - PyPy: done
+The binding uses ctypes (https://docs.python.org/2/library/ctypes.html) to wrap ffmpeg or libav 
+and is compatible with all major version of ffmpeg (v1.2 and from v2.5 to v2.8)
+and libav (from v0.8 to v11). 
+Note that python2 (v2.6 and v2.7), python3 (from v3.2 to v3.5) and pypy are supported.
 
 Install
 =======
@@ -73,7 +40,15 @@ Install from source:
 
 - pip install Avpy
 
-Please read doc/DEV.txt (virtualenvs) or doc/Windows.txt for additional information.
+Install from source:
+--------------------
+
+Clone Avpy repo from bitbucket or github
+
+- git clone https://bitbucket.org/sydh/avpy.git Avpy
+- git clone https://github.com/sydhds/Avpy.git Avpy
+
+Please read docs/DEV.txt (virtualenvs) or docs/Windows.txt for additional information.
 
 Contact
 =======

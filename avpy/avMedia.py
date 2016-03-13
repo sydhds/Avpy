@@ -23,7 +23,7 @@ import ctypes
 from . import av
 from .avUtil import toString, toCString, _guessScaling, _guessChannelLayout
 
-__version__ = '0.1.2.dev0'
+__version__ = '0.1.2'
 
 FRAME_SIZE_DEFAULT = 1152
 FPS_DEFAULT = (1, 24)

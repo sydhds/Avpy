@@ -1,4 +1,8 @@
-v0.1.2.dev0 -- Wip
+v0.1.2, 20160313 --
+
+Audio resampling support
+FFmpeg 2.5, 2.6, 2.7, 2.8 support
+Add audio encoding test (tox)
 
 v0.1.1, 20160214 -- 
 
