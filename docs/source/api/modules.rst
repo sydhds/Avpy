@@ -5,3 +5,4 @@ avpy
    :maxdepth: 4
 
    avpy
+   encoding

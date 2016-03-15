@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='Avpy',
-    version='0.1.2',
+    version='0.1.3.dev0',
     author='Sylvain Delhomme',
     author_email='sydhds@gmail.com',
     packages=['avpy', 'avpy.version'],
@@ -32,6 +32,7 @@ setup(
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
 
         'Topic :: Multimedia :: Sound/Audio',
         'Topic :: Multimedia :: Sound/Audio :: Conversion',
