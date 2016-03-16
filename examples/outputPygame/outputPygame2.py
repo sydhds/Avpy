@@ -127,8 +127,8 @@ if __name__ == '__main__':
                     # upload yuv data
 
                     size0 = pkt2.frame.contents.linesize[0] * pkt2.frame.contents.height
-                    size1 = pkt2.frame.contents.linesize[1] * (pkt2.frame.contents.height/2)
-                    size2 = pkt2.frame.contents.linesize[2] * (pkt2.frame.contents.height/2)
+                    size1 = pkt2.frame.contents.linesize[1] * (pkt2.frame.contents.height//2)
+                    size2 = pkt2.frame.contents.linesize[2] * (pkt2.frame.contents.height//2)
 
                     yuv = (ctypes.string_at(pkt2.frame.contents.data[0], size0),
                             ctypes.string_at(pkt2.frame.contents.data[1], size1),
