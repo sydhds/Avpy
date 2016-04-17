@@ -5,6 +5,8 @@ import wave
 
 from avpy import avMedia
 
+from nose.tools import assert_less
+
 def ptrAdd(ptr, offset):
 
     ''' C pointer add
@@ -15,7 +17,7 @@ def ptrAdd(ptr, offset):
 
 class TestEncoding(object):
 
-    def compareData(self, frame, w, h):
+    def compareData(self, frame, w, h, colorTpl):
 
         ''' Compare frame content
         '''
@@ -24,7 +26,8 @@ class TestEncoding(object):
         # optim -> use memcmp?
 
         # 1 linesize
-        _a = array.array('B', [109, 219, 1]*(w))
+        # _a = array.array('B', [109, 219, 1]*(w))
+        _a = array.array('B', colorTpl*(w))
         a = array.array('B', [0]*(w*3))
         
         for i in range(h):
@@ -108,7 +111,7 @@ class TestEncoding(object):
                 pkt.decode()
                 if pkt.decoded:
                     frame = pkt.swsFrame
-                    assert self.compareData(frame, w, h)
+                    assert self.compareData(frame, w, h, (109, 219, 1))
                     break
 
     def testWav(self):
@@ -175,10 +178,14 @@ class TestEncoding(object):
         assert wp.getnchannels() == si['channels']
         assert rate == si['sampleRate']
         assert wp.getsampwidth() == si['bytesPerSample']
+
         duration = frames / float(rate)
-        
+       
+        assert(duration > 0)
+
         if nFrame != nFrameInt:
-            assert abs(1.0 - duration) < 0.01
+            # assert abs(1.0 - duration) < 0.01
+            assert_less(abs(1.0 - duration), 0.01)
         else:
             assert duration == 1.0
 
@@ -198,6 +205,54 @@ class TestEncoding(object):
         
         assert wpFrameCount / nFrameInt == frameSize / (si['channels'] * si['bytesPerSample'])
 
+    def testImageArray(self):
 
+        # write image then read it and test data
 
+        mediaName = '/tmp/fooArray.tiff'
+
+        w = 8
+        h = 8
+
+        resolution = (w, h)
+
+        streamInfo = {
+            'width': resolution[0],
+            'height': resolution[1],
+            'codec': 'auto',
+            'pixelFormat': 'rgb24',
+            'type': 'video',
+            }
+
+        # codec auto. guess
+
+        a = array.array('B')
+        colorTuple = [11, 128, 255]
+        a.fromlist(colorTuple*w*h)
+        
+        with avMedia.Media.open(mediaName, 'w', streamsInfo=[streamInfo]) as m:
+            m.write(a, 1, 'video')
+
+        assert(os.path.exists(mediaName))
+        assert(os.path.getsize(mediaName) > 0)
+
+        media2 = avMedia.Media(mediaName)
+        mediaInfo = media2.info()
+        vstream = 0
+        streamInfo = mediaInfo['stream'][vstream]
+        
+        assert streamInfo['width'] == w
+        assert streamInfo['height'] == h
+
+        media2.addScaler(vstream, w, h)
+
+        for pkt in media2:
+            if pkt.streamIndex() == vstream:
+                pkt.decode()
+                if pkt.decoded:
+                    frame = pkt.swsFrame
+
+                    assert self.compareData(frame, w, h, colorTuple)
+
+                    break
 

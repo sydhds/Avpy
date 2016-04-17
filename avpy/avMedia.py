@@ -18,7 +18,9 @@
 
 import os
 import sys
+import array
 import ctypes
+import contextlib
 
 from . import av
 from .avUtil import toString, toCString, _guessScaling, _guessChannelLayout
@@ -791,7 +793,7 @@ class Media(object):
         ''' Write packet to media
 
         :param packet: packet to encode and add to media
-        :type packet: :class:`Packet`
+        :type packet: :class:`Packet` or array.array or numpy.array
         '''
 
         c = self.outStream.contents.codec
@@ -801,11 +803,46 @@ class Media(object):
 
             # guess if we should use packet.frame or packet.swsFrame
 
-            pktFrame = packet.frame
+            if isinstance(packet, array.array):
 
-            swsCtx = packet.swsCtx[packet.streamIndex()]
-            if swsCtx:
-                pktFrame = packet.swsFrame
+                # pktFrame = a.buffer_info()[0]
+                bufAddr, bufLen  = packet.buffer_info()
+                
+                # create a frame
+                buf = ctypes.cast(bufAddr, ctypes.POINTER(ctypes.c_ubyte))
+                pktFrame = av.lib.avcodec_alloc_frame()
+                pktFrame.contents.data[0] = buf
+
+                pktFrame.contents.width = c.contents.width
+                pktFrame.contents.height = c.contents.height
+                pktFrame.contents.linesize[0] = av.lib.avpicture_get_size(c.contents.pix_fmt, 
+                    c.contents.width, 1)
+
+            elif isinstance(packet, Packet):
+                pktFrame = packet.frame
+                swsCtx = packet.swsCtx[packet.streamIndex()]
+                if swsCtx:
+                    pktFrame = packet.swsFrame
+            else:
+                
+                pktFrame = None
+
+                try:
+                    import numpy
+                except ImportError:
+                    pass
+                else:
+                    buf = packet.ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte))
+                    pktFrame = av.lib.avcodec_alloc_frame()
+                    pktFrame.contents.data[0] = buf
+
+                    pktFrame.contents.width = c.contents.width
+                    pktFrame.contents.height = c.contents.height
+                    pktFrame.contents.linesize[0] = av.lib.avpicture_get_size(c.contents.pix_fmt, 
+                        c.contents.width, 1)
+
+                if not pktFrame:
+                    raise RuntimeError
             
             # libav8: encode_video, libav 9 or > encode_video2
             if hasattr(av.lib, 'avcodec_encode_video'):
@@ -869,6 +906,43 @@ class Media(object):
 
         else:
             raise RuntimeError('Unknown media type %s' % mediaType)
+
+    @staticmethod
+    @contextlib.contextmanager
+    def open(mediaName, mode=None, buffering=None, **kwargs):
+       
+        ''' Open a media file (writing only)
+        
+        :param mediaName: media name 
+        :type mediaName: str
+        :param mode: open media mode (ignored)
+        :type mode: str
+        :param buffering: buffering (ignored)
+        :type buffering: int
+        :param metaData: meta data dict (optional)
+        :type metaData: dict
+        :param streamsInfo: stream(s) info 
+        :type streamsInfo: dict
+
+        '''
+
+        m = Media(mediaName, mode)
+        
+        metadata = kwargs.get('metaData')
+        streamsInfo = kwargs.get('streamsInfo')
+
+        try:
+
+            for streamInfo in streamsInfo:
+                m.addStream(streamInfo['type'], streamInfo)
+            m.writeHeader(metadata)
+            yield m
+        except Exception:
+            # import traceback
+            # print traceback.format_exc()
+            raise
+        else:
+            m.writeTrailer()
 
 
 class Packet(object):
