@@ -66,3 +66,22 @@ class TestCodecInfo(object):
         assert ci['longName'] == 'MP3 (MPEG audio layer 3)'
         assert ci['type'] == 'audio'
 
+class TestCodecs(object):
+
+    def test(self):
+
+        c = avMedia.codecs()
+        from pprint import pprint
+        # pprint(c['video']['encoding'])
+        # TODO: add more tests
+        assert 'mpeg1video' in c['video']['decoding']
+        assert 'mpeg2video' in c['video']['encoding']
+
+        # pprint(c['audio'])
+        # pprint(c['subtitle'])
+
+        assert 'mp1' in c['audio']['decoding']
+        assert 'mp2' in c['audio']['encoding']
+
+        assert 'srt' in c['subtitle']['decoding']
+
