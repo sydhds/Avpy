@@ -22,3 +22,8 @@ python setup.py sdist upload -r pypi
 
 (see http://peterdowns.com/posts/first-time-with-pypi.html)
 
+Pushing to github
+-----------------
+
+git push --mirror github
+
