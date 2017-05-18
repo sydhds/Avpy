@@ -92,8 +92,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Avpy'
-copyright = '2013-2016, sydh'
+project = u'Avpy'
+copyright = u'2013-2016, sydh'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -245,8 +245,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'Avpy.tex', 'Avpy Documentation',
-   'sydh', 'manual'),
+  ('index', 'Avpy.tex', u'Avpy Documentation',
+   u'sydh', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -275,8 +275,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'avpy', 'Avpy Documentation',
-     ['sydh'], 1)
+    ('index', 'avpy', u'Avpy Documentation',
+     [u'sydh'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -289,8 +289,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Avpy', 'Avpy Documentation',
-   'sydh', 'Avpy', 'One line description of project.',
+  ('index', 'Avpy', u'Avpy Documentation',
+   u'sydh', 'Avpy', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -310,10 +310,10 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = 'Avpy'
-epub_author = 'sydh'
-epub_publisher = 'sydh'
-epub_copyright = '2015, sydh'
+epub_title = u'Avpy'
+epub_author = u'sydh'
+epub_publisher = u'sydh'
+epub_copyright = u'2015, sydh'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'Avpy'

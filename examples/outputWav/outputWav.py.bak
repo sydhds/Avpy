@@ -74,7 +74,7 @@ if __name__ == '__main__':
     if astreams:
         astream = astreams[0]
     else:
-        print(('No audio stream in %s' % mediaInfo['name']))
+        print('No audio stream in %s' % mediaInfo['name'])
         sys.exit(2)
    
     astreamInfo = mediaInfo['stream'][astream]
@@ -106,7 +106,7 @@ if __name__ == '__main__':
             media.addResampler(astream, inAudio, outAudio)
         except RuntimeError as e:
             
-            print(('Could not add an audio resampler: %s' % e))
+            print('Could not add an audio resampler: %s' % e)
             sys.exit(3)
 
     else:
@@ -124,7 +124,7 @@ if __name__ == '__main__':
            'NONE', 
            'not compressed') )
     except wave.Error as e:
-        print(('Wrong parameters for wav file: %s' % e))
+        print('Wrong parameters for wav file: %s' % e)
         sys.exit(1)
 
     # Size in bytes required for 1 second of audio
@@ -138,7 +138,7 @@ if __name__ == '__main__':
         if pkt.streamIndex() == astream:
             pkt.decode()
             if pkt.decoded:
-                print(('writing %s bytes...' % pkt.dataSize))
+                print('writing %s bytes...' % pkt.dataSize)
                 
                 if resampler:
                     audioDump(pkt.resampledFrame.contents.data[0], 
@@ -156,5 +156,5 @@ if __name__ == '__main__':
 
     # all audio data have been decoded - write file
     writeWav(wp)
-    print(('writing %s done!' % outputName)) 
+    print('writing %s done!' % outputName) 
 

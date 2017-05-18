@@ -112,11 +112,11 @@ class TestAudio(object):
                     assert self.compareAudioData(frame, pkt.rDataSize) 
         
         expectedSize = duration*secondSize
-        print(('decodedSize', decodedSize))
-        print(('expectedSize', expectedSize))
-        print(('frame size', streamInfo['frameSize']))
+        print('decodedSize', decodedSize)
+        print('expectedSize', expectedSize)
+        print('frame size', streamInfo['frameSize'])
         secondsDiff = float(expectedSize-decodedSize)/secondSize
-        print(('diff (in seconds)', secondsDiff)) 
+        print('diff (in seconds)', secondsDiff) 
         # XXX: accept a small margin error for now
         # wondering if this is normal or not...
         assert secondsDiff < 0.01

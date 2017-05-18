@@ -42,7 +42,7 @@ def main(options):
     buildDir = os.path.abspath(os.path.join(options.buildDir, '%s_%s' % (options.lib, options.version)))
 
     if not os.path.isdir(buildDir):
-        print(('Could not find %s build @ %s' % (options.lib, buildDir)))
+        print('Could not find %s build @ %s' % (options.lib, buildDir))
         sys.exit(1)
 
     pyLibVersion = ''.join(options.version.split('.')[:2])
@@ -65,7 +65,7 @@ def main(options):
         if os.path.isfile(os.path.join(buildDir, 'include', i)):
             addInclude.append(i)
         else:
-            print(('skipping %s' % i))
+            print('skipping %s' % i)
     addInclude = ' '.join(addInclude)
 
     print('generating xml...')
@@ -108,11 +108,11 @@ def main(options):
     xml2pyCmd += preloads
     run(xml2pyCmd)
 
-    print((buildDir + 'lib%s' % os.sep))
+    print(buildDir + 'lib%s' % os.sep)
     stripLibPath(pyFileTmp, pyFile, os.path.join(buildDir, 'lib%s' % os.sep))
 
     print('generation done!')
-    print(('python module: %s' % pyFile))
+    print('python module: %s' % pyFile)
 
 
 if __name__ == '__main__':

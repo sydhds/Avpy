@@ -12,7 +12,7 @@ Print media information such as:
 from avpy import Media, formats, codecs, codecInfo
 
 def printSep(ch='='):
-    print((ch*25))
+    print(ch*25)
 
 if __name__ == '__main__':
 
@@ -39,23 +39,23 @@ if __name__ == '__main__':
         infoDict = media.info()
         
         # general info
-        print(('%s info:' % options.media))
-        print((' format: %s' % infoDict['format']))
-        print((' metadata: %s' % infoDict['metadata']))
-        print((' duration: %f' % infoDict['duration']))
+        print('%s info:' % options.media)
+        print(' format: %s' % infoDict['format'])
+        print(' metadata: %s' % infoDict['metadata'])
+        print(' duration: %f' % infoDict['duration'])
 
         # stream(s) info
         printSep() 
         print('stream(s):')
         for stream in infoDict['stream']:
-            print(('- %s' % stream))
+            print('- %s' % stream)
             
             # codec info
             if options.info:
-                print(('  %s info:' % stream['codec']))
+                print('  %s info:' % stream['codec'])
                 info = codecInfo(stream['codec'])
                 for k in info:
-                    print(('    %s: %s' % (k, info[k])))
+                    print('    %s: %s' % (k, info[k]))
                 printSep()
     else:
         print('please provide a movie or sound file')

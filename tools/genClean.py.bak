@@ -56,9 +56,9 @@ def wAssignement(fp, yamlDict, src, key, cb=None):
 
     notFound = set(yamlDict[key]) - found
     if notFound:
-        print('Could not find:')
+        print 'Could not find:'
         for t in notFound:
-            print('- %s' % t)
+            print '- %s' % t
 
 def wClassFields(fp, yamlDict, src):
 
@@ -87,9 +87,9 @@ def wClassFields(fp, yamlDict, src):
 
     notFound = set(yamlDict['class']) - classFound
     if notFound:
-        print('Could not find class(es):')
+        print 'Could not find class(es):'
         for c in notFound:
-            print('- %s' % c)
+            print '- %s' % c
 
 
 def wFunctions(fp, yamlDict, src):
@@ -97,7 +97,7 @@ def wFunctions(fp, yamlDict, src):
     fcts = yamlDict['function']
     dupFunctions = set([x for x in fcts if fcts.count(x) > 1])
     for f in dupFunctions:
-        print('Warning: duplicated functions in config: %s' % f)
+        print 'Warning: duplicated functions in config: %s' % f
 
     with open(src, 'r') as f:
 
@@ -116,9 +116,9 @@ def wFunctions(fp, yamlDict, src):
 
     notFound = set(yamlDict['function']) - functionFound
     if notFound:
-        print('Could not find function(s):')
+        print 'Could not find function(s):'
         for f in notFound:
-            print('- %s' % f)
+            print '- %s' % f
 
 
 def main(options):
@@ -129,24 +129,24 @@ def main(options):
         y = yaml.load(f.read())
 
     fd = open(options.dst, 'w')	
-    print('writing:')
-    print('header...')
+    print 'writing:'
+    print 'header...'
     wHeader(fd, y)
-    print('type...')
+    print 'type...'
     wAssignement(fd, y, options.src, 'type')
-    print('define...')
+    print 'define...'
     wAssignement(fd, y, options.src, 'define')
-    print('define long...')
+    print 'define long...'
     wAssignement(fd, y, options.src, 'defineLong', longCb)
-    print('class...')
+    print 'class...'
     wClass(fd, y)
-    print('alias...')
+    print 'alias...'
     wAssignement(fd, y, options.src, 'alias')
-    print('class data...')
+    print 'class data...'
     wClassFields(fd, y, options.src)
-    print('functions...')
+    print 'functions...'
     wFunctions(fd, y, options.src)
-    print('done: %s' % options.dst)
+    print 'done: %s' % options.dst
 
 if __name__ == '__main__':
 

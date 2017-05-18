@@ -26,7 +26,7 @@ if __name__ == '__main__':
             help='print supported codecs (default: %default): all, video, audio, subtitle')
     (options, args) = parser.parse_args()
     
-    print(('Using avpy version %s' % avMedia.__version__))
+    print('Using avpy version %s' % avMedia.__version__)
     pprint(avMedia.versions())
     
     # supported formats (avi, mkv...)

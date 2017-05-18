@@ -49,7 +49,7 @@ if __name__ == '__main__':
     try:
         media = Media(options.media)
     except IOError as e:
-        print(('Unable to open %s: %s' % (options.media, e)))
+        print('Unable to open %s: %s' % (options.media, e))
         sys.exit(1)
 
     # dump info
@@ -60,27 +60,27 @@ if __name__ == '__main__':
     if vstreams:
         vstream = vstreams[0]
     else:
-        print(('No video stream in %s' % mediaInfo['name']))
+        print('No video stream in %s' % mediaInfo['name'])
         sys.exit(2)
 
     streamInfo = mediaInfo['stream'][vstream]
     size = streamInfo['width'], streamInfo['height']
 
-    print(('video stream index: %d' % vstream))
-    print(('video stream resolution: %dx%d' % (size[0], size[1])))
+    print('video stream index: %d' % vstream)
+    print('video stream resolution: %dx%d' % (size[0], size[1]))
 
     size = ( int(round(size[0]*options.scaleWidth)), 
             int(round(size[1]*options.scaleHeight)) )
 
-    print(('output resolution: %dx%d' % (size))) 
+    print('output resolution: %dx%d' % (size)) 
 
     # setup sdl2
     sdl2Version = sdl2.version_info
-    print(('Using sdl2 version: %d.%d.%d' % 
-            (sdl2Version[0], sdl2Version[1], sdl2Version[2])))
+    print('Using sdl2 version: %d.%d.%d' % 
+            (sdl2Version[0], sdl2Version[1], sdl2Version[2]))
     
     if sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO) != 0:
-        print((sdl2.SDL_GetError()))
+        print(sdl2.SDL_GetError())
         sys.exit(3)
     
     window = sdl2.SDL_CreateWindow(b'Demo player',
@@ -89,7 +89,7 @@ if __name__ == '__main__':
                                    size[0], size[1], 
                                    sdl2.SDL_WINDOW_SHOWN)    
     if not window:
-        print((sdl2.SDL_GetError()))
+        print(sdl2.SDL_GetError())
         sys.exit(4)
  
     if sdl2.SDL_BYTEORDER == sdl2.SDL_LIL_ENDIAN:
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     # a more valid example would check for renderer supported resolution
     
     if not renderer:
-        print(('Could not create renderer: %s' % sdl2.SDL_GetError()))
+        print('Could not create renderer: %s' % sdl2.SDL_GetError())
         useTexture = False
     else:
         useTexture = True
@@ -123,15 +123,15 @@ if __name__ == '__main__':
         if res == 0:
             formats = rendererInfo.texture_formats
             
-            print(('renderer %s - fmts:' % rendererInfo.name))
+            print('renderer %s - fmts:' % rendererInfo.name)
             for fmt in formats:
-                print((sdl2.SDL_GetPixelFormatName(fmt)))
+                print(sdl2.SDL_GetPixelFormatName(fmt))
             
             if sdl2.SDL_PIXELFORMAT_YV12 in formats:
                 rendererYuv = True
             else:
-                print(('Warning: render (%s) does not support yv12 format' 
-                        % rendererInfo.name))
+                print('Warning: render (%s) does not support yv12 format' 
+                        % rendererInfo.name)
             
             # XXX: opengl renderer does not report supporting RGB24
             # but only ARGB888 - bug? 
@@ -141,10 +141,10 @@ if __name__ == '__main__':
                 rendererRgb = True
             else:
                 # wtf?
-                print(('Warning: renderer (%s) does not support rgb24 or argb8888 format' 
-                        % rendererInfo.name))
+                print('Warning: renderer (%s) does not support rgb24 or argb8888 format' 
+                        % rendererInfo.name)
         else:
-            print(('Unable to query render info: %s' % sdl2.SDL_GetError()))
+            print('Unable to query render info: %s' % sdl2.SDL_GetError())
         
     useYuv =  False
     
@@ -206,7 +206,7 @@ if __name__ == '__main__':
                 running = False
                 break
 
-        pkt = next(media)
+        pkt = media.next()
 
         if pkt.streamIndex() == vstream:
             pkt.decode()

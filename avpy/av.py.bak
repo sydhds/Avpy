@@ -128,7 +128,7 @@ def _findModuleName():
         intv = versionDict[major]
         libName = None
         
-        for k in list(intv.keys()):
+        for k in intv.keys():
             if minor >= k[0] and minor < k[1]:
                 libName = intv[k]
                 break
