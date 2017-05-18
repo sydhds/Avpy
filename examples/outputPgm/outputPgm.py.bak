@@ -73,7 +73,7 @@ if __name__ == '__main__':
     try:
         media = Media(options.media)
     except IOError as e:
-        print(('Unable to open %s: %s' % (options.media, e)))
+        print('Unable to open %s: %s' % (options.media, e))
         sys.exit(1)
 
     # dump info
@@ -84,14 +84,14 @@ if __name__ == '__main__':
     if vstreams:
         vstream = vstreams[0]
     else:
-        print(('No video stream in %s' % mediaInfo['name']))
+        print('No video stream in %s' % mediaInfo['name'])
         sys.exit(2)
     
     # retrieve video width and height
     streamInfo = mediaInfo['stream'][vstream]
     w, h = streamInfo['width'], streamInfo['height']
 
-    print(('video stream resolution: %dx%d' % (w, h)))
+    print('video stream resolution: %dx%d' % (w, h))
 
     # pgm format require rgb24 (24 bits)
     media.addScaler(vstream, w, h)
@@ -107,7 +107,7 @@ if __name__ == '__main__':
             if pkt.decoded:
 
                 decodedCount += 1
-                print(('Decoded frame %d' % decodedCount))
+                print('Decoded frame %d' % decodedCount)
 
                 if decodedCount >= options.offset:
                     print('Saving frame...')

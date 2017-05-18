@@ -40,18 +40,18 @@ def buildGit(options):
     installFolder = os.path.abspath(os.path.join(options.repo, '%s_%s' % (options.lib, options.version)))
 
     if os.path.isdir(installFolder):
-        print(('A build already exists @ %s' % installFolder))
+        print('A build already exists @ %s' % installFolder)
         sys.exit(1)
     else:
         os.makedirs(installFolder)
 
     if not os.path.isdir(pathToGit):
         # TODO: auto clone repo
-        print(('Could not find folder %s, please clone %s before running build' % (pathToGit, options.lib))) 
+        print('Could not find folder %s, please clone %s before running build' % (pathToGit, options.lib)) 
         sys.exit(1)
 
-    print(('Building in %s' % pathToGit))
-    print(('Install in %s' % installFolder))
+    print('Building in %s' % pathToGit)
+    print('Install in %s' % installFolder)
     
     os.chdir(pathToGit)
 
@@ -73,8 +73,8 @@ def buildGit(options):
     run('make install > {0}/make_install.log 2>&1'.format(installFolder))
 
     print('build done!')
-    print(('configure log: %s' % os.path.join(installFolder, 'config.log')))
-    print(('make log: %s' % os.path.join(installFolder, 'make.log')))
+    print('configure log: %s' % os.path.join(installFolder, 'config.log'))
+    print('make log: %s' % os.path.join(installFolder, 'make.log'))
     
     if options.doc:
         
@@ -85,14 +85,14 @@ def buildGit(options):
         if not os.path.isfile(os.path.join(basedir, basefile)): 
             basedir = 'doc'
             if not os.path.isfile(os.path.join(basedir, basefile)):
-                print(('Could not find doxygen configuration file: %s' % basefile))
+                print('Could not find doxygen configuration file: %s' % basefile)
                 sys.exit(2)        
 
         doxyf = os.path.join(basedir, basefile)
         doxyDst = os.path.join(basedir, 'doxy', 'html')
         try:
             # clean
-            print(('removing %s...' % doxyDst))
+            print('removing %s...' % doxyDst)
             shutil.rmtree(doxyDst)
             print('done.')
         except OSError as e:

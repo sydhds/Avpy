@@ -43,7 +43,7 @@ if __name__ == '__main__':
     if astreams:
         astream = astreams[0]
     else:
-        print(('No audio stream in %s' % mediaInfo['name']))
+        print('No audio stream in %s' % mediaInfo['name'])
         sys.exit(2)
    
     # forge output audio format
@@ -67,7 +67,7 @@ if __name__ == '__main__':
             media.addResampler(astream, si, outAudio)
         except RuntimeError as e:
             
-            print(('Could not add an audio resampler: %s' % e))
+            print('Could not add an audio resampler: %s' % e)
             sys.exit(3)
 
     else:
@@ -86,7 +86,7 @@ if __name__ == '__main__':
     secondSize = outAudio['channels'] * outAudio['bytesPerSample'] * outAudio['sampleRate']
     decodedSize = 0
 
-    print(('playing sound of %s (%s seconds)...' % (options.media, options.length)))
+    print('playing sound of %s (%s seconds)...' % (options.media, options.length))
 
     # let's play!
     for i, pkt in enumerate(media):

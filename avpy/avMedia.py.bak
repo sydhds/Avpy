@@ -296,9 +296,9 @@ class Media(object):
     
     def __next__(self):
         # python3 require __next__, python2 next
-        return next(self)
+        return self.next()
 
-    def __next__(self):
+    def next(self):
         
         ''' Iterate over Media
         
@@ -492,7 +492,7 @@ class Media(object):
             if res == 0:
                 raise RuntimeError('Codec %s not supported in %s muxer' % errorTpl )
             elif res < 0:
-                print(('Warning: could not determine if codec %s is supported by %s muxer' % errorTpl))            
+                print('Warning: could not determine if codec %s is supported by %s muxer' % errorTpl)            
             
             stream = av.lib.avformat_new_stream(self.pFormatCtx, _codec)
             if not stream:
@@ -603,7 +603,7 @@ class Media(object):
             if res == 0:
                 raise RuntimeError('Codec %s not supported in %s muxer' % errorTpl )
             elif res < 0:
-                print(('Warning: could not determine if codec %s is supported by %s muxer' % errorTpl))            
+                print('Warning: could not determine if codec %s is supported by %s muxer' % errorTpl)            
 
             stream = av.lib.avformat_new_stream(self.pFormatCtx, _codec)
             if not stream:
@@ -1017,7 +1017,7 @@ class Packet(object):
         scalingId = scaler[4]
         codecCtx = self.codecCtx[streamIndex]
 
-        print((scalingId, av.lib.SWS_BILINEAR))
+        print(scalingId, av.lib.SWS_BILINEAR)
         #raise
 
         self.swsCtx[streamIndex] = av.lib.sws_getContext(
@@ -1388,7 +1388,7 @@ class Packet(object):
                     self.subtitleCount = self.subtitle.num_rects 
                     self.subtitleTypes = []
 
-                    for i in range(self.subtitleCount):
+                    for i in xrange(self.subtitleCount):
 
                         cType = self.subtitle.rects[i].contents.type
                         cTypeName = ''

@@ -37,12 +37,12 @@ if __name__ == '__main__':
     if stStreams:
         stStream = stStreams[0]
     else:
-        print(('No subtitle stream in %s' % mediaInfo['name']))
+        print('No subtitle stream in %s' % mediaInfo['name'])
         sys.exit(2)
     
     # dump subtitle header
     print('header:')
-    print((mediaInfo['stream'][stStream]['subtitleHeader']))
+    print(mediaInfo['stream'][stStream]['subtitleHeader'])
 
     count = 0
     # iterate over media and decode subtitle packet
@@ -61,9 +61,9 @@ if __name__ == '__main__':
                 for i in range(pkt2.subtitle.num_rects):
                     
                     if pkt2.subtitleTypes[i] == 'text':
-                        print((pkt2.subtitle.rects[i].contents.text))
+                        print(pkt2.subtitle.rects[i].contents.text)
                     elif pkt2.subtitleTypes[i] == 'ass':
-                        print((pkt2.subtitle.rects[i].contents.ass))
+                        print(pkt2.subtitle.rects[i].contents.ass)
                     else:
                         print('non text subtitle...')
 

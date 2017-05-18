@@ -46,7 +46,7 @@ if __name__ == '__main__':
     try:
         media = Media(options.media)
     except IOError as e:
-        print('Unable to open %s: %s' % (options.media, e))
+        print(('Unable to open %s: %s' % (options.media, e)))
         sys.exit(1)
 
     # dump info
@@ -57,15 +57,15 @@ if __name__ == '__main__':
     if vstreams:
         vstream = vstreams[0]
     else:
-        print('No video stream in %s' % mediaInfo['name'])
+        print(('No video stream in %s' % mediaInfo['name']))
         sys.exit(2)
 
     # retrieve video width and height
     streamInfo = mediaInfo['stream'][vstream]
     size = streamInfo['width'], streamInfo['height']
 
-    print('video stream index: %d' % vstream)
-    print('video stream resolution: %dx%d' % (size[0], size[1]))
+    print(('video stream index: %d' % vstream))
+    print(('video stream resolution: %dx%d' % (size[0], size[1])))
 
     # pygame format require rgb24 (24 bits)
     media.addScaler(vstream, *size, scaling=options.scaling)
@@ -86,7 +86,7 @@ if __name__ == '__main__':
             if pkt2.decoded:
 
                 decodedCount += 1
-                print('decoded frame %d' % decodedCount)
+                print(('decoded frame %d' % decodedCount))
 
                 if decodedCount >= options.offset:
                     print('saving frame...')

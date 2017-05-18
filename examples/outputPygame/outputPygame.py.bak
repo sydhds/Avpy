@@ -1,24 +1,23 @@
 #!/usr/bin/env python
 
 '''
-Decode the 5th first frame of the first video stream and write grayscale png (require PIL (or pillow lib)
+Decode the 5th first frame of the first video stream and write jpg (require pygame lib)
 
-python outputPil.py -m file.avi -> save frame 1 to 5
-python outputPil.py -m file.avi -o 140 -> save frame 140 to 145
+python outputPygame.py -m file.avi -> save frame 1 to 5
+python outputPygame.py -m file.avi -o 140 -> save frame 140 to 145
 '''
 
 import sys
 import ctypes
 import copy
 
-from PIL import Image
+import pygame
 
 from avpy import Media
 
 if __name__ == '__main__':
 
-    modeChoices = ['string', 'buffer']
-    
+    # cmdline
     from optparse import OptionParser
 
     usage = "usage: %prog -m foo.avi -o 140"
@@ -34,11 +33,10 @@ if __name__ == '__main__':
     parser.add_option('--copyPacket', 
             action='store_true',
             help='copy packet (debug only)')
-    parser.add_option('--mode',
-            type='choice',
-            choices=modeChoices,
-            default='buffer',
-            help='transfer from Avpy to PIL: %s' % modeChoices + '(default: %default)')
+
+    parser.add_option('--scaling', 
+            default='bilinear',
+            help='scaling algorithm')
 
     (options, args) = parser.parse_args()
 
@@ -48,7 +46,7 @@ if __name__ == '__main__':
     try:
         media = Media(options.media)
     except IOError as e:
-        print(('Unable to open %s: %s' % (options.media, e)))
+        print('Unable to open %s: %s' % (options.media, e))
         sys.exit(1)
 
     # dump info
@@ -59,24 +57,18 @@ if __name__ == '__main__':
     if vstreams:
         vstream = vstreams[0]
     else:
-        print(('No video stream in %s' % mediaInfo['name']))
+        print('No video stream in %s' % mediaInfo['name'])
         sys.exit(2)
 
     # retrieve video width and height
     streamInfo = mediaInfo['stream'][vstream]
     size = streamInfo['width'], streamInfo['height']
 
-    print(('video stream index: %d' % vstream))
-    print(('video stream resolution: %dx%d' % (size[0], size[1])))
-    
-    # test only - frombuffer (default mode) is faster
-    if options.mode == 'string':
-        print('Using PIL fromstring method...')
-    else:
-        print('Using PIL frombuffer method...')
-        
-    # png format require rgb24 (24 bits)
-    media.addScaler(vstream, *size)
+    print('video stream index: %d' % vstream)
+    print('video stream resolution: %dx%d' % (size[0], size[1]))
+
+    # pygame format require rgb24 (24 bits)
+    media.addScaler(vstream, *size, scaling=options.scaling)
 
     decodedCount = 0
     # iterate over media
@@ -94,7 +86,7 @@ if __name__ == '__main__':
             if pkt2.decoded:
 
                 decodedCount += 1
-                print(('decoded frame %d' % decodedCount))
+                print('decoded frame %d' % decodedCount)
 
                 if decodedCount >= options.offset:
                     print('saving frame...')
@@ -103,24 +95,10 @@ if __name__ == '__main__':
                     
                     # width*height*3 (rgb24)
                     bufLen = size[0]*size[1]*3
+                    surfaceStr = ctypes.string_at(buf, bufLen)
 
-                    if options.mode == 'string':
-    
-                        surfaceStr = ctypes.string_at(buf, bufLen)
-                        img = Image.fromstring('RGB', size, surfaceStr)
-
-                    elif options.mode == 'buffer':
-                        
-                        # benchmark note:
-                        # it seems that using 'buffer' mode is not really faster than 'string' mode but 
-                        # to see changes, comment the i.convert('LA').save(...) line
-                        
-                        buf2 = ctypes.cast(buf, ctypes.POINTER(ctypes.c_ubyte*bufLen))
-                        img = Image.frombuffer('RGB', (size[0], size[1]) , buf2.contents, 'raw', 'RGB', 0, 1)
-
-                    # convert to grayscale then write png
-                    img.convert('LA').save('frame.%d.png' % decodedCount)
-
+                    surface = pygame.image.fromstring(surfaceStr, size, 'RGB')
+                    pygame.image.save(surface, 'frame.%d.jpg' % decodedCount)
+                
                 if decodedCount >= options.offset + options.frameCount:
                     break 
-
